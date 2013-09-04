@@ -163,7 +163,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 				try {
 					project.updateCustomFields(YouTrackConnector.getClient(repository));
 				} catch (CoreException e) {
-					// TODO Auto-generated catch block
+					//TODO
 				}
 			}
 			
