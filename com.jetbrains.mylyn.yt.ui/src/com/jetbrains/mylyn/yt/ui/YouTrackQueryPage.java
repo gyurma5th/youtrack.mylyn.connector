@@ -53,7 +53,7 @@ public class YouTrackQueryPage extends AbstractRepositoryQueryPage2 {
 	@Override
 	protected void doRefresh() {
 		try {
-			LinkedList<YouTrackProject> projects = (LinkedList<YouTrackProject>) getClient().getAllProjects();
+			LinkedList<YouTrackProject> projects = (LinkedList<YouTrackProject>) getClient().getProjects();
 			projectCombo.removeAll();
 			for (YouTrackProject project : projects) {
 				projectCombo.add(project.getProjectShortName());
