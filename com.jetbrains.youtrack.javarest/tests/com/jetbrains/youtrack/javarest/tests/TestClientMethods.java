@@ -600,7 +600,7 @@ public class TestClientMethods {
 	public static void removeTestIssues(){
 		
 		/*
-		 * delete all 'testuser' issues from mylyn
+		 * delete all 'testuser' issues from project mylyn
 		 */
 		
 		List<YouTrackIssue> issues = client.getIssuesByFilter("created by: testuser project: mylyn", 100);
