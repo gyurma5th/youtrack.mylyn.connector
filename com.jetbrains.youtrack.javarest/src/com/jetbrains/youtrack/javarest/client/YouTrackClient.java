@@ -340,7 +340,6 @@ public class YouTrackClient {
 		
 		int number = resource.accept("application/xml").get(XmlNumberOfIssuesParser.class).getNumber();
 		
-		
 		if(number == -1){
 			return 0;
 		} else {
@@ -561,14 +560,13 @@ public class YouTrackClient {
 			Set<String> customFiledsNames = this.getProjectCustomFieldNames(oldIssue.getProjectName());
 			
 			for(String customFieldName : customFiledsNames){
-				if(newIssue.getProperties().get(customFieldName) instanceof String){
-					String newValue = newIssue.getProperties().get(customFieldName).toString();
+				if(newIssue.getProperties().get("CustomField"+customFieldName+":") instanceof String){
+					String newValue = newIssue.getProperties().get("CustomField"+customFieldName+":").toString();
 					this.applyCommand(oldIssueId, customFieldName + ": " + newValue);
 				}
 			}
 			
 			//TODO: add comments and other processing
-			
 			
 		} else {
 			throw new RuntimeException("Null target issue id while update issue.");

@@ -31,7 +31,6 @@ import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
 public class YouTrackTaskEditorPage extends AbstractTaskEditorPage{
 	
-	
 	private Button updateButton;
 
 	public YouTrackTaskEditorPage(TaskEditor editor) {

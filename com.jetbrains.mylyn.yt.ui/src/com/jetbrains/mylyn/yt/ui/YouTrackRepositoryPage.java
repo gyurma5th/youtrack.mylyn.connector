@@ -19,8 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
-import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
-
 public class YouTrackRepositoryPage extends AbstractRepositorySettingsPage {
 
 	public YouTrackRepositoryPage(TaskRepository taskRepository) {
