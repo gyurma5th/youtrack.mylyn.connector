@@ -1,0 +1,561 @@
+<issues>
+<issue id="1-1">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>JT RESTful API</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="description">
+<value>Read basics of subj</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366275237903</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366791631908</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="resolved">
+<value>1366791601300</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Depend" role="depends on">1-3</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>Fixed</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+<comment id="68-0" author="root" authorFullName="amarch" issueId="1-1" deleted="false" text="http://confluence.jetbrains.com/display/YTD3/YouTrack+REST+API+Reference how to perform diferent requests?" shownForIssueAuthor="false" created="1366279390088">
+<replies/>
+</comment>
+</issue>
+<issue id="1-2">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>2</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>memorize JT shortcuts</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="description">
+<value>
+Use YouTrack keyboard shortcuts without Vimium http://confluence.jetbrains.com/display/YTD3/Keyboard+Shortcuts
+</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366275537406</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366279485043</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>Open</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+</issue>
+<issue id="1-3">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>3</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>REST basics</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="description">
+<value>Read about REST and RESTful services</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366275648360</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366276306252</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="resolved">
+<value>1366276306244</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Depend" role="is required for">1-1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>Fixed</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+<comment id="68-1" author="root" authorFullName="amarch" issueId="1-3" deleted="false" text="Read presentation http://www.slideshare.net/iivanoo/mobile-applications-development-lecture-14 Try to write program such as http://developer.yahoo.com/java/howto-reqRestJava.html#get but not succeed in. I forgot the main article i read (but it was). Dont read, but seems useful: http://rest.elkstein.org/search?updated-max=2008-02-12T14:00:00-08:00&max-results=4&start=8&by-date=false" shownForIssueAuthor="false" created="1366276191439">
+<replies/>
+</comment>
+</issue>
+<issue id="1-4">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>4</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>Improve quality and effectiveness</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="description">
+<value>Abstract task for according subtasks</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366277198923</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366376724925</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>testuser</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>testuser</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Subtask" role="parent for">1-5</value>
+<value type="Subtask" role="parent for">1-6</value>
+<value type="Subtask" role="parent for">1-7</value>
+<value type="Subtask" role="parent for">1-14</value>
+<value type="Subtask" role="parent for">1-15</value>
+<value type="Subtask" role="parent for">1-19</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>In Progress</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+</issue>
+<issue id="1-5">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>5</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>Explore new office</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366277535410</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366277535410</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Subtask" role="subtask of">1-4</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>Submitted</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+</issue>
+<issue id="1-6">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>6</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>Read about Java most useful patterns</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366277669291</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366277669291</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Subtask" role="subtask of">1-4</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>In Progress</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+</issue>
+<issue id="1-7">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>7</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>Read about and write simple JUnit tests</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366277713111</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366277713111</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Subtask" role="subtask of">1-4</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>In Progress</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+</issue>
+<issue id="1-8">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>8</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>Mylyn Overview</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="description">
+<value>Basic task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366277894300</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366288836333</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Subtask" role="parent for">1-9</value>
+<value type="Subtask" role="parent for">1-10</value>
+<value type="Subtask" role="parent for">1-11</value>
+<value type="Subtask" role="parent for">1-12</value>
+<value type="Subtask" role="parent for">1-13</value>
+<value type="Subtask" role="parent for">1-16</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>In Progress</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+<comment id="68-2" author="root" authorFullName="amarch" issueId="1-8" deleted="false" text="http://wiki.eclipse.org/Mylyn" shownForIssueAuthor="false" created="1366280328028">
+<replies/>
+</comment>
+</issue>
+<issue id="1-9">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>9</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>Simple usage</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="description">
+<value>
+Install Mylyn, create and configure simple repo, submit new tasks
+</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366278058227</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366278124533</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="resolved">
+<value>1366278122823</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Subtask" role="subtask of">1-8</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Normal</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>Fixed</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+<comment id="68-3" author="root" authorFullName="amarch" issueId="1-9" deleted="false" text="Done, ref. https://github.com/Amarchuk/MadDays/issues?page=1&state=open" shownForIssueAuthor="false" created="1366278124527">
+<replies/>
+</comment>
+</issue>
+<issue id="1-10">
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="projectShortName">
+<value>1</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="numberInProject">
+<value>10</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="summary">
+<value>Mylyn Concepts and Usage</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="description">
+<value>Read about main concepts</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="created">
+<value>1366278449653</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updated">
+<value>1366288494408</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="updaterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterName">
+<value>root</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="reporterFullName">
+<value>amarch</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="commentsCount">
+<value>2</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SingleField" name="votes">
+<value>0</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="LinkField" name="links">
+<value type="Subtask" role="subtask of">1-8</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Priority">
+<value>Minor</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Type">
+<value>Task</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="State">
+<value>Open</value>
+</field>
+<field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CustomField" name="Subsystem">
+<value>No subsystem</value>
+</field>
+<comment id="68-4" author="root" authorFullName="amarch" issueId="1-10" deleted="false" text="Very useful pdf presentation https://tasktop.com/pdfs/docs/tutorials/2009-03-mylyn-tutorial.pdf" shownForIssueAuthor="false" created="1366278462536">
+<replies/>
+</comment>
+<comment id="68-5" author="root" authorFullName="amarch" issueId="1-10" deleted="false" text="Pdf explains that usage consists of two (mostly different) great parts: 1) task-oriented 2) context oriented what about the 2nd in our future plugin?" shownForIssueAuthor="false" created="1366279229908">
+<replies/>
+</comment>
+</issue>
+</issues>
