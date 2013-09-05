@@ -540,21 +540,41 @@ public class YouTrackClient {
 		}
 	}
 	
+	public void changeSummary(String issueId, String newSummary){
+		if(issueId != null && newSummary != null){
+			ClientResponse response = service.path("/issue/").path(issueId).
+					queryParam("summary", newSummary).post(ClientResponse.class);
+			if (response.getStatus() != 200) {
+				throw new RuntimeException("Failed to update issue summary: " + response.getStatus());
+			}
+		}
+	}
+	
+	public void changeDescription(String issueId, String newDescription){
+		if(issueId != null && newDescription != null){
+			ClientResponse response = service.path("/issue/").path(issueId).
+					queryParam("description", newDescription).post(ClientResponse.class);
+			if (response.getStatus() != 200) {
+				throw new RuntimeException("Failed to update issue description: " + response.getStatus());
+			}
+		}
+	}
+	
 	//TODO: what to do if old issue not update fully? 
-	// save locally old issue and return back or make incomplete update
+	// save locally old issue and return back or make incomplete update?
 	public void updateIssue(String oldIssueId, YouTrackIssue newIssue){
 		if(oldIssueId != null){
 			
 			YouTrackIssue oldIssue = this.getIssue(oldIssueId);
 			
 			if(newIssue.getSummary() != null && !oldIssue.getSummary().equals(newIssue.getSummary())){
-				//do smth
+				changeSummary(oldIssueId, newIssue.getSummary());
 			}
 			
 			if(newIssue.getDescription() != null && 
 					oldIssue.getDescription() != null && 
 					!oldIssue.getDescription().equals(newIssue.getDescription())){
-				//do smth
+				changeDescription(oldIssueId, newIssue.getDescription());
 			}
 			
 			Set<String> customFiledsNames = this.getProjectCustomFieldNames(oldIssue.getProjectName());
