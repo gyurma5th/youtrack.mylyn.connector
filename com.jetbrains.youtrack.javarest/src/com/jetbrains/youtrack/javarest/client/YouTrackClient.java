@@ -540,23 +540,22 @@ public class YouTrackClient {
 		}
 	}
 	
-	public void changeSummary(String issueId, String newSummary){
-		if(issueId != null && newSummary != null){
-			ClientResponse response = service.path("/issue/").path(issueId).
-					queryParam("summary", newSummary).post(ClientResponse.class);
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed to update issue summary: " + response.getStatus());
-			}
+	public void updateIssueSummary(String issueId, String newSummary){
+		ClientResponse response = service.path("/issue/").path(issueId).
+				queryParam("summary", newSummary).post(ClientResponse.class);
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Failed to update issue summary: " + response.getStatus());
 		}
 	}
 	
-	public void changeDescription(String issueId, String newDescription){
-		if(issueId != null && newDescription != null){
-			ClientResponse response = service.path("/issue/").path(issueId).
-					queryParam("description", newDescription).post(ClientResponse.class);
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed to update issue description: " + response.getStatus());
-			}
+	//summary cant be empty, so need get issue summary
+	public void updateIssueDescription(String issueId, String newDescription){
+		ClientResponse response = service.path("/issue/").path(issueId).
+				queryParam("description", newDescription).
+				queryParam("summary", getIssue(issueId).getSummary()).
+				post(ClientResponse.class);
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Failed to update issue description: " + response.getStatus());
 		}
 	}
 	
@@ -568,20 +567,20 @@ public class YouTrackClient {
 			YouTrackIssue oldIssue = this.getIssue(oldIssueId);
 			
 			if(newIssue.getSummary() != null && !oldIssue.getSummary().equals(newIssue.getSummary())){
-				changeSummary(oldIssueId, newIssue.getSummary());
+				updateIssueSummary(oldIssueId, newIssue.getSummary());
 			}
 			
 			if(newIssue.getDescription() != null && 
 					oldIssue.getDescription() != null && 
 					!oldIssue.getDescription().equals(newIssue.getDescription())){
-				changeDescription(oldIssueId, newIssue.getDescription());
+				updateIssueDescription(oldIssueId, newIssue.getDescription());
 			}
 			
 			Set<String> customFiledsNames = this.getProjectCustomFieldNames(oldIssue.getProjectName());
 			
 			for(String customFieldName : customFiledsNames){
-				if(newIssue.getProperties().get("CustomField"+customFieldName+":") instanceof String){
-					String newValue = newIssue.getProperties().get("CustomField"+customFieldName+":").toString();
+				if(newIssue.getProperties().get(customFieldName) instanceof String){
+					String newValue = newIssue.getProperties().get(customFieldName).toString();
 					this.applyCommand(oldIssueId, customFieldName + ": " + newValue);
 				}
 			}
