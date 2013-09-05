@@ -50,9 +50,9 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	}
 	
 	public static YouTrackProject getProject(TaskRepository repository, String projectname){
-		
 		if(!projectsByRepository.keySet().contains(repository)){
-			List<YouTrackProject> projects = clientByRepository.get(repository).getProjects();
+			YouTrackClient client = getClient(repository);
+			List<YouTrackProject> projects = client.getProjects();
 			projectsByRepository.put(repository, new HashSet<YouTrackProject>(projects));
 		} 
 		
@@ -86,7 +86,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	}
 	
 
-	public static synchronized YouTrackClient getClient(TaskRepository repository)	throws CoreException {
+	public static synchronized YouTrackClient getClient(TaskRepository repository) {
 		
 		YouTrackClient client = clientByRepository.get(repository);
 		
@@ -96,17 +96,12 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 					equals(new URL(repository.getUrl()).getHost())) {
 				
 				client = YouTrackClient.createClient(repository.getUrl().toString());
-				try {
 					boolean login = client.login(repository.getUserName(), repository.getPassword());
 					if (!login) {
-						throw new CoreException(new Status(IStatus.ERROR, YouTrackCorePlugin.ID_PLUGIN, NLS.bind(
-										"Can't login into  : {0}", repository.getUrl().toString())));
+//						throw new CoreException(new Status(IStatus.ERROR, YouTrackCorePlugin.ID_PLUGIN, NLS.bind(
+//										"Can't login into  : {0}", repository.getUrl().toString())));
+						throw new RuntimeException("Can't login into  : " + repository.getUrl().toString());
 					}
-				} catch (Exception e) {
-					throw new CoreException(new Status(IStatus.ERROR,
-							YouTrackCorePlugin.ID_PLUGIN, NLS.bind("Can't login into  : {0}", repository
-											.getUrl().toString()), e));
-				}
 				clientByRepository.put(repository, client);
 			} /*else {
 				try {
@@ -122,8 +117,9 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
 			}*/
 		} catch (MalformedURLException e) {
-			throw new CoreException(new Status(IStatus.ERROR,
-					YouTrackCorePlugin.ID_PLUGIN, NLS.bind("MalformedURLException in url : {0}", repository.getUrl().toString()), e));
+			throw new RuntimeException("Malformed url " + e.getMessage(), e);
+//			throw new CoreException(new Status(IStatus.ERROR,
+//					YouTrackCorePlugin.ID_PLUGIN, NLS.bind("MalformedURLException in url : {0}", repository.getUrl().toString()), e));
 		}
 		return client;
 	}

@@ -571,17 +571,20 @@ public class YouTrackClient {
 			}
 			
 			if(newIssue.getDescription() != null && 
-					oldIssue.getDescription() != null && 
-					!oldIssue.getDescription().equals(newIssue.getDescription())){
+					(oldIssue.getDescription() == null || !oldIssue.getDescription().equals(
+							newIssue.getDescription()))){
 				updateIssueDescription(oldIssueId, newIssue.getDescription());
 			}
 			
-			Set<String> customFiledsNames = this.getProjectCustomFieldNames(oldIssue.getProjectName());
+			Set<String> customFieldsNames = this.getProjectCustomFieldNames(oldIssue.getProjectName());
 			
-			for(String customFieldName : customFiledsNames){
+			for(String customFieldName : customFieldsNames){
 				if(newIssue.getProperties().get(customFieldName) instanceof String){
 					String newValue = newIssue.getProperties().get(customFieldName).toString();
-					this.applyCommand(oldIssueId, customFieldName + ": " + newValue);
+					if(!oldIssue.getProperties().containsKey(customFieldName) || 
+							!newValue.equals(oldIssue.getProperties().get(customFieldName).toString())){
+						this.applyCommand(oldIssueId, customFieldName + ": " + newValue);
+					}
 				}
 			}
 			

@@ -57,18 +57,12 @@ public class NewIssueWizard extends NewTaskWizard implements INewWizard {
 				setControl(composite);
 				
 				LinkedList<YouTrackProject> projects;
-				try {
-					projects = (LinkedList<YouTrackProject>) YouTrackConnector.getClient(getTaskRepository()).getProjects();
-					if(projectCombo != null){
-						for(YouTrackProject project : projects){
-							projectCombo.add(project.getProjectShortName());
-						}
+				projects = (LinkedList<YouTrackProject>) YouTrackConnector.getClient(getTaskRepository()).getProjects();
+				if(projectCombo != null){
+					for(YouTrackProject project : projects){
+						projectCombo.add(project.getProjectShortName());
 					}
-				} catch (CoreException e) {
-					//ignore
 				}
-
-				
 			}
 		});
 	}

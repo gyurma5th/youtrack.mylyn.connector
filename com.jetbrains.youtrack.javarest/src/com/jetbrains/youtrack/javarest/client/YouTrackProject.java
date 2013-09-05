@@ -42,7 +42,7 @@ public class YouTrackProject {
 		this.projectShortName = projectShortName;
 	}
 	
-	private HashMap<String, YouTrackCustomField> customFieldsMap;
+	private HashMap<String, YouTrackCustomField> customFieldsMap = new HashMap<>();
 	
 	private Date customFieldsUpdatedDate;
 	
