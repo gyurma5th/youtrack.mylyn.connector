@@ -548,7 +548,7 @@ public class YouTrackClient {
 		}
 	}
 	
-	//summary cant be empty, so need get issue summary
+	//summary can't be empty by rest restriction
 	public void updateIssueDescription(String issueId, String newDescription){
 		ClientResponse response = service.path("/issue/").path(issueId).
 				queryParam("description", newDescription).
