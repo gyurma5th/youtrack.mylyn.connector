@@ -71,7 +71,10 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	private static IntellisenseSearchValues intellisense;
 	
 	private static SimpleContentProposalProvider scp;
+	
+	private Group fastQueryComposite;
 
+	private Group customQueryComposite;
 	
 	public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository, IRepositoryQuery query) {
 		super("youtrack.repository.query.page", repository, query);
@@ -133,7 +136,27 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	protected void createPageContent(SectionComposite parent) {
 		
 		customizeQueryCheckbox = new Button(parent.getContent(), SWT.CHECK);
-		customizeQueryCheckbox.setText("Checkbox 1");
+		customizeQueryCheckbox.setText("Customize query");
+		customizeQueryCheckbox.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				Button button = (Button) e.widget;
+				
+		        if(button.getSelection()){
+		        	recursiveSetEnabled(fastQueryComposite, false);
+					recursiveSetEnabled(customQueryComposite, true);
+		        } else {
+					recursiveSetEnabled(fastQueryComposite, true);
+					recursiveSetEnabled(customQueryComposite, false);
+		        }
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
 		
 		createFastQueryCompositeContent(parent);
 		createCustomizeQueryContent(parent);
@@ -144,28 +167,28 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 //		Composite composite = new Composite(parent.getContent(), SWT.BORDER);
 //		composite.setLayout(new GridLayout(2, false));
 		
-		Group composite = new Group(parent.getContent(), SWT.NONE);
-		composite.setText("Saved search");
+		fastQueryComposite = new Group(parent.getContent(), SWT.NONE);
+		fastQueryComposite.setText("Saved search");
 		GridData gd = new GridData(SWT.FILL);
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
-		composite.setLayout(new GridLayout(2, false));
-		composite.setLayoutData(gd);
+		fastQueryComposite.setLayout(new GridLayout(2, false));
+		fastQueryComposite.setLayoutData(gd);
 		
 
 //		Label label = new Label(composite, SWT.NONE);
 //		label.setText("Saved Search:");
-		savedSearchesCombo = new Combo(composite, SWT.FILL);
+		savedSearchesCombo = new Combo(fastQueryComposite, SWT.FILL);
 //		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(label);
 		savedSearchesCombo.setLayoutData(gd);
 		
 		fillSearches();
 		
-		Composite numberOfIssuesComposite = new Composite(composite, SWT.BORDER);
+		Composite numberOfIssuesComposite = new Composite(fastQueryComposite, SWT.BORDER);
 		numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 		
 		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
-		labelIssues.setText("Issues in query: ");
+		labelIssues.setText("#");
 		
 		numberOfIssues = new Text(numberOfIssuesComposite, SWT.SINGLE);
 		numberOfIssues.setEnabled(false);
@@ -192,13 +215,13 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	
 	protected void createCustomizeQueryContent(SectionComposite parent){
 	
-		Group composite = new Group(parent.getContent(), SWT.NONE);
-		composite.setText("Enter query into search box (press Ctrl+Space for query completion).");
+		customQueryComposite = new Group(parent.getContent(), SWT.NONE);
+		customQueryComposite.setText("Enter query into search box (press Ctrl+Space for query completion).");
 		GridData gd = new GridData(SWT.FILL);
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
-		composite.setLayout(new GridLayout(2, false));
-		composite.setLayoutData(gd);
+		customQueryComposite.setLayout(new GridLayout(2, false));
+		customQueryComposite.setLayoutData(gd);
 
 		Listener countSuitableIssuesListener = new Listener() {
 	        @Override
@@ -223,7 +246,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 //		Label searchLabel = new Label(parent.getContent(), SWT.NONE);
 //		searchLabel.setText("Search box:");
 		
-		searchBoxText = new Text(composite, SWT.SINGLE | SWT.FILL);
+		searchBoxText = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
 		searchBoxText.setLayoutData(gd);
 		
 		searchBoxText.addListener(SWT.CHANGED, countSuitableIssuesListener);
@@ -265,14 +288,15 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
         }
         );
 		
-		Composite numberOfIssuesComposite = new Composite(composite, SWT.BORDER);
+		Composite numberOfIssuesComposite = new Composite(customQueryComposite, SWT.BORDER);
 		numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 		
 		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
-		labelIssues.setText("Issues in query: ");
+		labelIssues.setText("#");
 		numberOfIssues = new Text(numberOfIssuesComposite, SWT.SINGLE);
 		numberOfIssues.setEnabled(false);
 
+		recursiveSetEnabled(customQueryComposite, false);
 	}
 	
 	private YouTrackClient getClient() throws CoreException {
@@ -329,13 +353,18 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	}
 	
 	public void recursiveSetEnabled(Control ctrl, boolean enabled) {
-	   if (ctrl instanceof Composite) {
+		if (ctrl instanceof Composite) {
 	      Composite comp = (Composite) ctrl;
-	      for (Control c : comp.getChildren())
-	         recursiveSetEnabled(c, enabled);
-	   } else {
+	      if(comp.getChildren().length == 0){
+	    	 comp.setEnabled(enabled);
+	      } else {
+	    	  for (Control control : comp.getChildren()){
+	    		  recursiveSetEnabled(control, enabled);
+	    	  }
+	      }
+		} else {
 	      ctrl.setEnabled(enabled);
-	   }
+		}
 	}
 	
 	private void insertAcceptedProposal(IContentProposal proposal){
