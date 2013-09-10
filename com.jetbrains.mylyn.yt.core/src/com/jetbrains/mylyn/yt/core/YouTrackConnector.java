@@ -227,7 +227,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	public int queryIssuesAmount(String projectname, String filter, TaskRepository repository) throws CoreException{
 		int amount = getClient(repository).getNumberOfIssues(getFilter(projectname, filter, repository));
 		if(amount == -1){
-			return 0;
+			return queryIssuesAmount(projectname, filter, repository);
 		} else {
 			return amount;
 		}

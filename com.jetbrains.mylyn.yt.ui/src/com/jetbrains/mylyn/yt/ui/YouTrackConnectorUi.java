@@ -45,8 +45,9 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
 	@Override
 	public IWizard getQueryWizard(TaskRepository repository, IRepositoryQuery query) {
 		RepositoryQueryWizard wizard = new RepositoryQueryWizard(repository);
-		wizard.addPage(new YouTrackFastQueryPage("youtrack.fast.query.page", repository, query));
-		wizard.addPage(new YouTrackSearchQueryPage("youtrack.search.query.page", repository, query));
+		wizard.addPage(new YouTrackRepositoryQueryPage("youtrack.repository.query.page", repository, query));
+//		wizard.addPage(new YouTrackFastQueryPage("youtrack.fast.query.page", repository, query));
+//		wizard.addPage(new YouTrackSearchQueryPage("youtrack.search.query.page", repository, query));
 		return wizard;
 	}
 
