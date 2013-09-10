@@ -76,16 +76,18 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 
 	private Group customQueryComposite;
 	
+	private final String defaultMessage = "Choose saved search or select checkbox and customize query.";
+	
 	public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository, IRepositoryQuery query) {
 		super("youtrack.repository.query.page", repository, query);
 		this.repository = repository;
 		setTitle("YouTrack Repository Query");
-		setDescription("Choose saved search or select checkbox and customize query.");
+		setDescription(defaultMessage);
 	}
 
 	@Override
 	protected void doRefreshControls(){
-		doRefresh();
+		doFullRefresh();
 	}
 	
 	@Override
@@ -97,18 +99,17 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	protected boolean restoreState(IRepositoryQuery query) {
 		String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
 		if (filter != null) {
-			for(SavedSearch savedSearch : searches){
-				if(savedSearch.getSearchText().equals(filter)){
-					savedSearchesCombo.setText(savedSearch.getName());
-					break;
+			if(customizeQueryCheckbox.getSelection()){
+				searchBoxText.setText(filter);
+			} else {
+				for(SavedSearch savedSearch : searches){
+					if(savedSearch.getSearchText().equals(filter)){
+						savedSearchesCombo.setText(savedSearch.getName());
+						break;
+					}
 				}
 			}
 		}
-		filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
-		if(filter != null){
-			searchBoxText.setText(filter);
-		}
-		
 		return true;
 	}
 
@@ -117,19 +118,14 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		if (getQueryTitle() != null) {
 			query.setSummary(getQueryTitle());
 		}
-		if(savedSearchesCombo.getText() != null){
+		if(savedSearchesCombo.getText() != null && !customizeQueryCheckbox.getSelection()){
 			query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER, 
 					searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
 		}
-		
-		setMessage("Choose saved search or select customize query.");
-		
-		if (getQueryTitle() != null) {
-			query.setSummary(getQueryTitle());
-		}
-		if(searchBoxText.getText() != null){
+		if(searchBoxText.getText() != null && customizeQueryCheckbox.getSelection()){
 			query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER, searchBoxText.getText());
 		}
+		setMessage(defaultMessage);
 	}
 
 	@Override
@@ -151,7 +147,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 					recursiveSetEnabled(fastQueryComposite, true);
 					recursiveSetEnabled(customQueryComposite, false);
 		        }
-		        doRefreshControls();
+		        doPartialRefresh();
 			}
 			
 			@Override
@@ -165,22 +161,18 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	}
 	
 	protected void createFastQueryCompositeContent(SectionComposite parent){
-//		Composite composite = new Composite(parent.getContent(), SWT.BORDER);
-//		composite.setLayout(new GridLayout(2, false));
 		
 		fastQueryComposite = new Group(parent.getContent(), SWT.NONE);
 		fastQueryComposite.setText("Saved search");
+		fastQueryComposite.setLayout(new GridLayout(2, false));
+		
 		GridData gd = new GridData(SWT.FILL);
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
-		fastQueryComposite.setLayout(new GridLayout(2, false));
 		fastQueryComposite.setLayoutData(gd);
 		
 
-//		Label label = new Label(composite, SWT.NONE);
-//		label.setText("Saved Search:");
 		savedSearchesCombo = new Combo(fastQueryComposite, SWT.FILL);
-//		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(label);
 		savedSearchesCombo.setLayoutData(gd);
 		
 		fillSearches();
@@ -201,7 +193,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	        	if(getQueryTitle() == null || getQueryTitle().length() == 0){
 	        		setQueryTitle(savedSearchesCombo.getText());
 	        	}
-	        	
+
 	        	int queryIssuesAmount;
 				try {
 					queryIssuesAmount = getClient().getNumberOfIssues(searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
@@ -217,11 +209,12 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	protected void createCustomizeQueryContent(SectionComposite parent){
 	
 		customQueryComposite = new Group(parent.getContent(), SWT.NONE);
-		customQueryComposite.setText("Enter query into search box (press Ctrl+Space for query completion).");
+		customQueryComposite.setText("Search box");
+		customQueryComposite.setLayout(new GridLayout(2, false));
+		
 		GridData gd = new GridData(SWT.FILL);
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
-		customQueryComposite.setLayout(new GridLayout(2, false));
 		customQueryComposite.setLayoutData(gd);
 
 		Listener countSuitableIssuesListener = new Listener() {
@@ -231,25 +224,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	        }
 	    };
 	    
-	    SelectionListener countSuitableIssuesSelectionListener = new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				countIssuesInListeners();
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				countIssuesInListeners();
-			}
-		};
-		
-//		Label searchLabel = new Label(parent.getContent(), SWT.NONE);
-//		searchLabel.setText("Search box:");
-		
 		searchBoxText = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
 		searchBoxText.setLayoutData(gd);
-		
 		searchBoxText.addListener(SWT.CHANGED, countSuitableIssuesListener);
 		
 		try {
@@ -268,9 +244,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 				}
 			});
         }
-        catch( Exception e )
+        catch(Exception e)
         {
-           //TODO: fix
+           throw new RuntimeException(e);
         }
 		
 		searchBoxText.addKeyListener( new KeyAdapter()
@@ -283,7 +259,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
         			items  = intellisense.getIntellisenseItems();
 					scp.setProposals(options); 
 				} catch (CoreException e) {
-					// TODO Auto-generated catch block
+					throw new RuntimeException(e);
 				}
             }
         }
@@ -304,9 +280,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		return YouTrackConnector.getClient(getTaskRepository());
 	}
 	
-	protected void doRefresh() {
+	protected void doPartialRefresh() {
 		savedSearchesCombo.removeAll();
-		numberOfIssues2.setText("");
+		numberOfIssues1.setText("");
 		fillSearches();
 		for(SavedSearch search : this.searches){
 			savedSearchesCombo.add(search.getName());
@@ -314,13 +290,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		
 		searchBoxText.setText("");
 		numberOfIssues2.setText("");
-		
-		if(this.getPreviousPage() != null){
-			IWizardPage previousPage = this.getPreviousPage();
-			if(previousPage instanceof YouTrackFastQueryPage){
-				this.setQueryTitle(((YouTrackFastQueryPage) previousPage).getQueryTitle());
-			}
-		}
+	}
+	
+	protected void doFullRefresh() {
+		doPartialRefresh();
+		setQueryTitle("");
 	}
 	
 	protected void fillSearches(){
@@ -342,8 +316,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	
 	@Override
 	public boolean isPageComplete() {
-		if(this.getQueryTitle() != null && this.getQueryTitle().length() > 0 && 
-				(savedSearchesCombo.getSelectionIndex() != -1 || searchBoxText.getText().length() > 0)){
+		if(getQueryTitle() != null && getQueryTitle().length() > 0 && 
+				((savedSearchesCombo.getItemCount() > 0 && savedSearchesCombo.getSelectionIndex() != -1)
+						|| searchBoxText.getText().length() > 0)){
 			return true;
 		}
         return false;
