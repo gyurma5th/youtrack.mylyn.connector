@@ -54,11 +54,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		
 	private Combo savedSearchesCombo;
 	
-	private Text numberOfIssues;
+	private Text numberOfIssues1;
+	
+	private Text numberOfIssues2;
 	
 	private Button customizeQueryCheckbox;
-	
-	private Combo projectCombo;
 	
 	private Text searchBoxText;
 	
@@ -80,7 +80,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		super("youtrack.repository.query.page", repository, query);
 		this.repository = repository;
 		setTitle("YouTrack Repository Query");
-		setDescription("Choose saved search or select customize query.");
+		setDescription("Choose saved search or select checkbox and customize query.");
 	}
 
 	@Override
@@ -151,6 +151,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 					recursiveSetEnabled(fastQueryComposite, true);
 					recursiveSetEnabled(customQueryComposite, false);
 		        }
+		        doRefreshControls();
 			}
 			
 			@Override
@@ -190,8 +191,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
 		labelIssues.setText("#");
 		
-		numberOfIssues = new Text(numberOfIssuesComposite, SWT.SINGLE);
-		numberOfIssues.setEnabled(false);
+		numberOfIssues1 = new Text(numberOfIssuesComposite, SWT.SINGLE);
+		numberOfIssues1.setEnabled(false);
 		
 		savedSearchesCombo.addListener(SWT.Selection, new Listener() {
 	        @Override
@@ -204,9 +205,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	        	int queryIssuesAmount;
 				try {
 					queryIssuesAmount = getClient().getNumberOfIssues(searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
-					numberOfIssues.setText(new Integer(queryIssuesAmount).toString());
+					numberOfIssues1.setText(new Integer(queryIssuesAmount).toString());
 				} catch (CoreException e) {
-					numberOfIssues.setText("");
+					numberOfIssues1.setText("");
 					throw new RuntimeException(e.getMessage());
 				}
 	        }
@@ -293,8 +294,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		
 		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
 		labelIssues.setText("#");
-		numberOfIssues = new Text(numberOfIssuesComposite, SWT.SINGLE);
-		numberOfIssues.setEnabled(false);
+		numberOfIssues2 = new Text(numberOfIssuesComposite, SWT.SINGLE);
+		numberOfIssues2.setEnabled(false);
 
 		recursiveSetEnabled(customQueryComposite, false);
 	}
@@ -305,14 +306,14 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	
 	protected void doRefresh() {
 		savedSearchesCombo.removeAll();
-		numberOfIssues.setText("");
+		numberOfIssues2.setText("");
 		fillSearches();
 		for(SavedSearch search : this.searches){
 			savedSearchesCombo.add(search.getName());
 		}
 		
 		searchBoxText.setText("");
-		numberOfIssues.setText("");
+		numberOfIssues2.setText("");
 		
 		if(this.getPreviousPage() != null){
 			IWizardPage previousPage = this.getPreviousPage();
@@ -341,7 +342,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	
 	@Override
 	public boolean isPageComplete() {
-		if(this.getQueryTitle() != null && this.getQueryTitle().length() > 0 && savedSearchesCombo.getSelectionIndex() != -1){
+		if(this.getQueryTitle() != null && this.getQueryTitle().length() > 0 && 
+				(savedSearchesCombo.getSelectionIndex() != -1 || searchBoxText.getText().length() > 0)){
 			return true;
 		}
         return false;
@@ -380,9 +382,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		try {
 			int queryIssuesAmount = 
 					((YouTrackConnector) getConnector()).queryIssuesAmount(null, searchBoxText.getText(), getTaskRepository());
-			numberOfIssues.setText(new Integer(queryIssuesAmount).toString());
+			numberOfIssues2.setText(new Integer(queryIssuesAmount).toString());
 		} catch (CoreException e) {
-			numberOfIssues.setText("");
+			numberOfIssues2.setText("");
 			throw new RuntimeException(e.getMessage());
 		}
 	}
