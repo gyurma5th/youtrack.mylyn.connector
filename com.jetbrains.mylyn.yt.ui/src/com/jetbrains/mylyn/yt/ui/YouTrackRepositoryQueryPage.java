@@ -139,15 +139,17 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 			public void widgetSelected(SelectionEvent e) {
 				
 				Button button = (Button) e.widget;
+				doPartialRefresh();
 				
 		        if(button.getSelection()){
+		        	setMessage("Enter query into search box (press Ctrl+Space for query completion).");
 		        	recursiveSetEnabled(fastQueryComposite, false);
 					recursiveSetEnabled(customQueryComposite, true);
 		        } else {
+		        	setMessage("Choose saved search.");
 					recursiveSetEnabled(fastQueryComposite, true);
 					recursiveSetEnabled(customQueryComposite, false);
 		        }
-		        doPartialRefresh();
 			}
 			
 			@Override
@@ -295,6 +297,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	protected void doFullRefresh() {
 		doPartialRefresh();
 		setQueryTitle("");
+		setMessage(defaultMessage);
 	}
 	
 	protected void fillSearches(){
