@@ -341,7 +341,7 @@ public class YouTrackClient {
 		int number = resource.accept("application/xml").get(XmlNumberOfIssuesParser.class).getNumber();
 		
 		if(number == -1){
-			return 0;
+			return getNumberOfIssues(filterQuery);
 		} else {
 			return number;
 		}

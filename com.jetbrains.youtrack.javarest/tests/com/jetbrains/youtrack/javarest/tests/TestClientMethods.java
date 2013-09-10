@@ -270,6 +270,7 @@ public class TestClientMethods {
 			int count = client.getNumberOfIssues(null);
 			count = client.getNumberOfIssues("project: " + TEST_PROJECT_NAME);
 			assertTrue(client.getNumberOfIssues("project: " + TEST_PROJECT_NAME) <= client.getNumberOfIssues(null));
+			assertEquals(1, client.getNumberOfIssues("#{Meta Issue} " + "project: " + TEST_PROJECT_NAME));
 	}
 	
 	
