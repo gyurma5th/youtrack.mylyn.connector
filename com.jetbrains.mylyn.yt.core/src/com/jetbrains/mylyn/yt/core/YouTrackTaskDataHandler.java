@@ -14,6 +14,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.mylyn.internal.tasks.core.AbstractTaskCategory;
+import org.eclipse.mylyn.internal.tasks.core.RepositoryQuery;
+import org.eclipse.mylyn.internal.tasks.core.TaskList;
+import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse.ResponseKind;
@@ -373,11 +377,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 	
 	@Override
 	public void migrateTaskData(TaskRepository taskRepository, TaskData taskData) {
-
+		
 		if (taskData.isNew() || isEnableEditMode()) {
 			
 			YouTrackProject project = YouTrackConnector.getProject(taskRepository, taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
-			
+			 
 			for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
 				if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
 					attr.getMetaData().setReadOnly(false);
