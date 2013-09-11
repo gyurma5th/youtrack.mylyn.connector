@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
@@ -154,7 +155,8 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	public TaskData getTaskData(TaskRepository taskRepository, String taskId,
 			IProgressMonitor monitor) throws CoreException {
 		
-		YouTrackIssue issue = getClient(taskRepository).getIssue(taskId.replace("_","-"));
+		String key = TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), taskId).getTaskKey();
+		YouTrackIssue issue = getClient(taskRepository).getIssue(key);
 		// stall a while to allow the UI to update
 		try {
 			Thread.sleep(500);

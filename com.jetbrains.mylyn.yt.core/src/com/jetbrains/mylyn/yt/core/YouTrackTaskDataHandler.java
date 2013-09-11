@@ -91,11 +91,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 				//upload new comments
 				String newComment = getNewComment(taskData);
 				if (newComment != null && newComment.length() > 0) {
-						client.addComment(taskData.getTaskId().replace("_", "-"), newComment);
+						client.addComment(taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY).getValue(), newComment);
 						taskData.getRoot().getMappedAttribute(COMMENT_NEW).clearValues();
 				}
 				
-				client.updateIssue(taskData.getTaskId().replace("_", "-"), issue);
+				client.updateIssue(taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY).getValue(), issue);
 				
 				return new RepositoryResponse(ResponseKind.TASK_UPDATED, taskData.getTaskId());
 			}
@@ -118,6 +118,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		
 		attribute = data.getRoot().createAttribute(TaskAttribute.DATE_CREATION);
 		attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME).setLabel("Created:");
+		
+		attribute = data.getRoot().createAttribute(TaskAttribute.TASK_KEY);
+		attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT).setLabel("Issue key:");
 		
 		attribute = data.getRoot().createAttribute(TaskAttribute.DATE_MODIFICATION);
 		attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME).setLabel("Updated:");
@@ -213,18 +216,17 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		
 		issue.mapProperties();
 		
-		/*TODO:
-		understand this from RepositoryTaskHandleUtil:
+		/*
+		because valid id not contain '-':
 		public static boolean isValidTaskId(String taskId) {
 			return !taskId.contains(HANDLE_DELIM);
 		}
 		see also createTaskData() in JiraTaskDataHandler
 		*/
 		
-		String taskId = issue.getId();
-		taskId = taskId.replace("-", "_");
+		String issueId = issue.getId();
 		TaskData taskData = new TaskData(getAttributeMapper(repository), repository.getConnectorKind(),
-				repository.getRepositoryUrl(), taskId);
+				repository.getRepositoryUrl(), issueId.substring(issueId.indexOf("-") + 1));
 		initializeTaskData(repository, taskData, null, monitor);
 		
 		TaskAttribute attribute = taskData.getRoot().getAttribute(TaskAttribute.SUMMARY);
@@ -232,6 +234,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 
 		attribute = taskData.getRoot().getAttribute(TaskAttribute.DESCRIPTION);
 		attribute.setValue(issue.property("description").toString());
+		
+		attribute = taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY);
+		attribute.setValue(issueId);
 
 		attribute = taskData.getRoot().getAttribute(TaskAttribute.DATE_CREATION);
 		taskData.getAttributeMapper().setDateValue(attribute, new Date(Long.parseLong(issue.property("created").toString())));
@@ -260,10 +265,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		
 		attribute = taskData.getRoot().getAttribute(TaskAttribute.COMPONENT);
 		if(issue.property("links") instanceof String){
-			attribute.addValue(issue.property("links").toString().replace("-", "_"));
+			attribute.addValue(issue.property("links").toString());
 		} else {
 			for(String value: (LinkedList<String>) issue.property("links")){
-				attribute.addValue(value.replace("-", "_"));
+				attribute.addValue(value);
 			}
 		}
 
