@@ -11,8 +11,8 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorCommentPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorDescriptionPart;
+import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.ToolBarButtonContribution;
-import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
@@ -32,6 +32,8 @@ import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 public class YouTrackTaskEditorPage extends AbstractTaskEditorPage{
 	
 	private Button updateButton;
+	
+	private final static String ID_NEW_COMMENTS_PART = "ID_NEW_COMMENTS_PART";
 
 	public YouTrackTaskEditorPage(TaskEditor editor) {
 		super(editor, YouTrackCorePlugin.CONNECTOR_KIND);
@@ -82,9 +84,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage{
 			}
 		}.setPath(PATH_ACTIONS));
 		
-		
-		
-		descriptors.add(new TaskEditorPartDescriptor("ID_NEW_COMMENTS_PART") {
+		descriptors.add(new TaskEditorPartDescriptor(ID_NEW_COMMENTS_PART) {
 			@Override
 			public AbstractTaskEditorPart createPart() {
 				return new YouTrackTaskEditorNewCommentPart();
@@ -127,9 +127,18 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage{
 	}
 	
 	public void doEdit(){
-		((YouTrackTaskDataHandler) getConnector().getTaskDataHandler()).setEnableEditMode(true);
+		YouTrackTaskDataHandler.setEnableEditMode(true);
 		getEditor().refreshPages();
-		((YouTrackTaskDataHandler) getConnector().getTaskDataHandler()).setEnableEditMode(false);
+		YouTrackTaskDataHandler.setEnableEditMode(false);
+	}
+	
+	@Override
+	public void appendTextToNewComment(String text) {
+		AbstractTaskEditorPart newCommentPart = getPart(ID_NEW_COMMENTS_PART);
+		if (newCommentPart instanceof TaskEditorRichTextPart) {
+			((TaskEditorRichTextPart) newCommentPart).appendText(text);
+			newCommentPart.setFocus();
+		}
 	}
 
 }

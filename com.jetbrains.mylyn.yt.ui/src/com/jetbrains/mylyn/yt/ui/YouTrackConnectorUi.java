@@ -5,10 +5,15 @@
 package com.jetbrains.mylyn.yt.ui;
 
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
+import org.eclipse.mylyn.tasks.core.ITask;
+import org.eclipse.mylyn.tasks.core.ITaskComment;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.AbstractRepositoryConnectorUi;
 import org.eclipse.mylyn.tasks.ui.wizards.ITaskRepositoryPage;
 import org.eclipse.mylyn.tasks.ui.wizards.NewTaskWizard;
@@ -46,9 +51,21 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
 	public IWizard getQueryWizard(TaskRepository repository, IRepositoryQuery query) {
 		RepositoryQueryWizard wizard = new RepositoryQueryWizard(repository);
 		wizard.addPage(new YouTrackRepositoryQueryPage("youtrack.repository.query.page", repository, query));
-//		wizard.addPage(new YouTrackFastQueryPage("youtrack.fast.query.page", repository, query));
-//		wizard.addPage(new YouTrackSearchQueryPage("youtrack.search.query.page", repository, query));
 		return wizard;
+	}
+	
+	@Override
+	public String getTaskKindLabel(ITask repositoryTask) {
+		return "Issue";
+	}
+	
+	@Override
+	public String getReplyText(TaskRepository taskRepository, ITask task, ITaskComment taskComment, boolean includeTask) {
+		if (taskComment == null) {
+			return String.format("Reply to description:", task.getAttribute(TaskAttribute.DESCRIPTION));
+		} else {
+			return String.format("Reply to comment:", taskComment.getText());
+		}
 	}
 
 }

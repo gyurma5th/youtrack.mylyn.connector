@@ -47,6 +47,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 	
 	private static boolean enableEditMode = false;
 	
+	private static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
+	
 	public YouTrackTaskDataHandler(YouTrackConnector connector) {
 		this.connector = connector;
 	}
@@ -90,7 +92,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 				String newComment = getNewComment(taskData);
 				if (newComment != null && newComment.length() > 0) {
 						client.addComment(taskData.getTaskId().replace("_", "-"), newComment);
-						taskData.getRoot().getMappedAttribute("TaskAttribute.COMMENT_NEW").clearValues();
+						taskData.getRoot().getMappedAttribute(COMMENT_NEW).clearValues();
 				}
 				
 				client.updateIssue(taskData.getTaskId().replace("_", "-"), issue);
@@ -145,7 +147,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SINGLE_SELECT).setLabel("Project:");
 		
 		if(!data.isNew()){
-			attribute = data.getRoot().createAttribute("TaskAttribute.COMMENT_NEW");
+			attribute = data.getRoot().createAttribute(COMMENT_NEW);
 			attribute.getMetaData().setReadOnly(false).setType(TaskAttribute.TYPE_LONG_RICH_TEXT);
 		}
 		
@@ -378,7 +380,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 	@Override
 	public void migrateTaskData(TaskRepository taskRepository, TaskData taskData) {
 		
-		if (taskData.isNew() || isEnableEditMode()) {
+		if ((taskData != null && taskData.isNew()) || isEnableEditMode()) {
 			
 			YouTrackProject project = YouTrackConnector.getProject(taskRepository, taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
 			 
@@ -409,7 +411,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 	
 	private String getNewComment(TaskData taskData) {
 		String newComment = "";
-		TaskAttribute attribute = taskData.getRoot().getMappedAttribute("TaskAttribute.COMMENT_NEW");
+		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(COMMENT_NEW);
 		if (attribute != null) {
 			newComment = taskData.getAttributeMapper().getValue(attribute);
 		}
