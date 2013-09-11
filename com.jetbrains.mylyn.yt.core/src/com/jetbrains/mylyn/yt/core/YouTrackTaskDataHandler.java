@@ -350,7 +350,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 					YouTrackCorePlugin.ID_PLUGIN, IStatus.OK, "Wrong or null summary.", null));
 		}
 		
-		YouTrackProject project = YouTrackConnector.getProject(repository, taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue());
+		YouTrackProject project = YouTrackConnector.getProject(repository, 
+				taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue());
 		
 		if(!project.isCustomFieldsUpdated()){
 			project.updateCustomFields(YouTrackConnector.getClient(repository));
@@ -358,17 +359,28 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		
 		for (TaskAttribute attribute : taskData.getRoot().getAttributes().values()) {
 			if (attribute.getId().startsWith("CustomField") && attribute.getValue() != null && !attribute.getValue().equals("")){
-				Class fieldClass =  YouTrackCustomFieldType.getTypeByName(
-						YouTrackConnector.getProject(repository, taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue()).
-						getCustomFieldsMap().get(attribute.getMetaData().getLabel().replaceAll(":", "")).getType()).
-						getFieldValuesClass();
-				try{
+				
+				//TODO: fix this mess
+				
+				String emptyText = YouTrackConnector.getProject(repository, taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue()).
+						getCustomFieldsMap().get(attribute.getMetaData().getLabel().replaceAll(":", "")).getEmptyText();
+				
+				if(attribute.getValue().toString().equals(emptyText)){
 					issue.addProperty("CustomField" + attribute.getMetaData().getLabel(), 
-							CastCheck.toObject(fieldClass, attribute.getValue()).toString() );
-				}
-				catch(NumberFormatException e) {
-					throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-							YouTrackCorePlugin.ID_PLUGIN, IStatus.OK, NLS.bind("Wrong type of value in field \"{0}\".", attribute.getMetaData().getLabel()), null));
+							attribute.getValue().toString() );
+				} else {
+					Class fieldClass =  YouTrackCustomFieldType.getTypeByName(
+							YouTrackConnector.getProject(repository, taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue()).
+							getCustomFieldsMap().get(attribute.getMetaData().getLabel().replaceAll(":", "")).getType()).
+							getFieldValuesClass();
+					try{
+						issue.addProperty("CustomField" + attribute.getMetaData().getLabel(), 
+								CastCheck.toObject(fieldClass, attribute.getValue()).toString() );
+					}
+					catch(NumberFormatException e) {
+						throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
+								YouTrackCorePlugin.ID_PLUGIN, IStatus.OK, NLS.bind("Wrong type of value in field \"{0}\".", attribute.getMetaData().getLabel()), null));
+					}
 				}
 			}
 		}

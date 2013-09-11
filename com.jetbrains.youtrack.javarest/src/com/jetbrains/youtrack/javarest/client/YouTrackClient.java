@@ -576,7 +576,10 @@ public class YouTrackClient {
 				updateIssueDescription(oldIssueId, newIssue.getDescription());
 			}
 			
-			Set<String> customFieldsNames = this.getProjectCustomFieldNames(oldIssue.getProjectName());
+			String project = newIssue.getProjectName();
+			Set<String> customFieldsNames = this.getProjectCustomFieldNames(project);
+			
+			
 			
 			for(String customFieldName : customFieldsNames){
 				if(newIssue.getProperties().get(customFieldName) instanceof String){
