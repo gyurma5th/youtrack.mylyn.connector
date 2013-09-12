@@ -571,64 +571,39 @@ public class TestClientMethods {
 	
 	
 	@Test
-	public void testUpdateIssueSummary(){
+	public void testUpdateIssueSummaryAndDescription(){
 		String testIssueId = TEST_PROJECT_NAME + "-100";
 		YouTrackIssue issue = client.getIssue(testIssueId);
 		assertEquals("OLD SUMMARY", issue.getSummary());
-		client.updateIssueSummary(testIssueId, "NEW SUMMARY");
+		assertEquals("OLD DESCRIPTION", issue.getDescription());
+		client.updateIssueSummaryAndDescription(testIssueId, "NEW SUMMARY", "NEW DESCRIPTION");
 		issue = client.getIssue(testIssueId);
 		assertEquals("NEW SUMMARY", issue.getSummary());
-		
-		try{
-			client.updateIssueSummary(testIssueId, null);
-			fail("Exception expected while send null issue summary.");
-		} catch (Exception e){
-		}
-		
-		try{
-			client.updateIssueSummary(null, "");
-			fail("Exception expected while send null issue id.");
-		} catch (Exception e){
-		}
-		
-		try{
-			client.updateIssueSummary("not existed issue id", "");
-			fail("Exception expected while send issue summary by wrong issue id.");
-		} catch (Exception e){
-		}
-		
-		client.updateIssueSummary(testIssueId, "OLD SUMMARY");
-	}
-	
-	
-	@Test
-	public void testUpdateIssueDescription(){
-		String testIssueId = TEST_PROJECT_NAME + "-100";
-		YouTrackIssue issue = client.getIssue(testIssueId);
-		assertEquals("OLD DESCRIPTION", issue.getDescription());
-		client.updateIssueDescription(testIssueId, "NEW DESCRIPTION");
-		issue = client.getIssue(testIssueId);
 		assertEquals("NEW DESCRIPTION", issue.getDescription());
 		
 		try{
-			client.updateIssueDescription(testIssueId, null);
-			fail("Exception expected while send null issue description.");
+			client.updateIssueSummaryAndDescription(testIssueId, "", "Descr");
+			fail("Exception expected while send empty issue summary.");
 		} catch (Exception e){
 		}
 		
 		try{
-			client.updateIssueDescription(null, "");
+			client.updateIssueSummaryAndDescription("not existed id", "Summary", "Description");
+			fail("Exception expected while send issue summary and description by wrong issue id.");
+		} catch (Exception e){
+		}
+		
+		try{
+			client.updateIssueSummaryAndDescription(null, "Summary", "Description");
 			fail("Exception expected while send null issue id.");
 		} catch (Exception e){
 		}
 		
-		try{
-			client.updateIssueDescription("not existed issue id", "");
-			fail("Exception expected while send issue description by wrong issue id.");
-		} catch (Exception e){
-		}
+		client.updateIssueSummaryAndDescription(testIssueId, "NEW SUMMARY", null);
+		issue = client.getIssue(testIssueId);
+		assertEquals("NEW DESCRIPTION", issue.getDescription());
 		
-		client.updateIssueDescription(testIssueId, "OLD DESCRIPTION");
+		client.updateIssueSummaryAndDescription(testIssueId, "OLD SUMMARY", "OLD DESCRIPTION");
 	}
 	
 	

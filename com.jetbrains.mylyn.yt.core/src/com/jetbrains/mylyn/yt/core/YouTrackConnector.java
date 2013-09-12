@@ -155,8 +155,16 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	public TaskData getTaskData(TaskRepository taskRepository, String taskId,
 			IProgressMonitor monitor) throws CoreException {
 		
-		String key = TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), taskId).getTaskKey();
-		YouTrackIssue issue = getClient(taskRepository).getIssue(key);
+		System.err.println(taskId);
+		
+		String realIssueId;
+		if(taskId.contains("-")){
+			realIssueId = taskId;
+		} else {
+			realIssueId = TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), taskId).getTaskKey();
+		}
+		
+		YouTrackIssue issue = getClient(taskRepository).getIssue(realIssueId);
 		// stall a while to allow the UI to update
 		try {
 			Thread.sleep(500);

@@ -546,14 +546,6 @@ public class YouTrackClient {
 		}
 	}
 	
-	public void updateIssueSummary(String issueId, String newSummary){
-		ClientResponse response = service.path("/issue/").path(issueId).
-				queryParam("summary", newSummary).post(ClientResponse.class);
-		if (response.getStatus() != 200) {
-			throw new RuntimeException("Failed to update issue summary: " + response.getStatus());
-		}
-	}
-	
 	private void callPost(CallPost call, int okStatus, String exceptionMessage) {
 		ClientResponse response = call.call();
 		if (response.getStatus() != okStatus) {
@@ -564,18 +556,10 @@ public class YouTrackClient {
 	/**
 	 * summary can't be empty by rest restriction
 	 * @param issueId
-	 * @param newDescription
+	 * @param newSummary
+	 * @param newDescription new description
+	 * 						 if null, not changed
 	 */
-	public void updateIssueDescription(final String issueId, final String newDescription){
-		ClientResponse response = service.path("/issue/").path(issueId).
-					queryParam("description", newDescription).
-					queryParam("summary", getIssue(issueId).getSummary()).
-					post(ClientResponse.class);
-		if(response.getStatus() != 200){
-			throw new RuntimeException("Failed to update issue description: " + response.getStatus());
-		}
-	}
-	
 	public void updateIssueSummaryAndDescription(String issueId, String newSummary, String newDescription){
 		WebResource resource = service.path("/issue/").path(issueId);
 		if(newSummary != null && newSummary.length() > 0){
@@ -602,14 +586,11 @@ public class YouTrackClient {
 			
 			YouTrackIssue oldIssue = this.getIssue(oldIssueId);
 			
-			if(newIssue.getSummary() != null && !oldIssue.getSummary().equals(newIssue.getSummary())){
-				updateIssueSummary(oldIssueId, newIssue.getSummary());
-			}
-			
-			if(newIssue.getDescription() != null && 
-					(oldIssue.getDescription() == null || !oldIssue.getDescription().equals(
-							newIssue.getDescription()))){
-				updateIssueDescription(oldIssueId, newIssue.getDescription());
+			if(newIssue.getSummary() != null && newIssue.getSummary().length() > 0 &&
+					(!oldIssue.getSummary().equals(newIssue.getSummary()) || (newIssue.getDescription() != null && 
+							(oldIssue.getDescription() == null || !oldIssue.getDescription().equals(
+									newIssue.getDescription()))))){
+				updateIssueSummaryAndDescription(oldIssueId, newIssue.getSummary(), newIssue.getDescription());
 			}
 			
 			String project = newIssue.getProjectName();
