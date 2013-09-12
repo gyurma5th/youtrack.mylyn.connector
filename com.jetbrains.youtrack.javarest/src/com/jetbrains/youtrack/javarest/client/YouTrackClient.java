@@ -7,10 +7,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.plaf.SliderUI;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
 import com.jetbrains.youtrack.javarest.utils.BuildBundleValues;
+import com.jetbrains.youtrack.javarest.utils.CallPost;
 import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
@@ -329,6 +331,7 @@ public class YouTrackClient {
 	/**
 	 * @param filterQuery
 	 * @return number of relevant issues or all issues, if filter string is null
+	 * return -1 if reach max number of attempts
 	 */
 	public int getNumberOfIssues(String filterQuery){
 		WebResource resource = service.path("/issue/count");
@@ -338,13 +341,16 @@ public class YouTrackClient {
 			resource = resource.queryParam("filter", "");
 		}
 		
-		int number = resource.accept("application/xml").get(XmlNumberOfIssuesParser.class).getNumber();
-		
-		if(number == -1){
-			return getNumberOfIssues(filterQuery);
-		} else {
-			return number;
+		int number;
+		int attemptCount = 0;
+		while((number = resource.accept("application/xml").get(XmlNumberOfIssuesParser.class).getNumber()) == -1 && attemptCount++ < 20){
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				break;
+			}
 		}
+		return number;
 	}
 	
 	@XmlRootElement(name="int") 
@@ -548,19 +554,49 @@ public class YouTrackClient {
 		}
 	}
 	
-	//summary can't be empty by rest restriction
-	public void updateIssueDescription(String issueId, String newDescription){
+	private void callPost(CallPost call, int okStatus, String exceptionMessage) {
+		ClientResponse response = call.call();
+		if (response.getStatus() != okStatus) {
+			throw new RuntimeException(exceptionMessage + "\nRESPONSE CODE " + response.getStatus());
+		}
+	}
+	
+	/**
+	 * summary can't be empty by rest restriction
+	 * @param issueId
+	 * @param newDescription
+	 */
+	public void updateIssueDescription(final String issueId, final String newDescription){
 		ClientResponse response = service.path("/issue/").path(issueId).
-				queryParam("description", newDescription).
-				queryParam("summary", getIssue(issueId).getSummary()).
-				post(ClientResponse.class);
-		if (response.getStatus() != 200) {
+					queryParam("description", newDescription).
+					queryParam("summary", getIssue(issueId).getSummary()).
+					post(ClientResponse.class);
+		if(response.getStatus() != 200){
 			throw new RuntimeException("Failed to update issue description: " + response.getStatus());
 		}
 	}
 	
-	//TODO: what to do if old issue not update fully? 
-	// save locally old issue and return back or make incomplete update?
+	public void updateIssueSummaryAndDescription(String issueId, String newSummary, String newDescription){
+		WebResource resource = service.path("/issue/").path(issueId);
+		if(newSummary != null && newSummary.length() > 0){
+			resource = resource.queryParam("summary", newSummary);
+			if(newDescription != null){
+				resource = resource.queryParam("description", newDescription);
+			}
+		} else {
+			throw new RuntimeException("Failed to update issue: summary cant be empty");
+		}
+		ClientResponse response = resource.post(ClientResponse.class);
+		if(response.getStatus() != 200){
+			throw new RuntimeException("Failed to update issue description and summary " + response.getStatus());
+		}
+	}
+	
+	/**
+	 * If issue not update fully, make incomplete update
+	 * @param oldIssueId
+	 * @param newIssue
+	 */
 	public void updateIssue(String oldIssueId, YouTrackIssue newIssue){
 		if(oldIssueId != null){
 			
@@ -578,8 +614,6 @@ public class YouTrackClient {
 			
 			String project = newIssue.getProjectName();
 			Set<String> customFieldsNames = this.getProjectCustomFieldNames(project);
-			
-			
 			
 			for(String customFieldName : customFieldsNames){
 				if(newIssue.getProperties().get(customFieldName) instanceof String){

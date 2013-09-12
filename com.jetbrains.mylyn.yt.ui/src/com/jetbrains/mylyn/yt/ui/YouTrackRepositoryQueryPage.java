@@ -257,7 +257,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
             {	
             	try {
             		intellisense = getClient().intellisenseSearchValues(searchBoxText.getText(), searchBoxText.getCaretPosition());
-        			options = intellisense.getOptions();
+            		options = intellisense.getOptions();
         			items  = intellisense.getIntellisenseItems();
 					scp.setProposals(options); 
 				} catch (CoreException e) {

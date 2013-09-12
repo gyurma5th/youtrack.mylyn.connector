@@ -61,7 +61,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		YouTrackClient client = YouTrackConnector.getClient(repository);
 		YouTrackIssue issue = new YouTrackIssue();
 		
-		try{
+		try {
 			issue = buildIssue(repository, taskData);
 			Map<String, String> changedCF = new HashMap<>();
 			for(String key : issue.getProperties().keySet()){
@@ -267,7 +267,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		if(issue.property("links") instanceof String){
 			attribute.addValue(issue.property("links").toString());
 		} else {
-			for(String value: (LinkedList<String>) issue.property("links")){
+			for(String value: (Iterable<String>) issue.property("links")){
 				attribute.addValue(value);
 			}
 		}
