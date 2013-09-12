@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
 import com.jetbrains.youtrack.javarest.utils.BuildBundleValues;
-import com.jetbrains.youtrack.javarest.utils.CallPost;
+import com.jetbrains.youtrack.javarest.utils.ICallPost;
 import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
@@ -151,7 +151,7 @@ public class YouTrackClient {
 	}
 
 	public boolean login(final String username, final String password) {
-		callPost(new CallPost() {
+		callPost(new ICallPost() {
 			@Override
 			public ClientResponse call() {
 				if (username == null || password == null || "".equals(username)  || "".equals(password) ){
@@ -171,7 +171,7 @@ public class YouTrackClient {
 	}
 	
 	public boolean loginWithCredentials() {
-		callPost(new CallPost() {
+		callPost(new ICallPost() {
 			@Override
 			public ClientResponse call() {
 				if(username == null || password == null){
@@ -281,7 +281,7 @@ public class YouTrackClient {
 	 * @return new issue id from tracker, if successfully uploaded
 	 */
 	public String putNewIssue(final YouTrackIssue issue){
-		ClientResponse response = callPost(new CallPost() {
+		ClientResponse response = callPost(new ICallPost() {
 			@Override
 			public ClientResponse call() {
 				if(issue != null && issue.getProjectName() != null && issue.getSummary() != null) {
@@ -302,7 +302,7 @@ public class YouTrackClient {
 	}
 
 	public void deleteIssue(final String issueId){
-		callPost(new CallPost() {
+		callPost(new ICallPost() {
 			@Override
 			public ClientResponse call() {
 				if(issueId != null){
@@ -315,7 +315,7 @@ public class YouTrackClient {
 	}
 	
 	public void applyCommand(final String issueId, final String command) {
-		callPost(new CallPost() {
+		callPost(new ICallPost() {
 			@Override
 			public ClientResponse call() {
 				if(issueId != null && command != null){
@@ -463,7 +463,7 @@ public class YouTrackClient {
 	}
 	
 	public void addComment(final String issueId, final String comment){
-		callPost(new CallPost() {
+		callPost(new ICallPost() {
 			@Override
 			public ClientResponse call() {
 				if(issueId != null && comment != null){
@@ -518,7 +518,7 @@ public class YouTrackClient {
 		return service.path("/user/search").accept("application/xml").get(SavedSearches.class).getSearchNames();
 	}
 	
-	private ClientResponse callPost(CallPost call, int okStatus, String exceptionMessage) {
+	private ClientResponse callPost(ICallPost call, int okStatus, String exceptionMessage) {
 		ClientResponse response = call.call();
 		if (response.getStatus() != okStatus) {
 			throw new RuntimeException(exceptionMessage + "\nRESPONSE CODE: " + response.getStatus());
@@ -564,7 +564,7 @@ public class YouTrackClient {
 	 * 						 if null, not changed
 	 */
 	public void updateIssueSummaryAndDescription(final String issueId, final String newSummary, final String newDescription){
-		callPost(new CallPost() {
+		callPost(new ICallPost() {
 			@Override
 			public ClientResponse call() {
 				WebResource resource = service.path("/issue/").path(issueId);
