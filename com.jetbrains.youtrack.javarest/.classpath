@@ -17,7 +17,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jackson-mapper-asl-1.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-xc-1.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-apache-client-1.12.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jersey-bundle-1.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jersey-bundle-1.12.jar" sourcepath="C:/Users/Alexander.Marchuk/Downloads/jersey-bundle-1.12-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-client-1.12-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-client-1.17.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-core-1.12.jar"/>

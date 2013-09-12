@@ -150,51 +150,53 @@ public class YouTrackClient {
 		}
 	}
 
-	public boolean login(String username, String password) {
-		
-		if (username == null || password == null || "".equals(username)  || "".equals(password) ){
-			throw new RuntimeException("Failed : NULL username or password ");
-		} else {
-	
-			ClientResponse response = service.path("/user/login").
-					queryParam("login", username).
-					queryParam("password", password).
-					post(ClientResponse.class);
-			
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed to login: HTTP error code : " + response.getStatus());
+	public boolean login(final String username, final String password) {
+		callPost(new CallPost() {
+			@Override
+			public ClientResponse call() {
+				if (username == null || password == null || "".equals(username)  || "".equals(password) ){
+					throw new RuntimeException("Failed : NULL username or password ");
+				} else {
+					return service.path("/user/login").
+							queryParam("login", username).
+							queryParam("password", password).
+							post(ClientResponse.class);
+				}
 			}
-			
-			this.setPassword(password);
-			this.setUsername(username);
-			
-			return true;
-		}
+		}, 200, "Failed to login");
+		
+		this.setPassword(password);
+		this.setUsername(username);
+		return true;
 	}
 	
 	public boolean loginWithCredentials() {
-		if(username == null || password == null){
-			throw new RuntimeException("Failed to login with credentials : saved username or password is NULL ");
-		} else {
-			
-			ClientResponse response = service.path("/user/login")
-					.queryParam("login", getUsername())
-					.queryParam("password", getPassword())
-					.post(ClientResponse.class);
-			
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed to login with credentials : HTTP error code : " + response.getStatus());
+		callPost(new CallPost() {
+			@Override
+			public ClientResponse call() {
+				if(username == null || password == null){
+					throw new RuntimeException("Failed to login with credentials : saved username or password is NULL ");
+				} else {
+					return service.path("/user/login")
+							.queryParam("login", getUsername())
+							.queryParam("password", getPassword())
+							.post(ClientResponse.class);
+				}
 			}
-			
-			return true;
-		}
+		}, 200, "Failed to login with credentials");
+		
+		return true;
+	}
+	
+	public boolean issueExist(String issueId){
+		return service.path("/issue/").path(issueId).path("/exists").get(ClientResponse.class).getStatus() == 200;
 	}
 
 	public YouTrackIssue getIssue(String id) {
 		if(id == null){
 			throw new RuntimeException("Null issue id");
 		} else {
-			if (service.path("/issue/").path(id).path("/exists").get(ClientResponse.class).getStatus() != 200) {
+			if (!issueExist(id)) {
 				throw new RuntimeException("Issue with such id dont exist in tracker.");
 			} else {
 				return service.path("/issue/").path(id).accept("application/xml").get(YouTrackIssue.class);
@@ -278,54 +280,52 @@ public class YouTrackClient {
 	 * @param issue
 	 * @return new issue id from tracker, if successfully uploaded
 	 */
-	public String putNewIssue(YouTrackIssue issue){
+	public String putNewIssue(final YouTrackIssue issue){
+		ClientResponse response = callPost(new CallPost() {
+			@Override
+			public ClientResponse call() {
+				if(issue != null && issue.getProjectName() != null && issue.getSummary() != null) {
+					WebResource resource = service.path("/issue").
+							queryParam("project", issue.getProjectName()).
+							queryParam("summary", issue.getSummary());
+					if(issue.getDescription() != null){
+						resource = resource.queryParam("description", issue.getDescription());
+					}
+					return resource.put(ClientResponse.class);
+				} else {
+					throw new RuntimeException("Issue's project and summary can't be null.");
+				}
+			}
+		}, 201, "Failed put new issue");
 		
-		if(issue.getProjectName() != null && issue.getSummary() != null) {
-			
-			WebResource resource = service.path("/issue").
-					queryParam("project", issue.getProjectName()).
-					queryParam("summary", issue.getSummary());
-			
-			if(issue.getDescription() != null){
-				resource = resource.queryParam("description", issue.getDescription());
-			}
-			
-			ClientResponse response = resource.put(ClientResponse.class);
-			
-			if (response.getStatus() != 201) {
-				throw new RuntimeException("Failed put new issue : HTTP error code : "+ response.getStatus());
-			}
-			return YouTrackIssue.getIdFromResponse(response);
-		} else {
-			throw new RuntimeException("Issue's project and summary can't be null.");
-		}
+		return YouTrackIssue.getIdFromResponse(response);
 	}
 
-	public void deleteIssue(String issueId){
-		if(issueId != null){
-			
-			ClientResponse response =  service.path("/issue/").path(issueId).delete(ClientResponse.class);
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed delete issue : HTTP error code : "+ response.getStatus());
+	public void deleteIssue(final String issueId){
+		callPost(new CallPost() {
+			@Override
+			public ClientResponse call() {
+				if(issueId != null){
+					return  service.path("/issue/").path(issueId).delete(ClientResponse.class);
+				} else {
+					throw new RuntimeException("Null issue id");
+				}
 			}
-		} else {
-			throw new RuntimeException("Null issue id");
-		}
-		
+		}, 200, "Failed delete issue " + issueId);
 	}
 	
-	public void applyCommand(String issueId, String command) {
-		
-		if(issueId != null && command != null){
-			ClientResponse response = service.path("/issue/").path(issueId).path("/execute").
-											queryParam("command", command).
-											post(ClientResponse.class);
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed apply command to issue: HTTP error code : "+ response.getStatus());
+	public void applyCommand(final String issueId, final String command) {
+		callPost(new CallPost() {
+			@Override
+			public ClientResponse call() {
+				if(issueId != null && command != null){
+					return service.path("/issue/").path(issueId).path("/execute").
+							queryParam("command", command).post(ClientResponse.class);
+				} else {
+					throw new RuntimeException("Null issue id or command while apply command.");
+				}
 			}
-		} else {
-			throw new RuntimeException("Null issue id or command while apply command.");
-		}
+		}, 200, "Failed apply command " + command + " to issue " + issueId);
 	}
 
 	/**
@@ -462,18 +462,20 @@ public class YouTrackClient {
 				get(UserBundleValues.class).getValues();
 	}
 	
-	public void addComment(String issueId, String comment){
-		if(issueId != null && comment != null && comment.length() > 0){
-			ClientResponse response = service.path("/issue/").path(issueId).path("/execute").
-					queryParam("comment", comment).
-					accept("application/xml").
-					post(ClientResponse.class);
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed add comment to issue: HTTP error code : "+ response.getStatus());
+	public void addComment(final String issueId, final String comment){
+		callPost(new CallPost() {
+			@Override
+			public ClientResponse call() {
+				if(issueId != null && comment != null){
+					return service.path("/issue/").path(issueId).path("/execute").
+							queryParam("comment", comment).
+							accept("application/xml").
+							post(ClientResponse.class);
+				} else {
+					throw new RuntimeException("Null issue id or comment body.");
+				}
 			}
-		} else {
-			throw new RuntimeException("Null issue id or comment body.");
-		}
+		}, 200, "Failed add comment to issue " + issueId);
 	}
 	
 	public String[] intellisenseOptions(String filter){
@@ -516,6 +518,14 @@ public class YouTrackClient {
 		return service.path("/user/search").accept("application/xml").get(SavedSearches.class).getSearchNames();
 	}
 	
+	private ClientResponse callPost(CallPost call, int okStatus, String exceptionMessage) {
+		ClientResponse response = call.call();
+		if (response.getStatus() != okStatus) {
+			throw new RuntimeException(exceptionMessage + "\nRESPONSE CODE: " + response.getStatus());
+		}
+		return response;
+	}
+	
 	public LinkedList<SavedSearch> getSavedSearches(){
 		return service.path("/user/search").accept("application/xml").get(SavedSearches.class).getSearches();
 	}
@@ -546,13 +556,6 @@ public class YouTrackClient {
 		}
 	}
 	
-	private void callPost(CallPost call, int okStatus, String exceptionMessage) {
-		ClientResponse response = call.call();
-		if (response.getStatus() != okStatus) {
-			throw new RuntimeException(exceptionMessage + "\nRESPONSE CODE " + response.getStatus());
-		}
-	}
-	
 	/**
 	 * summary can't be empty by rest restriction
 	 * @param issueId
@@ -560,20 +563,22 @@ public class YouTrackClient {
 	 * @param newDescription new description
 	 * 						 if null, not changed
 	 */
-	public void updateIssueSummaryAndDescription(String issueId, String newSummary, String newDescription){
-		WebResource resource = service.path("/issue/").path(issueId);
-		if(newSummary != null && newSummary.length() > 0){
-			resource = resource.queryParam("summary", newSummary);
-			if(newDescription != null){
-				resource = resource.queryParam("description", newDescription);
+	public void updateIssueSummaryAndDescription(final String issueId, final String newSummary, final String newDescription){
+		callPost(new CallPost() {
+			@Override
+			public ClientResponse call() {
+				WebResource resource = service.path("/issue/").path(issueId);
+				if(newSummary != null && newSummary.length() > 0){
+					resource = resource.queryParam("summary", newSummary);
+					if(newDescription != null){
+						resource = resource.queryParam("description", newDescription);
+					}
+				} else {
+					throw new RuntimeException("Failed to update issue: summary cant be empty");
+				}
+				return resource.post(ClientResponse.class);
 			}
-		} else {
-			throw new RuntimeException("Failed to update issue: summary cant be empty");
-		}
-		ClientResponse response = resource.post(ClientResponse.class);
-		if(response.getStatus() != 200){
-			throw new RuntimeException("Failed to update issue description and summary " + response.getStatus());
-		}
+		}, 200, "Failed to update issue description and summary ");
 	}
 	
 	/**
@@ -605,9 +610,6 @@ public class YouTrackClient {
 					}
 				}
 			}
-			
-			//TODO: add comments and other processing
-			
 		} else {
 			throw new RuntimeException("Null target issue id while update issue.");
 		}

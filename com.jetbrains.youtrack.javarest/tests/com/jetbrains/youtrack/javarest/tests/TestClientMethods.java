@@ -266,6 +266,19 @@ public class TestClientMethods {
 	
 	
 	@Test
+	public void testIssueExist(){
+		assertTrue(client.issueExist(MYLYN_PROJECT_NAME + "-1"));
+		assertFalse(client.issueExist(MYLYN_PROJECT_NAME + "-0"));
+		
+		try{
+			client.issueExist(null);
+			fail("Exception expected while check that null issue id exist.");
+		} catch(Exception e){
+		}
+		
+	}
+	
+	@Test
 	public void testGetNumberOfIssues(){
 			int count = client.getNumberOfIssues(null);
 			count = client.getNumberOfIssues("project: " + TEST_PROJECT_NAME);
@@ -470,12 +483,6 @@ public class TestClientMethods {
 		try{
 			client.addComment(TEST_PROJECT_NAME+"-1", null);
 			fail("Exception expected while add new comment with null body.");
-		} catch(Exception e){
-		}
-		
-		try{
-			client.addComment(TEST_PROJECT_NAME+"-1", "");
-			fail("Exception expected while add new comment with empty body.");
 		} catch(Exception e){
 		}
 		

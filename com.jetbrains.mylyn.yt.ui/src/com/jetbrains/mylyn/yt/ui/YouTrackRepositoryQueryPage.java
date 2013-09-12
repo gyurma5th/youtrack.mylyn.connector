@@ -199,6 +199,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 	        	int queryIssuesAmount;
 				try {
 					queryIssuesAmount = getClient().getNumberOfIssues(searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
+					if(queryIssuesAmount == -1){
+						numberOfIssues1.setText("");
+					}
 					numberOfIssues1.setText(new Integer(queryIssuesAmount).toString());
 				} catch (CoreException e) {
 					numberOfIssues1.setText("");
@@ -345,7 +348,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage2{
 		} else {
 	      ctrl.setEnabled(enabled);
 		}
-	}
+	}	
 	
 	private void insertAcceptedProposal(IContentProposal proposal){
 		IntellisenseItem item = items.get(Arrays.asList(options).indexOf(proposal.getContent()));

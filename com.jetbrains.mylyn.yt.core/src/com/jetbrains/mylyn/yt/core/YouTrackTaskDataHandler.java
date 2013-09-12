@@ -399,6 +399,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		
 		if ((taskData != null && taskData.isNew()) || isEnableEditMode()) {
 			
+//			TODO: see exception here
 			YouTrackProject project = YouTrackConnector.getProject(taskRepository, taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
 			 
 			for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
