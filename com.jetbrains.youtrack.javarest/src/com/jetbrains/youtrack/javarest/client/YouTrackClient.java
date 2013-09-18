@@ -601,14 +601,19 @@ public class YouTrackClient {
 			String project = newIssue.getProjectName();
 			Set<String> customFieldsNames = this.getProjectCustomFieldNames(project);
 			
+			StringBuilder command = new StringBuilder();
 			for(String customFieldName : customFieldsNames){
 				if(newIssue.getProperties().get(customFieldName) instanceof String){
 					String newValue = newIssue.getProperties().get(customFieldName).toString();
 					if(!oldIssue.getProperties().containsKey(customFieldName) || 
 							!newValue.equals(oldIssue.getProperties().get(customFieldName).toString())){
-						this.applyCommand(oldIssueId, customFieldName + ": " + newValue);
+						command.append(customFieldName + ": " + newValue + " ");
+						
 					}
 				}
+			}
+			if(command.toString() != null){
+				this.applyCommand(oldIssueId, command.toString());
 			}
 		} else {
 			throw new RuntimeException("Null target issue id while update issue.");

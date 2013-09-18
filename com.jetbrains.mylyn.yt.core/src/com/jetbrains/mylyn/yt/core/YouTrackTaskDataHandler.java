@@ -77,14 +77,20 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 				String uploadedIssueId = client.putNewIssue(issue);
 				issue.setId(uploadedIssueId);
 				
+				StringBuilder addCFsCommand = new StringBuilder();
+				
 				Set<String> customFiledsNames = client.getProjectCustomFieldNames(
 						taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
 				for(String key : customFiledsNames){
 					if(key.startsWith("CustomField")){
-						client.applyCommand(issue.getId(), 
-								key + ": " + issue.getProperties().get(key).toString());
+						addCFsCommand.append(key + ": " + issue.getProperties().get(key).toString() + " ");
 					}
 				}
+				
+				if(addCFsCommand.toString() != null){
+					client.applyCommand(issue.getId(), addCFsCommand.toString());
+				}
+				
 				return new RepositoryResponse(ResponseKind.TASK_CREATED, issue.getId());
 			}
 			else{
