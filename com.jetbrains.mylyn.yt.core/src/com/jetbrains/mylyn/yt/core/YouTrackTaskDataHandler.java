@@ -406,25 +406,28 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		if ((taskData != null && taskData.isNew()) || isEnableEditMode()) {
 			
 //			TODO: see exception here
-			YouTrackProject project = YouTrackConnector.getProject(taskRepository, taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
-			 
-			for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
-				if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
-					attr.getMetaData().setReadOnly(false);
-				} else if (TaskAttribute.SUMMARY.equals(attr.getId())) {
-					attr.getMetaData().setReadOnly(false);
-				} else if (attr.getId().startsWith("CustomField")) {
-					attr.getMetaData().setReadOnly(false);
-					String customFieldName = attr.getMetaData().getLabel().replaceAll(":", "");
-					if(project.getCustomFieldsMap().get(customFieldName) == null){
-						project.updateCustomFields(YouTrackConnector.getClient(taskRepository));
-					}
-					YouTrackCustomField customField = project.getCustomFieldsMap().get(customFieldName);
-					if(!YouTrackCustomFieldType.getTypeByName(customField.getType()).isSimple()){
-						LinkedList<String> values  = customField.getBundle().getValues();
-						if(values != null){
-							for(String value: values){
-								attr.putOption(value, value);
+			if(taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT) != null){
+				
+				YouTrackProject project = YouTrackConnector.getProject(taskRepository, taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
+				 
+				for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
+					if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
+						attr.getMetaData().setReadOnly(false);
+					} else if (TaskAttribute.SUMMARY.equals(attr.getId())) {
+						attr.getMetaData().setReadOnly(false);
+					} else if (attr.getId().startsWith("CustomField")) {
+						attr.getMetaData().setReadOnly(false);
+						String customFieldName = attr.getMetaData().getLabel().replaceAll(":", "");
+						if(project.getCustomFieldsMap().get(customFieldName) == null){
+							project.updateCustomFields(YouTrackConnector.getClient(taskRepository));
+						}
+						YouTrackCustomField customField = project.getCustomFieldsMap().get(customFieldName);
+						if(!YouTrackCustomFieldType.getTypeByName(customField.getType()).isSimple()){
+							LinkedList<String> values  = customField.getBundle().getValues();
+							if(values != null){
+								for(String value: values){
+									attr.putOption(value, value);
+								}
 							}
 						}
 					}

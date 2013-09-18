@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorCommentPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorDescriptionPart;
@@ -77,27 +78,26 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage{
 		descriptors.add(new TaskEditorPartDescriptor(ID_PART_DESCRIPTION) {
 			@Override
 			public AbstractTaskEditorPart createPart() {
-				TaskEditorDescriptionPart part = new TaskEditorDescriptionPart();
-//				part.setExpandVertically(true);
-				part.setSectionStyle(ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
+				YouTrackDescriptionPart part = new YouTrackDescriptionPart();
 				return part;
 			}
 		}.setPath(PATH_ACTIONS));
 		
-		descriptors.add(new TaskEditorPartDescriptor(ID_NEW_COMMENTS_PART) {
+		/*descriptors.add(new TaskEditorPartDescriptor(ID_NEW_COMMENTS_PART) {
 			@Override
 			public AbstractTaskEditorPart createPart() {
-				return new YouTrackTaskEditorNewCommentPart();
+				AbstractTaskEditorPart part = new YouTrackTaskEditorNewCommentPart();
+				return part;
 			}
-		}.setPath(PATH_PEOPLE));
+		}.setPath(PATH_PEOPLE));*/
 		
-		descriptors.add(new TaskEditorPartDescriptor(ID_PART_COMMENTS) {
+		/*descriptors.add(new TaskEditorPartDescriptor(ID_PART_COMMENTS) {
 			@Override
 			public AbstractTaskEditorPart createPart() {
 				TaskEditorCommentPart part = new TaskEditorCommentPart();
 				return part;
 			}
-		}.setPath(PATH_PEOPLE));
+		}.setPath(PATH_PEOPLE));*/
 		
 		return descriptors;
 	}

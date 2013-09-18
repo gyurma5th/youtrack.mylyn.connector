@@ -179,10 +179,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	}
 
 	protected void createPageContent(SectionComposite parent) {
-		
 		createFastQueryCompositeContent(parent);
 		createCustomizeQueryContent(parent);
-		
 	}
 	
 	protected void createFastQueryCompositeContent(SectionComposite parent){

@@ -110,4 +110,24 @@ public class YouTrackProject {
 			setCustomFieldsUpdatedDate(new Date());
 		}
 	}
+	
+	public String getBothNames(){
+		if(getProjectFullName() != null){
+			if(getProjectShortName() != null){
+				return getProjectFullName() + " [" + getProjectShortName() + "]";
+			} else {
+				return getProjectFullName();
+			}
+		} else {
+			return "";
+		}
+	}
+	
+	public static String getShortNameFromBoth(String both){
+		if(both.contains("[") && both.contains("]")){
+			return both.substring(both.indexOf("[") + 1, both.indexOf("]"));
+		} else {
+			return both;
+		}
+	}
 }

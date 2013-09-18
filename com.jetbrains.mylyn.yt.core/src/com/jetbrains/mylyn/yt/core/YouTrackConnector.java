@@ -155,8 +155,6 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	public TaskData getTaskData(TaskRepository taskRepository, String taskId,
 			IProgressMonitor monitor) throws CoreException {
 		
-		System.err.println(taskId);
-		
 		String realIssueId;
 		if(taskId.contains("-")){
 			realIssueId = taskId;

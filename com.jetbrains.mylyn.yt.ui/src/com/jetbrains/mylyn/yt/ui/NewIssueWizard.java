@@ -15,6 +15,7 @@ import org.eclipse.mylyn.tasks.core.TaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.wizards.NewTaskWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -46,13 +47,19 @@ public class NewIssueWizard extends NewTaskWizard implements INewWizard {
 			
 			@Override
 			public void createControl(Composite parent) {
+				setTitle("Select project name from repository");
 				Composite composite = new Composite(parent, SWT.BORDER);
-				composite.setLayout(new GridLayout(2, false));
+				composite.setLayout(new GridLayout(1, false));
 
 				Label label = new Label(composite, SWT.NONE);
 				label.setText("Select project:");
 				projectCombo = new Combo(composite, SWT.NONE);
 				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(label);
+				
+				GridData gd = new GridData(SWT.FILL);
+				gd.grabExcessHorizontalSpace = true;
+				gd.horizontalAlignment = SWT.FILL;
+				projectCombo.setLayoutData(gd);
 				
 				setControl(composite);
 				
@@ -60,7 +67,7 @@ public class NewIssueWizard extends NewTaskWizard implements INewWizard {
 				projects = (LinkedList<YouTrackProject>) YouTrackConnector.getClient(getTaskRepository()).getProjects();
 				if(projectCombo != null){
 					for(YouTrackProject project : projects){
-						projectCombo.add(project.getProjectShortName());
+						projectCombo.add(project.getBothNames());
 					}
 				}
 			}
@@ -81,7 +88,7 @@ public class NewIssueWizard extends NewTaskWizard implements INewWizard {
 		return new TaskMapping() {
 			@Override
 			public String getProduct() {
-				return s;
+				return YouTrackProject.getShortNameFromBoth(s);
 			}
 		};
 	}
