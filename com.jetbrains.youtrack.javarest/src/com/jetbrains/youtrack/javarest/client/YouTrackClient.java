@@ -39,8 +39,6 @@ public class YouTrackClient {
 	
 	private String password = null;
 
-	private String credentials;
-
 	private String HOST;
 
 	private int PORT;
