@@ -53,9 +53,9 @@ public class NewIssueWizard extends NewTaskWizard implements INewWizard {
 
 				Label label = new Label(composite, SWT.NONE);
 				label.setText("Select project:");
-				projectCombo = new Combo(composite, SWT.NONE);
 				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(label);
 				
+				projectCombo = new Combo(composite, SWT.NONE);
 				GridData gd = new GridData(SWT.FILL);
 				gd.grabExcessHorizontalSpace = true;
 				gd.horizontalAlignment = SWT.FILL;
