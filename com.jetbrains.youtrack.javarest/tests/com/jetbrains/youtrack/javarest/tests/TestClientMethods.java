@@ -4,7 +4,10 @@
 
 package com.jetbrains.youtrack.javarest.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -12,20 +15,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.jetbrains.youtrack.javarest.client.Field;
+import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
-import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.SavedSearch;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.UniformInterfaceException;
 
 public class TestClientMethods {
 	

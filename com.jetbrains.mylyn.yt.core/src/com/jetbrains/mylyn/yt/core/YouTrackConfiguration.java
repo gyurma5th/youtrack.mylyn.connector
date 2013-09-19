@@ -4,8 +4,6 @@
 
 package com.jetbrains.mylyn.yt.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;

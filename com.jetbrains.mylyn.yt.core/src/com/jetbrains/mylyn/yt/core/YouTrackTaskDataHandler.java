@@ -14,10 +14,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.mylyn.internal.tasks.core.AbstractTaskCategory;
-import org.eclipse.mylyn.internal.tasks.core.RepositoryQuery;
-import org.eclipse.mylyn.internal.tasks.core.TaskList;
-import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse.ResponseKind;
@@ -37,8 +33,6 @@ import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
-
-import org.eclipse.swt.widgets.Link;
 
 
 public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{

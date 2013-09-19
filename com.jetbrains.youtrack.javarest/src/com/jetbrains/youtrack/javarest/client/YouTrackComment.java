@@ -5,10 +5,8 @@
 package com.jetbrains.youtrack.javarest.client;
 
 import java.util.Date;
-import java.util.LinkedList;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 
 public class YouTrackComment {
 

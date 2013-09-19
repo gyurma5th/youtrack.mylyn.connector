@@ -7,13 +7,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.plaf.SliderUI;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
 import com.jetbrains.youtrack.javarest.utils.BuildBundleValues;
-import com.jetbrains.youtrack.javarest.utils.ICallPost;
 import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
+import com.jetbrains.youtrack.javarest.utils.ICallPost;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
 import com.jetbrains.youtrack.javarest.utils.OwnedField;

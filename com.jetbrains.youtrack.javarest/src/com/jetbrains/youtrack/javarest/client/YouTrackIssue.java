@@ -7,9 +7,7 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
-import com.jetbrains.youtrack.javarest.client.YouTrackComment;
 import com.sun.jersey.api.client.ClientResponse;
 
 @XmlRootElement(name = "issue")

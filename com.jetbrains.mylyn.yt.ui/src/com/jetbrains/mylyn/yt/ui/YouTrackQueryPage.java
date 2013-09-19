@@ -4,12 +4,9 @@
 
 package com.jetbrains.mylyn.yt.ui;
 
-import java.awt.List;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.mylyn.internal.provisional.tasks.ui.wizards.AbstractRepositoryQueryPage2;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
@@ -19,13 +16,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConfiguration;
 import com.jetbrains.mylyn.yt.core.YouTrackConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
-import com.jetbrains.youtrack.javarest.client.YouTrackProject;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
+import com.jetbrains.youtrack.javarest.client.YouTrackProject;
 
 public class YouTrackQueryPage extends AbstractRepositoryQueryPage2 {
 

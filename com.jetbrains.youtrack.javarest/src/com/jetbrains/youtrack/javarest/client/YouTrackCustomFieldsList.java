@@ -4,9 +4,10 @@
 
 package com.jetbrains.youtrack.javarest.client;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlElement;
 import java.util.LinkedList;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "projectCustomFieldRefs")
 public class YouTrackCustomFieldsList {

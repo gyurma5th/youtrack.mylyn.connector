@@ -6,7 +6,6 @@ package com.jetbrains.mylyn.yt.ui;
 
 import java.util.LinkedList;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;

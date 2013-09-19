@@ -8,10 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.mylyn.commons.ui.CommonImages;
-import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorCommentPart;
-import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorDescriptionPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.ToolBarButtonContribution;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
@@ -25,7 +22,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;

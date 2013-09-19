@@ -8,14 +8,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.UniformInterfaceException;
 
 @XmlRootElement(name="project")
 public class YouTrackProject {

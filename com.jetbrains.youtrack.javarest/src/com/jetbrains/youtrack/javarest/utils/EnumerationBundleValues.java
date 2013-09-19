@@ -4,9 +4,10 @@
 
 package com.jetbrains.youtrack.javarest.utils;
 
+import java.util.LinkedList;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.LinkedList;
 
 @XmlRootElement(name = "enumeration")
 public class EnumerationBundleValues {

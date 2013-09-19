@@ -14,7 +14,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
@@ -26,12 +25,10 @@ import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
 import org.eclipse.mylyn.tasks.core.sync.ISynchronizationSession;
-import org.eclipse.osgi.util.NLS;
 
-import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
+import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
-
 import com.jetbrains.youtrack.javarest.utils.MyRunnable;
 
 public class YouTrackConnector extends AbstractRepositoryConnector {

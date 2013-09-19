@@ -2,7 +2,6 @@ package com.jetbrains.mylyn.yt.ui;
 
 import org.eclipse.mylyn.internal.tasks.ui.editors.Messages;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
-import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
