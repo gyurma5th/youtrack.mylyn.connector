@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.jetbrains.mylyn.yt.connector.plugin.feature"
-      label="YT Mylyn Connector Feature"
+      label="YouTrack Mylyn Connector"
       version="1.0.0.201309191747"
       provider-name="JETBRAINS">
 
