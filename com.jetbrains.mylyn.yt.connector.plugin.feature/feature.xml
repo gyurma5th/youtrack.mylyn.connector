@@ -2,7 +2,7 @@
 <feature
       id="com.jetbrains.mylyn.yt.connector.plugin.feature"
       label="YT Mylyn Connector Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201309191747"
       provider-name="JETBRAINS">
 
    <description url="http://www.example.com/description">
