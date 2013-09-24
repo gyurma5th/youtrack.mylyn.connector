@@ -57,11 +57,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		
 		try {
 			issue = buildIssue(repository, taskData);
-			Map<String, String> changedCF = new HashMap<>();
-			for(String key : issue.getProperties().keySet()){
-				if(key.startsWith("CustomField")){
-					changedCF.put(key.substring("CustomField".length(), key.length()-1),
-							issue.getProperties().get(key).toString());
+			Map<String, Object> changedCF = new HashMap<>();
+			for(String name : issue.getProperties().keySet()){
+				if(name.startsWith("CustomField")){
+					changedCF.put(name.substring("CustomField".length(), name.length()-1),
+							issue.getProperties().get(name));
 				}
 			}
 			issue.getProperties().putAll(changedCF);
@@ -73,11 +73,17 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 				
 				StringBuilder addCFsCommand = new StringBuilder();
 				
-				Set<String> customFiledsNames = client.getProjectCustomFieldNames(
-						taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
-				for(String key : customFiledsNames){
-					if(key.startsWith("CustomField")){
-						addCFsCommand.append(key + ": " + issue.getProperties().get(key).toString() + " ");
+				for(String name : issue.getProperties().keySet()){
+					if(name.startsWith("CustomField")){
+						String realCFName = name.substring("CustomField".length(), name.length()-1);
+						if(issue.getProperties().get(name) instanceof String){
+							addCFsCommand.append(realCFName + ": " + issue.getProperties().get(name).toString() + " ");
+						} else {
+							addCFsCommand.append(realCFName + " ");
+							for(String value: (LinkedList<String>) issue.getProperties().get(name)){
+								addCFsCommand.append(value + " ");
+							}
+						}
 					}
 				}
 				
@@ -379,8 +385,18 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 							getCustomFieldsMap().get(attribute.getMetaData().getLabel().replaceAll(":", "")).getType()).
 							getFieldValuesClass();
 					try{
-						issue.addProperty("CustomField" + attribute.getMetaData().getLabel(), 
-								CastCheck.toObject(fieldClass, attribute.getValue()).toString() );
+						
+						if(attribute.getMetaData().getType().equals(TaskAttribute.TYPE_MULTI_SELECT)){
+							LinkedList<String> multiValues = new LinkedList<>();
+							for(String value : attribute.getValues()){
+								multiValues.add(value);
+							}
+							issue.addProperty("CustomField" + attribute.getMetaData().getLabel(), (Object) multiValues);
+						} else {
+							issue.addProperty("CustomField" + attribute.getMetaData().getLabel(), 
+									CastCheck.toObject(fieldClass, attribute.getValue()).toString());
+						}
+						
 					}
 					catch(NumberFormatException e) {
 						throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,

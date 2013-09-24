@@ -78,13 +78,13 @@ public class YouTrackIssue {
 	/*
 	 * Add new property, not update
 	 */
-	public void addProperty(String newProperty, String value){
+	public void addProperty(String newProperty, Object value){
 		if(newProperty != null && !properties.containsKey(newProperty)){
-			properties.put(newProperty, (Object) value);
+			properties.put(newProperty, value);
 		}
 	}
 	
-	public void updateProperty(String property, String newValue){
+	public void updateProperty(String property, Object newValue){
 		if(properties.containsKey(property)){
 			properties.put(property, newValue);
 		}

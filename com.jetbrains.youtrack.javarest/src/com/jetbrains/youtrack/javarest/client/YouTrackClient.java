@@ -596,7 +596,7 @@ public class YouTrackClient {
 			}
 			
 			String project = newIssue.getProjectName();
-			Set<String> customFieldsNames = this.getProjectCustomFieldNames(project);
+			Set<String> customFieldsNames = getProjectCustomFieldNames(project);
 			
 			StringBuilder command = new StringBuilder();
 			for(String customFieldName : customFieldsNames){
@@ -606,6 +606,11 @@ public class YouTrackClient {
 							!newValue.equals(oldIssue.getProperties().get(customFieldName).toString())){
 						command.append(customFieldName + ": " + newValue + " ");
 						
+					}
+				} else {
+					command.append(customFieldName + " ");
+					for(String value : (LinkedList<String>) newIssue.getProperties().get(customFieldName)){
+						command.append(value + " ");
 					}
 				}
 			}
