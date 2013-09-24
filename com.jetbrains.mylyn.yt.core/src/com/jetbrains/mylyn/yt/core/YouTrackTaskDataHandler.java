@@ -4,9 +4,12 @@
 
 package com.jetbrains.mylyn.yt.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -388,7 +391,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 						
 						if(attribute.getMetaData().getType().equals(TaskAttribute.TYPE_MULTI_SELECT)){
 							LinkedList<String> multiValues = new LinkedList<>();
-							for(String value : attribute.getValues()){
+							for(String value : unzipList(attribute.getValues())){
 								multiValues.add(value);
 							}
 							issue.addProperty("CustomField" + attribute.getMetaData().getLabel(), (Object) multiValues);
@@ -408,6 +411,16 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		
 		
 		return issue;
+	}
+	
+	
+	private List<String> unzipList(List<String> list){
+		String s  = list.get(0);
+		if(s.startsWith("[") && s.endsWith("]")){
+			return new ArrayList<String>(Arrays.asList(s.substring(1, s.length()-1).split(",")));
+		} else {
+			return list;
+		}
 	}
 	
 	@Override

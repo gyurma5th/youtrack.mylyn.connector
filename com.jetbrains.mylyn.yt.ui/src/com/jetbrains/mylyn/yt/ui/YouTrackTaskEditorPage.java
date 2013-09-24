@@ -15,6 +15,7 @@ import org.eclipse.mylyn.internal.tasks.ui.editors.ToolBarButtonContribution;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
+import org.eclipse.mylyn.tasks.ui.editors.AttributeEditorFactory;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
 import org.eclipse.swt.SWT;
@@ -127,6 +128,11 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage{
 		YouTrackTaskDataHandler.setEnableEditMode(true);
 		getEditor().refreshPages();
 		YouTrackTaskDataHandler.setEnableEditMode(false);
+	}
+	
+	@Override
+	protected AttributeEditorFactory createAttributeEditorFactory() {
+		return new YouTrackAttributeEditorFactory(getModel(), getTaskRepository(), getEditorSite());
 	}
 	
 	@Override
