@@ -209,7 +209,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-
+		customizeQueryCheckbox.setSelection(true);
 		
 		fastQueryComposite = new Group(parent.getContent(), SWT.NONE);
 		fastQueryComposite.setLayout(new GridLayout(1, false));
@@ -228,7 +228,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 		
 		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
-//		labelIssues.setText("#");
 		
 		numberOfIssues1 = new Text(numberOfIssuesComposite, SWT.SINGLE);
 		numberOfIssues1.setEnabled(false);
@@ -258,8 +257,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 				}
 	        }
 	    });
-		
-		recursiveSetEnabled(savedSearchesCombo, false);
 	}
 	
 	protected void createCustomizeQueryContent(SectionComposite parent){
@@ -421,8 +418,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 			} else {
 				numberOfIssues2.setText(queryIssuesAmount + " issues");
 			}
-			
-//			numberOfIssues2.setText(new Integer(queryIssuesAmount).toString());
 		} catch (CoreException e) {
 			numberOfIssues2.setText("");
 			throw new RuntimeException(e.getMessage());
@@ -435,7 +430,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	 * Code below is code from AbstractRepositoryQueryPage2
 	 * 
 	 */
-	
 
 	public void createControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
