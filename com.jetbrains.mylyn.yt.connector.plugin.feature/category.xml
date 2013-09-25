@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/com.jetbrains.mylyn.yt.connector.plugin.feature_1.0.0.201309191747.jar" id="com.jetbrains.mylyn.yt.connector.plugin.feature" version="1.0.0.201309191747">
-      <category name="feature.1"/>
-   </feature>
-   <category-def name="feature.1" label="Feature 1"/>
-</site>
