@@ -244,13 +244,12 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 				try {
 					queryIssuesAmount = getClient().getNumberOfIssues(searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
 					if(queryIssuesAmount == -1){
-						numberOfIssues1.setText("");
+						numberOfIssues1.setText("Can't get number of issues. Please retry to select.");
 					} else if(queryIssuesAmount == 1){
 						numberOfIssues1.setText("1 issue");
 					} else {
 						numberOfIssues1.setText(queryIssuesAmount + " issues");
 					}
-//					numberOfIssues1.setText(new Integer(queryIssuesAmount).toString());
 				} catch (CoreException e) {
 					numberOfIssues1.setText("");
 					throw new RuntimeException(e.getMessage());
@@ -412,7 +411,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 					((YouTrackConnector) getConnector()).queryIssuesAmount(null, searchBoxText.getText(), getTaskRepository());
 			
 			if(queryIssuesAmount == -1){
-				numberOfIssues2.setText("");
+				numberOfIssues2.setText("Can't get number of issues. Please retry to select.");
 			} else if(queryIssuesAmount == 1){
 				numberOfIssues2.setText("1 issue");
 			} else {
