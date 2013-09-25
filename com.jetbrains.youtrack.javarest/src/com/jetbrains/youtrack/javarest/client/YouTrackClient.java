@@ -605,9 +605,20 @@ public class YouTrackClient {
 					if(!oldIssue.getProperties().containsKey(customFieldName) || 
 							!newValue.equals(oldIssue.getProperties().get(customFieldName).toString())){
 						command.append(customFieldName + ": " + newValue + " ");
-						
 					}
 				} else {
+					if(oldIssue.getProperties().containsKey(customFieldName)){
+						LinkedList<String> removedValues = (LinkedList<String>) oldIssue.getProperties().get(customFieldName);
+						if(removedValues.size() > 0){
+							StringBuilder removeCommand = new StringBuilder();
+							removeCommand.append("Remove " + customFieldName + " ");
+							for(String value : removedValues){
+								removeCommand.append(value + " ");
+							}
+							applyCommand(oldIssueId, removeCommand.toString());
+						}
+					}
+					
 					command.append(customFieldName + " ");
 					for(String value : (LinkedList<String>) newIssue.getProperties().get(customFieldName)){
 						command.append(value + " ");
