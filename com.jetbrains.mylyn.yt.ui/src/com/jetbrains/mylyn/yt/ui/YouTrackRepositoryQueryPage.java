@@ -9,7 +9,10 @@ package com.jetbrains.mylyn.yt.ui;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -74,7 +77,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	
 	private TaskRepository repository;
 	
-	private LinkedList<SavedSearch> searches;
+	private List<SavedSearch> searches;
 		
 	private Combo savedSearchesCombo;
 	
@@ -86,21 +89,21 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	
 	private Text searchBoxText;
 	
-	private static String KEY_PRESS = "Ctrl+Space";
+	private final String KEY_PRESS = "Ctrl+Space";
 
-	private static String[] options;
+	private LinkedList<IntellisenseItem> items;
 	
-	private static LinkedList<IntellisenseItem> items;
+	private Map<String, IntellisenseItem> itemByNameMap = new HashMap<String, IntellisenseItem>();
 	
-	private static IntellisenseSearchValues intellisense;
+	private IntellisenseSearchValues intellisense;
 	
-	private static SimpleContentProposalProvider scp;
+	private SimpleContentProposalProvider scp;
 	
 	private Group fastQueryComposite;
 
 	private Group customQueryComposite;
 	
-	private final String defaultMessage = "Choose saved search or select checkbox and customize query.";
+	private final String defaultMessage = "Choose saved search or customize query.";
 	
 	private Button cancelButton;
 
@@ -131,7 +134,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		this.connector = TasksUi.getRepositoryConnector(getTaskRepository().getConnectorKind());
 		this.repository = repository;
 		setTitle("YouTrack Repository Query");
-		setDescription(defaultMessage);
 	}
 
 	protected void doRefreshControls(){
@@ -286,10 +288,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		searchBoxText.addListener(SWT.CHANGED, countSuitableIssuesListener);
 		
 		try {
-			intellisense = getClient().intellisenseSearchValues(searchBoxText.getText());
-			options = intellisense.getOptions();
-			scp = new SimpleContentProposalProvider(options);
-            scp.setProposals(options);
+			intellisense = getClient().intellisenseSearchValues(searchBoxText.getText());   
+			scp = new SimpleContentProposalProvider(intellisense.getOptions());
             KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
             ContentProposalAdapter adapter = new ContentProposalAdapter(searchBoxText, new TextContentAdapter(), scp, ks, null);
             adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
@@ -312,9 +312,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
             {	
             	try {
             		intellisense = getClient().intellisenseSearchValues(searchBoxText.getText(), searchBoxText.getCaretPosition());
-            		options = intellisense.getOptions();
-        			items  = intellisense.getIntellisenseItems();
-					scp.setProposals(options); 
+            		items  = intellisense.getIntellisenseItems();
+            		for(int ind = 0; ind < items.size(); ind++){
+            			itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
+            		}
+					scp.setProposals(intellisense.getOptions()); 
 				} catch (CoreException e) {
 					throw new RuntimeException(e);
 				}
@@ -326,7 +328,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 		
 		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
-//		labelIssues.setText("#");
 		numberOfIssues2 = new Text(numberOfIssuesComposite, SWT.SINGLE);
 		numberOfIssues2.setEnabled(false);
 		
@@ -373,9 +374,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		} 
 	}
 	
-	
-	
-	
 	@Override
 	public boolean canFlipToNextPage(){
 		return false;
@@ -397,7 +395,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	}	
 	
 	private void insertAcceptedProposal(IContentProposal proposal){
-		IntellisenseItem item = items.get(Arrays.asList(options).indexOf(proposal.getContent()));
+		IntellisenseItem item = itemByNameMap.get((proposal.getContent()));
 		String beforeInsertion = searchBoxText.getText();
 		String afterInsertion = beforeInsertion.substring(0, item.getCompletionPositions().getStart()) + 
 				proposal.getContent() + beforeInsertion.substring(item.getCompletionPositions().getEnd());
@@ -423,8 +421,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		}
 	}
 	
-	
-	
 	/*
 	 * Code below is code from AbstractRepositoryQueryPage2
 	 * 
@@ -439,8 +435,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 			layout.marginHeight = 0;
 		}
 		composite.setLayout(layout);
-
-//		createTitleGroup(composite);
 
 		innerComposite = new SectionComposite(composite, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(2, 1).applyTo(innerComposite);
@@ -484,7 +478,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		if (titleText != null && titleText.getText().length() > 0) {
 			return true;
 		}
-		setMessage(Messages.AbstractRepositoryQueryPage2_Enter_a_title);
+		setMessage(defaultMessage);
 		return false;
 	}
 

@@ -16,6 +16,7 @@ import org.eclipse.mylyn.tasks.ui.editors.LayoutHint.RowSpan;
 import org.eclipse.ui.services.IServiceLocator;
 
 public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
+	
 	private final TaskDataModel model;
 
 	public YouTrackAttributeEditorFactory(TaskDataModel model, TaskRepository taskRepository, IServiceLocator serviceLocator) {
