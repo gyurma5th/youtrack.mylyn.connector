@@ -2,7 +2,7 @@
 <feature
       id="com.jetbrains.mylyn.yt.connector.feature"
       label="YouTrack Mylyn Connector"
-      version="1.0.0.0"
+      version="1.0.0.qualifier"
       provider-name="JetBrains">
 
    <description url="http://amarchuk.github.io/youtrack.mylyn.connector/">
