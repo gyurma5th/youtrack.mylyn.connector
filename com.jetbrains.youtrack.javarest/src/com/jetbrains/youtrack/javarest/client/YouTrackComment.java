@@ -1,5 +1,5 @@
 /**
-@author: amarch
+@author: Alexander Marchuk
  */
 
 package com.jetbrains.youtrack.javarest.client;
