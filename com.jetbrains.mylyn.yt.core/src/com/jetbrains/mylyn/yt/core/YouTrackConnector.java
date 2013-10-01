@@ -139,7 +139,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
 	@Override
 	public String getLabel() {
-		return "YouTrack Demo Repository";
+		return "YouTrack Repository";
 	}
 
 	@Override
