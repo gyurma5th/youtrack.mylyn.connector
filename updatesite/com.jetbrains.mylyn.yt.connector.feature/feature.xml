@@ -3,7 +3,7 @@
       id="com.jetbrains.mylyn.yt.connector.feature"
       label="YouTrack Mylyn Connector"
       version="1.0.0.0"
-      provider-name="JETBRAINS">
+      provider-name="JetBrains">
 
    <description url="http://amarchuk.github.io/youtrack.mylyn.connector/">
       Eclipse plugin connector for YouTrack bugtracker using Mylyn.
