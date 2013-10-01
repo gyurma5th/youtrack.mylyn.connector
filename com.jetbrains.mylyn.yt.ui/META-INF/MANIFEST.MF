@@ -20,4 +20,3 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.jetbrains.mylyn.yt.ui
 Bundle-ClassPath: .
 Import-Package: org.eclipse.mylyn.commons.workbench.forms
-
