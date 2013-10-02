@@ -330,8 +330,13 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 			}
 			
 			if(issue.getProperties().containsKey(field.getName())){
-				customFieldAttribute.setValue(issue.property(field.getName()).toString());
-			} else{
+				if(YouTrackCustomFieldType.getTypeByName(field.getType()).singleField() ||
+						!(issue.property(field.getName()) instanceof List<?>)){
+					customFieldAttribute.setValue(issue.property(field.getName()).toString());
+				} else {
+					customFieldAttribute.setValues((List<String>) issue.property(field.getName()));
+				}
+			} else {
 				customFieldAttribute.setValue("");
 				if(project.getCustomFieldsMap().get(field.getName()).getEmptyText() != null){
 					customFieldAttribute.setValue(project.getCustomFieldsMap().get(field.getName()).getEmptyText());
@@ -391,7 +396,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 						
 						if(attribute.getMetaData().getType().equals(TaskAttribute.TYPE_MULTI_SELECT)){
 							LinkedList<String> multiValues = new LinkedList<>();
-							for(String value : unzipList(attribute.getValues())){
+							for(String value : attribute.getValues()){
 								multiValues.add(value);
 							}
 							issue.addProperty("CustomField" + attribute.getMetaData().getLabel(), (Object) multiValues);
@@ -413,14 +418,16 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 		return issue;
 	}
 	
-	
-	private List<String> unzipList(List<String> list){
-		String s  = list.get(0);
-		if(s.startsWith("[") && s.endsWith("]")){
-			return new ArrayList<String>(Arrays.asList(s.substring(1, s.length()-1).split(",")));
-		} else {
-			return list;
-		}
+	public static List<String> unzipList(List<String> list){
+		if(list.size() > 0){
+			String s  = list.get(0);
+			if(s.startsWith("[") && s.endsWith("]")){
+				return new ArrayList<String>(Arrays.asList(s.substring(1, s.length()-1).split(",")));
+			} else {
+				return list;
+			}
+		} 
+		return new ArrayList<String>();
 	}
 	
 	@Override
