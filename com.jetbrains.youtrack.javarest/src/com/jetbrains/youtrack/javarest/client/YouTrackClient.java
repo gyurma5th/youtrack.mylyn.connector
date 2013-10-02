@@ -607,22 +607,44 @@ public class YouTrackClient {
 						command.append(customFieldName + ": " + newValue + " ");
 					}
 				} else {
-					if(oldIssue.getProperties().containsKey(customFieldName)){
-						LinkedList<String> removedValues = (LinkedList<String>) oldIssue.getProperties().get(customFieldName);
-						if(removedValues.size() > 0){
-							StringBuilder removeCommand = new StringBuilder();
-							removeCommand.append("Remove " + customFieldName + " ");
-							for(String value : removedValues){
-								removeCommand.append(value + " ");
-							}
-							applyCommand(oldIssueId, removeCommand.toString());
+					LinkedList<String> oldValues = new LinkedList<>();
+					if(oldIssue.getProperties().containsKey(customFieldName) && 
+							(oldIssue.getProperties().get(customFieldName) instanceof LinkedList<?>)){
+						oldValues = (LinkedList<String>) oldIssue.getProperties().get(customFieldName);
+					}
+					
+					LinkedList<String> selectedValues = (LinkedList<String>) newIssue.getProperties().get(customFieldName);
+					LinkedList<String> newValues = new LinkedList<>();
+					LinkedList<String> removeValues = new LinkedList<>();
+					
+					for(String value : selectedValues){
+						if(!oldValues.contains(value)){
+							newValues.add(value);
 						}
 					}
 					
-					command.append(customFieldName + " ");
-					for(String value : (LinkedList<String>) newIssue.getProperties().get(customFieldName)){
-						command.append(value + " ");
+					for(String value : oldValues){
+						if(!selectedValues.contains(value)){
+							removeValues.add(value);
+						}
 					}
+					
+					if(removeValues.size() > 0){
+						StringBuilder removeCommand = new StringBuilder();
+						removeCommand.append("Remove " + customFieldName + " ");
+						for(String value : removeValues){
+							removeCommand.append(value + " ");
+						}
+						applyCommand(oldIssueId, removeCommand.toString());
+					}
+					
+					if(newValues.size() > 0){
+						command.append("add " + customFieldName + " ");
+						for(String value : newValues){
+							command.append(value + " ");
+						}
+					}
+					
 				}
 			}
 			if(command.toString() != null){
