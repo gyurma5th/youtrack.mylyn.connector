@@ -22,6 +22,8 @@ import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
+import com.jetbrains.youtrack.javarest.utils.BundleValue;
+import com.jetbrains.youtrack.javarest.utils.BundleValues;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.SavedSearch;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
@@ -410,7 +412,10 @@ public class TestClientMethods {
 		} catch(Exception e){
 		}
 		
-		bundleValues = client.getStateBundleValues("States");
+		System.err.println(client.stateBundleValues("States").getStateValues().size());
+		
+		bundleValues = ((BundleValues) client.stateBundleValues("States")).getValues();
+		
 		assertEquals(13, bundleValues.size());
 		assertTrue(bundleValues.contains("Submitted"));
 		assertTrue(bundleValues.contains("Open"));
@@ -428,13 +433,13 @@ public class TestClientMethods {
 		
 		
 		try{
-			bundleValues = client.getStateBundleValues("Unexisted enumeration bundlename");
+			bundleValues = ((BundleValues) client.stateBundleValues("Unexisted enumeration bundlename")).getValues();
 			fail("Exception expected while get unexisted state bundle values.");
 		} catch(Exception e){
 		}
 		
 		try{
-			bundleValues = client.getStateBundleValues(null);
+			bundleValues = ((BundleValues) client.stateBundleValues(null)).getValues();
 			fail("Exception expected while get null bundle values.");
 		} catch(Exception e){
 		}

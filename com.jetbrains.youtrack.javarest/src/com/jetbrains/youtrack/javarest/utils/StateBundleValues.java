@@ -10,13 +10,20 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "stateBundle")
-public class StateBundleValues {
+public class StateBundleValues extends BundleValues{
 	
-	private LinkedList<String> values = new LinkedList<String>();
+	@XmlElement(name = "state", type = StateValue.class)
+	private LinkedList<StateValue> stateValues;
 	
-	@XmlElement(name = "state", type = String.class)
 	public LinkedList<String> getValues() {
+		LinkedList<String> values = new LinkedList<>();
+		for(StateValue value : stateValues){
+			values.add(value.getValue());
+		}
 		return values;
 	}
 
+	public LinkedList<StateValue> getStateValues() {
+		return stateValues;
+	}
 }
