@@ -7,6 +7,7 @@ package com.jetbrains.youtrack.javarest.client;
 import java.util.LinkedList;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
+import com.jetbrains.youtrack.javarest.utils.BundleValues;
 
 
 public class YouTrackCustomFieldBundle {
@@ -60,7 +61,7 @@ public class YouTrackCustomFieldBundle {
 					case "ownedField[*]" :
 						return client.getOwnedFieldBundleValues(this.name);
 					case "state[1]" : 
-						return client.getStateBundleValues(this.name);
+						return  ((BundleValues) client.stateBundleValues(this.name)).getValues();
 					case "version[1]" :
 					case "version[*]" :
 						return client.getVersionBundleValues(this.name);

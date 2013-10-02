@@ -281,16 +281,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 			}
 		}
 
-		if(YouTrackConnector.getClient(repository).isStateResolved("States", issue.property("State").toString())){
-			attribute = taskData.getRoot().createAttribute(TaskAttribute.DATE_COMPLETION);
-			attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME).setLabel("Completed date:");
-			taskData.getAttributeMapper().setDateValue(attribute, 
-					taskData.getAttributeMapper().getDateValue(taskData.getRoot().getAttribute(TaskAttribute.DATE_MODIFICATION)));
-			attribute = taskData.getRoot().getAttribute(TaskAttribute.STATUS);
-			attribute.setValue("true");
-		}
-		
-		
 		if(issue.getComments() != null && issue.getComments().size() > 0) {
 
 			TaskCommentMapper mapper = new TaskCommentMapper();
@@ -329,6 +319,20 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 			}
 			
 			if(issue.getProperties().containsKey(field.getName())){
+				
+				if(YouTrackConnector.getClient(repository).isStateResolved("States", issue.property("State").toString())){
+				if(YouTrackCustomFieldType.getTypeByName(field.getType()).equals(YouTrackCustomFieldType.STATE)){
+					
+				}
+					attribute = taskData.getRoot().createAttribute(TaskAttribute.DATE_COMPLETION);
+					attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME).setLabel("Completed date:");
+					taskData.getAttributeMapper().setDateValue(attribute, 
+							taskData.getAttributeMapper().getDateValue(taskData.getRoot().getAttribute(TaskAttribute.DATE_MODIFICATION)));
+					attribute = taskData.getRoot().getAttribute(TaskAttribute.STATUS);
+					attribute.setValue("true");
+				}
+				
+				
 				if(YouTrackCustomFieldType.getTypeByName(field.getType()).singleField() ||
 						!(issue.property(field.getName()) instanceof List<?>)){
 					customFieldAttribute.setValue(issue.property(field.getName()).toString());

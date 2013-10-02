@@ -445,9 +445,14 @@ public class YouTrackClient {
 				get(BuildBundleValues.class).getValues();
 	}
 	
-	public LinkedList<String> getStateBundleValues(String bundlename){
+	public LinkedList<StateValue> getStateBundleValues(String bundlename){
 		return service.path("/admin/customfield/stateBundle/").path(bundlename).accept("application/xml").
-				get(StateBundleValues.class).getValues();
+				get(StateBundleValues.class).getStateValues();
+	}
+	
+	public StateBundleValues stateBundleValues(String bundlename){
+		return service.path("/admin/customfield/stateBundle/").path(bundlename).accept("application/xml").
+				get(StateBundleValues.class);
 	}
 	
 	public boolean isStateResolved(String bundlename, String state){
