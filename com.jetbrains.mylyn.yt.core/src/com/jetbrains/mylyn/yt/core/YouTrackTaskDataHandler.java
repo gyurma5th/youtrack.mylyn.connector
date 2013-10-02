@@ -281,8 +281,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 			}
 		}
 
-		//TODO: Add other complete task statements
-		if(issue.property("State").toString().equals("Fixed")){
+		if(YouTrackConnector.getClient(repository).isStateResolved("States", issue.property("State").toString())){
 			attribute = taskData.getRoot().createAttribute(TaskAttribute.DATE_COMPLETION);
 			attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME).setLabel("Completed date:");
 			taskData.getAttributeMapper().setDateValue(attribute, 

@@ -470,6 +470,17 @@ public class TestClientMethods {
 		}
 	}
 	
+	@Test
+	public void testIsStateResolved(){
+		boolean resolved = client.isStateResolved("States", "Incomplete");
+		assertTrue(resolved);
+		
+		resolved = client.isStateResolved("States", "Fixed");
+		assertTrue(resolved);
+		
+		resolved = client.isStateResolved("States", "Open");
+		assertTrue(!resolved);
+	}
 	
 	@Test
 	public void testAddComment(){
@@ -552,7 +563,7 @@ public class TestClientMethods {
 		assertEquals("#{Usability Problem}", search.getSearchText());
 		
 		LinkedList<UserSavedSearch> userSearches = client.getSavedSearchesForUser("testuser");
-		assertEquals(5, userSearches.size());
+		assertEquals(6, userSearches.size());
 		
 		searches = client.getSavedSearchesNamesForUser("testuser");
 		assertTrue(searches.contains("Unassigned in testproject"));
