@@ -20,6 +20,7 @@ import com.jetbrains.youtrack.javarest.utils.OwnedFieldBundleValues;
 import com.jetbrains.youtrack.javarest.utils.SavedSearch;
 import com.jetbrains.youtrack.javarest.utils.SavedSearches;
 import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
+import com.jetbrains.youtrack.javarest.utils.StateValue;
 import com.jetbrains.youtrack.javarest.utils.UserBundleValues;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearches;
@@ -449,6 +450,11 @@ public class YouTrackClient {
 				get(StateBundleValues.class).getValues();
 	}
 	
+	public boolean isStateResolved(String bundlename, String state){
+		return service.path("/admin/customfield/stateBundle/").path(bundlename).path(state).accept("application/xml").
+				get(StateValue.class).isResolved();
+	}
+	
 	public LinkedList<String> getVersionBundleValues(String bundlename){
 		return service.path("/admin/customfield/versionBundle/").path(bundlename).accept("application/xml").
 				get(VersionBundleValues.class).getValues();
@@ -608,12 +614,23 @@ public class YouTrackClient {
 					}
 				} else {
 					LinkedList<String> oldValues = new LinkedList<>();
-					if(oldIssue.getProperties().containsKey(customFieldName) && 
-							(oldIssue.getProperties().get(customFieldName) instanceof LinkedList<?>)){
-						oldValues = (LinkedList<String>) oldIssue.getProperties().get(customFieldName);
+					if(oldIssue.getProperties().containsKey(customFieldName)){
+						if(oldIssue.getProperties().get(customFieldName) instanceof String){
+							oldValues.add(oldIssue.getProperties().get(customFieldName).toString());
+						} else {
+							oldValues = (LinkedList<String>) oldIssue.getProperties().get(customFieldName);
+						}
 					}
 					
-					LinkedList<String> selectedValues = (LinkedList<String>) newIssue.getProperties().get(customFieldName);
+					LinkedList<String> selectedValues = new LinkedList<>();
+					if(newIssue.getProperties().containsKey(customFieldName)){
+						if(newIssue.getProperties().get(customFieldName) instanceof String){
+							selectedValues.add(newIssue.getProperties().get(customFieldName).toString());
+						} else {
+							selectedValues = (LinkedList<String>) newIssue.getProperties().get(customFieldName);
+						}
+					}
+							
 					LinkedList<String> newValues = new LinkedList<>();
 					LinkedList<String> removeValues = new LinkedList<>();
 					
