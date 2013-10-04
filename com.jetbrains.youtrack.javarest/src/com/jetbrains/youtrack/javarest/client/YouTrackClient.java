@@ -636,20 +636,10 @@ public class YouTrackClient {
 						}
 					}
 							
-					LinkedList<String> newValues = new LinkedList<>();
-					LinkedList<String> removeValues = new LinkedList<>();
-					
-					for(String value : selectedValues){
-						if(!oldValues.contains(value)){
-							newValues.add(value);
-						}
-					}
-					
-					for(String value : oldValues){
-						if(!selectedValues.contains(value)){
-							removeValues.add(value);
-						}
-					}
+					LinkedList<String> newValues = new LinkedList<>(selectedValues);
+					newValues.removeAll(oldValues);
+					LinkedList<String> removeValues = new LinkedList<>(oldValues);
+					removeValues.removeAll(selectedValues);
 					
 					if(removeValues.size() > 0){
 						StringBuilder removeCommand = new StringBuilder();
