@@ -10,13 +10,22 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "enumeration")
-public class EnumerationBundleValues {
+public class EnumerationBundleValues extends BundleValues{
 	
-	private LinkedList<String> values = new LinkedList<String>();
+	@XmlElement(name  = "value", type = EnumerationValue.class)
+	private LinkedList<EnumerationValue> bundleValues;
 
-	@XmlElement(name = "value", type = String.class)
+	public LinkedList<EnumerationValue> getEnumerationValues() {
+		return bundleValues;
+	}
+	
 	public LinkedList<String> getValues() {
+		LinkedList<String> values = new LinkedList<>();
+		if(bundleValues != null){
+			for(BundleValue value : bundleValues){
+				values.add(value.getValue());
+			}
+		}
 		return values;
 	}
-
 }

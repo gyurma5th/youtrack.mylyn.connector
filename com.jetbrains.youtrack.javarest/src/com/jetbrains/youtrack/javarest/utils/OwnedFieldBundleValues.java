@@ -10,21 +10,22 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "ownedFieldBundle")
-public class OwnedFieldBundleValues {
+public class OwnedFieldBundleValues extends BundleValues {
 	
-	@XmlElement(name = "ownedField", type = OwnedField.class)
-	public LinkedList<OwnedField> ownedFields;
+	@XmlElement(name = "ownedField", type = OwnedFieldValue.class)
+	public LinkedList<OwnedFieldValue> bundleValues;
 	
-	public LinkedList<OwnedField> getOwnedFields() {
-		return ownedFields;
+	public LinkedList<OwnedFieldValue> getOwnedFields() {
+		return bundleValues;
 	}
 	
 	public LinkedList<String> getValues() {
 		LinkedList<String> values = new LinkedList<>();
-		for(OwnedField ownedField : ownedFields){
-			values.add(ownedField.getValue());
+		if(bundleValues != null){
+			for(BundleValue value : bundleValues){
+				values.add(value.getValue());
+			}
 		}
 		return values;
 	}
-
 }

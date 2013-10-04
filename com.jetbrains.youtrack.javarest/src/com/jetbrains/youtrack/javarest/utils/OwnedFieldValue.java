@@ -5,9 +5,11 @@
 package com.jetbrains.youtrack.javarest.utils;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
-public class OwnedField{
+@XmlRootElement(name = "ownedField")
+public class OwnedFieldValue extends BundleValue{
 	
 	@XmlValue
 	private String value;
@@ -29,5 +31,4 @@ public class OwnedField{
 	public String getDescription() {
 		return description;
 	}
-
 }

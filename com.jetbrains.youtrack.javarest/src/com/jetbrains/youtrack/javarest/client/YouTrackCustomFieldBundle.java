@@ -10,13 +10,15 @@ import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustom
 import com.jetbrains.youtrack.javarest.utils.BundleValues;
 
 
-public class YouTrackCustomFieldBundle {
+public class YouTrackCustomFieldBundle<T extends BundleValues> {
 	
 	private String name;
 	
 	private String cfType;
 	
 	private LinkedList<String> values;
+	
+	private T bundleValues;
 	
 	public YouTrackCustomFieldBundle(String name){
 		this.setName(name);
@@ -39,44 +41,51 @@ public class YouTrackCustomFieldBundle {
 	}
 
 	public LinkedList<String> getValues() {
-		return values;
+		if(bundleValues != null){
+			return ((BundleValues) bundleValues).getValues();
+		}
+		return null;
 	}
 
-	public void setValues(LinkedList<String> values) {
-		this.values = values;
-	}
-	
-	public LinkedList<String> getBundleValuesFromClient(YouTrackClient client){
-		YouTrackCustomFieldType type = YouTrackCustomFieldType.getTypeByName(this.cfType);
+	public T getBundleValuesFromClient(YouTrackClient client){
+		YouTrackCustomFieldType type = YouTrackCustomFieldType.getTypeByName(cfType);
 		if(type != null){
 			try{
 				switch(type.getName()){
 					case "enum[1]" :
 					case "enum[*]" :
-						return client.getEnumerationBundleValues(this.name);
+						return (T) client.getEnumerationBundleValues(name);
 					case "build[1]" :
 					case "build[*]" :
-						return client.getBuildBundleValues(this.name);
+						return (T) client.getBuildBundleValues(name);
 					case "ownedField[1]" :
 					case "ownedField[*]" :
-						return client.getOwnedFieldBundleValues(this.name);
+						return (T) client.getOwnedFieldBundleValues(name);
 					case "state[1]" : 
-						return  ((BundleValues) client.stateBundleValues(this.name)).getValues();
+						return (T) client.getStateBundleValues(name);
 					case "version[1]" :
 					case "version[*]" :
-						return client.getVersionBundleValues(this.name);
+						return (T) client.getVersionBundleValues(name);
 					case "user[1]" :
 					case "user[*]" :
-						return client.getUserBundleValues(this.name);
-					//TODO: where is "group"? rest api
+						return (T) client.getUserBundleValues(name);
+					//TODO: where is "group" rest api methods?
 					default: 
-						return new LinkedList<String>();
+						return null;
 				}
 			} catch(Exception e){
 			//TODO:	
 			}
 		}
-		return new LinkedList<String>();
+		return null;
+	}
+
+	public T getBundleValues() {
+		return bundleValues;
+	}
+
+	public void setBundleValues(T bundleValues) {
+		this.bundleValues = bundleValues;
 	}
 
 }

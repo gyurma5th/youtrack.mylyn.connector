@@ -91,11 +91,10 @@ public class YouTrackProject {
 			
 			if(projectShortName != null && !projectShortName.equals("")){
 				for(YouTrackCustomField field : client.getProjectCustomFields(projectShortName)){
-					YouTrackCustomField fullField;
-						fullField = client.getProjectCustomField(projectShortName, field.getName());
+					YouTrackCustomField fullField = client.getProjectCustomField(projectShortName, field.getName());
 						if(!YouTrackCustomFieldType.getTypeByName(fullField.getType()).isSimple()){
-							LinkedList<String> values = fullField.findBundle().getBundleValuesFromClient(client);
-							fullField.getBundle().setValues(values);
+							fullField.findBundle();
+							fullField.getBundle().setBundleValues(fullField.getBundle().getBundleValuesFromClient(client));
 						}
 						addCustomField(fullField);
 				}

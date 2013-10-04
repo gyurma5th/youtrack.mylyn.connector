@@ -13,17 +13,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class StateBundleValues extends BundleValues{
 	
 	@XmlElement(name = "state", type = StateValue.class)
-	private LinkedList<StateValue> stateValues;
+	private LinkedList<StateValue> bundleValues;
+
+	public LinkedList<StateValue> getStateValues() {
+		return bundleValues;
+	}
 	
 	public LinkedList<String> getValues() {
 		LinkedList<String> values = new LinkedList<>();
-		for(StateValue value : stateValues){
-			values.add(value.getValue());
+		if(bundleValues != null){
+			for(BundleValue value : bundleValues){
+				values.add(value.getValue());
+			}
 		}
 		return values;
-	}
-
-	public LinkedList<StateValue> getStateValues() {
-		return stateValues;
 	}
 }

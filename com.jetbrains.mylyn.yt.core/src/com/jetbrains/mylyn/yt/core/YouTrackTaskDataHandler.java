@@ -36,6 +36,8 @@ import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
+import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
+import com.jetbrains.youtrack.javarest.utils.StateValue;
 
 
 public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
@@ -320,16 +322,22 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 			
 			if(issue.getProperties().containsKey(field.getName())){
 				
-				if(YouTrackConnector.getClient(repository).isStateResolved("States", issue.property("State").toString())){
 				if(YouTrackCustomFieldType.getTypeByName(field.getType()).equals(YouTrackCustomFieldType.STATE)){
-					
-				}
-					attribute = taskData.getRoot().createAttribute(TaskAttribute.DATE_COMPLETION);
-					attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME).setLabel("Completed date:");
-					taskData.getAttributeMapper().setDateValue(attribute, 
-							taskData.getAttributeMapper().getDateValue(taskData.getRoot().getAttribute(TaskAttribute.DATE_MODIFICATION)));
-					attribute = taskData.getRoot().getAttribute(TaskAttribute.STATUS);
-					attribute.setValue("true");
+					LinkedList<StateValue> states = ((StateBundleValues) field.getBundle().getBundleValues()).getStateValues();
+					for(StateValue state : states){
+						if(state.getValue().equals(issue.property("State").toString())){
+							if(state.isResolved()){
+								attribute = taskData.getRoot().createAttribute(TaskAttribute.DATE_COMPLETION);
+								attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME).setLabel("Completed date:");
+								taskData.getAttributeMapper().setDateValue(attribute, 
+										taskData.getAttributeMapper().getDateValue(taskData.getRoot().getAttribute(TaskAttribute.DATE_MODIFICATION)));
+								attribute = taskData.getRoot().getAttribute(TaskAttribute.STATUS);
+								attribute.setValue("true");
+							} else {
+								break;
+							}
+						}
+					}
 				}
 				
 				

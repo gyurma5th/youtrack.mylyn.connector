@@ -10,12 +10,22 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "buildBundle")
-public class BuildBundleValues {
+public class BuildBundleValues extends BundleValues{
 	
-	private LinkedList<String> values = new LinkedList<String>();
+	@XmlElement(name = "build", type = BuildValue.class)
+	private LinkedList<BuildValue> bundleValues;
+
+	public LinkedList<BuildValue> getBuildValues() {
+		return bundleValues;
+	}
 	
-	@XmlElement(name = "build", type = String.class)
 	public LinkedList<String> getValues() {
+		LinkedList<String> values = new LinkedList<>();
+		if(bundleValues != null){
+			for(BundleValue value : bundleValues){
+				values.add(value.getValue());
+			}
+		}
 		return values;
 	}
 

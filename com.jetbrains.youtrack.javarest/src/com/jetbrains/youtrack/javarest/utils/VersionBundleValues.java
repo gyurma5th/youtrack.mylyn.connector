@@ -10,12 +10,22 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "versions")
-public class VersionBundleValues {
+public class VersionBundleValues extends BundleValues {
 	
-	private LinkedList<String> values = new LinkedList<String>();
+	@XmlElement(name = "version", type = VersionValue.class)
+	private LinkedList<VersionValue> bundleValues;
 	
-	@XmlElement(name = "version", type = String.class)
+	public LinkedList<VersionValue> getVersionValues() {
+		return bundleValues;
+	}
+	
 	public LinkedList<String> getValues() {
+		LinkedList<String> values = new LinkedList<>();
+		if(bundleValues != null){
+			for(BundleValue value : bundleValues){
+				values.add(value.getValue());
+			}
+		}
 		return values;
 	}
 

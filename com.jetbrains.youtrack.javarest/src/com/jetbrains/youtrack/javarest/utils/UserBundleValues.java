@@ -11,12 +11,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 
 @XmlRootElement(name = "userBundle")
-public class UserBundleValues {
+public class UserBundleValues extends BundleValues{
 	
-	private LinkedList<String> values = new LinkedList<String>();
+	@XmlElement(name = "user", type = UserValue.class)
+	private LinkedList<UserValue> bundleValues;
 
-	@XmlElement(name = "user", type = String.class)
+	public LinkedList<UserValue> getStateValues() {
+		return bundleValues;
+	}
+	
 	public LinkedList<String> getValues() {
+		LinkedList<String> values = new LinkedList<>();
+		if(bundleValues != null){
+			for(BundleValue value : bundleValues){
+				values.add(value.getValue());
+			}
+		}
 		return values;
 	}
 

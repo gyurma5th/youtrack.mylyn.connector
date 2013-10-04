@@ -363,58 +363,58 @@ public class TestClientMethods {
 	@Test
 	public void testGetCustomFieldBundleValues(){
 		
-		LinkedList<String> bundleValues = client.getEnumerationBundleValues("Types");
+		LinkedList<String> bundleValues = ((BundleValues) client.getEnumerationBundleValues("Types")).getValues();
 		assertEquals(9, bundleValues.size());
 		assertEquals("Bug", bundleValues.get(0));
 		
 		try{
-			bundleValues = client.getEnumerationBundleValues("Unexisted enumeration bundlename");
+			bundleValues = ((BundleValues) client.getEnumerationBundleValues("Unexisted enumeration bundlename")).getValues();
 			fail("Exception expected while get unexisted enumeration bundle values.");
 		} catch(Exception e){
 		}
 		
 		try{
-			bundleValues = client.getEnumerationBundleValues(null);
+			bundleValues = ((BundleValues) client.getEnumerationBundleValues(null)).getValues();
 			fail("Exception expected while get null bundle values.");
 		} catch(Exception e){
 		}
 		
 		
-		bundleValues = client.getOwnedFieldBundleValues("Subsystems");
+		bundleValues = ((BundleValues) client.getOwnedFieldBundleValues("Subsystems")).getValues();
 		assertEquals(1, bundleValues.size());
 		assertEquals("No subsystem", bundleValues.get(0));
-		assertEquals("root", client.getOwnedFields("Subsystems").get(0).getOwner());
+		assertEquals("root", client.getOwnedFieldBundleValues("Subsystems").getOwnedFields().get(0).getOwner());
 		
 		try{
-			bundleValues = client.getOwnedFieldBundleValues("Unexisted enumeration bundlename");
+			bundleValues = ((BundleValues) client.getOwnedFieldBundleValues("Unexisted ownedField bundle")).getValues();
 			fail("Exception expected while get unexisted ownedField bundle values.");
 		} catch(Exception e){
 		}
 		
 		try{
-			bundleValues = client.getOwnedFieldBundleValues(null);
+			bundleValues = ((BundleValues) client.getOwnedFieldBundleValues(null)).getValues();
 			fail("Exception expected while get null bundle values.");
 		} catch(Exception e){
 		}
 		
-		bundleValues = client.getBuildBundleValues("Builds");
+		bundleValues = ((BundleValues) client.getBuildBundleValues("Builds")).getValues();
 		assertEquals(0, bundleValues.size());
 		
 		try{
-			bundleValues = client.getBuildBundleValues("Unexisted enumeration bundlename");
+			bundleValues = ((BundleValues) client.getBuildBundleValues("Unexisted build bundle")).getValues();
 			fail("Exception expected while get unexisted build bundle values.");
 		} catch(Exception e){
 		}
 		
 		try{
-			bundleValues = client.getBuildBundleValues(null);
+			bundleValues = ((BundleValues) client.getBuildBundleValues(null)).getValues();
 			fail("Exception expected while get null bundle values.");
 		} catch(Exception e){
 		}
 		
-		System.err.println(client.stateBundleValues("States").getStateValues().size());
+		System.err.println(client.getStateBundleValues("States").getStateValues().size());
 		
-		bundleValues = ((BundleValues) client.stateBundleValues("States")).getValues();
+		bundleValues = ((BundleValues) client.getStateBundleValues("States")).getValues();
 		
 		assertEquals(13, bundleValues.size());
 		assertTrue(bundleValues.contains("Submitted"));
@@ -433,43 +433,43 @@ public class TestClientMethods {
 		
 		
 		try{
-			bundleValues = ((BundleValues) client.stateBundleValues("Unexisted enumeration bundlename")).getValues();
+			bundleValues = ((BundleValues) client.getStateBundleValues("Unexisted enumeration bundlename")).getValues();
 			fail("Exception expected while get unexisted state bundle values.");
 		} catch(Exception e){
 		}
 		
 		try{
-			bundleValues = ((BundleValues) client.stateBundleValues(null)).getValues();
+			bundleValues = ((BundleValues) client.getStateBundleValues(null)).getValues();
 			fail("Exception expected while get null bundle values.");
 		} catch(Exception e){
 		}
 		
-		bundleValues = client.getVersionBundleValues("Versions");
+		bundleValues = ((BundleValues) client.getVersionBundleValues("Versions")).getValues();
 		assertEquals(0, bundleValues.size());
 		
 		try{
-			bundleValues = client.getVersionBundleValues("Unexisted enumeration bundlename");
+			bundleValues = ((BundleValues) client.getVersionBundleValues("Unexisted versions bundle")).getValues();
 			fail("Exception expected while get unexisted version bundle values.");
 		} catch(Exception e){
 		}
 		
 		try{
-			bundleValues = client.getVersionBundleValues(null);
+			bundleValues = ((BundleValues) client.getVersionBundleValues(null)).getValues();
 			fail("Exception expected while get null bundle values.");
 		} catch(Exception e){
 		}
 		
-		bundleValues = client.getUserBundleValues("Mylyn Eclipse Plugin Assignees");
+		bundleValues = ((BundleValues) client.getUserBundleValues("Mylyn Eclipse Plugin Assignees")).getValues();
 		assertEquals(0, bundleValues.size());
 		
 		try{
-			bundleValues = client.getUserBundleValues("Unexisted enumeration bundlename");
+			bundleValues = ((BundleValues) client.getUserBundleValues("Unexisted user bundle")).getValues();
 			fail("Exception expected while get unexisted user bundle values.");
 		} catch(Exception e){
 		}
 		
 		try{
-			bundleValues = client.getUserBundleValues(null);
+			bundleValues = ((BundleValues) client.getUserBundleValues(null)).getValues();
 			fail("Exception expected while get null bundle values.");
 		} catch(Exception e){
 		}

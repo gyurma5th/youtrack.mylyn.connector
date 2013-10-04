@@ -11,11 +11,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
 import com.jetbrains.youtrack.javarest.utils.BuildBundleValues;
+import com.jetbrains.youtrack.javarest.utils.BuildValue;
 import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
+import com.jetbrains.youtrack.javarest.utils.EnumerationValue;
 import com.jetbrains.youtrack.javarest.utils.ICallPost;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
-import com.jetbrains.youtrack.javarest.utils.OwnedField;
+import com.jetbrains.youtrack.javarest.utils.OwnedFieldValue;
 import com.jetbrains.youtrack.javarest.utils.OwnedFieldBundleValues;
 import com.jetbrains.youtrack.javarest.utils.SavedSearch;
 import com.jetbrains.youtrack.javarest.utils.SavedSearches;
@@ -425,32 +427,22 @@ public class YouTrackClient {
 		return cfNames;
 	}
 	
-	public LinkedList<String> getEnumerationBundleValues(String bundlename){
+	public EnumerationBundleValues getEnumerationBundleValues(String bundlename){
 		return service.path("/admin/customfield/bundle/").path(bundlename).accept("application/xml").
-				get(EnumerationBundleValues.class).getValues();
+				get(EnumerationBundleValues.class);
 	}
 	
-	public LinkedList<String> getOwnedFieldBundleValues(String bundlename){
+	public OwnedFieldBundleValues getOwnedFieldBundleValues(String bundlename){
 		return service.path("/admin/customfield/ownedFieldBundle/").path(bundlename).accept("application/xml").
-				get(OwnedFieldBundleValues.class).getValues();
+				get(OwnedFieldBundleValues.class);
 	}
 	
-	public LinkedList<OwnedField> getOwnedFields(String bundlename){
-		return service.path("/admin/customfield/ownedFieldBundle/").path(bundlename).accept("application/xml").
-				get(OwnedFieldBundleValues.class).getOwnedFields();
-	}
-	
-	public LinkedList<String> getBuildBundleValues(String bundlename){
+	public BuildBundleValues getBuildBundleValues(String bundlename){
 		return service.path("/admin/customfield/buildBundle/").path(bundlename).accept("application/xml").
-				get(BuildBundleValues.class).getValues();
+				get(BuildBundleValues.class);
 	}
 	
-	public LinkedList<StateValue> getStateBundleValues(String bundlename){
-		return service.path("/admin/customfield/stateBundle/").path(bundlename).accept("application/xml").
-				get(StateBundleValues.class).getStateValues();
-	}
-	
-	public StateBundleValues stateBundleValues(String bundlename){
+	public StateBundleValues getStateBundleValues(String bundlename){
 		return service.path("/admin/customfield/stateBundle/").path(bundlename).accept("application/xml").
 				get(StateBundleValues.class);
 	}
@@ -460,14 +452,14 @@ public class YouTrackClient {
 				get(StateValue.class).isResolved();
 	}
 	
-	public LinkedList<String> getVersionBundleValues(String bundlename){
+	public VersionBundleValues getVersionBundleValues(String bundlename){
 		return service.path("/admin/customfield/versionBundle/").path(bundlename).accept("application/xml").
-				get(VersionBundleValues.class).getValues();
+				get(VersionBundleValues.class);
 	}
 	
-	public LinkedList<String> getUserBundleValues(String bundlename){
+	public UserBundleValues getUserBundleValues(String bundlename){
 		return service.path("/admin/customfield/userBundle/").path(bundlename).accept("application/xml").
-				get(UserBundleValues.class).getValues();
+				get(UserBundleValues.class);
 	}
 	
 	public void addComment(final String issueId, final String comment){
