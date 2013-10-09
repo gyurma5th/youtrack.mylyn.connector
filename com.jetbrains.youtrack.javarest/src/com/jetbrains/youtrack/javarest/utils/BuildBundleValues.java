@@ -19,6 +19,7 @@ public class BuildBundleValues extends BundleValues{
 		return bundleValues;
 	}
 	
+	@Override
 	public LinkedList<String> getValues() {
 		LinkedList<String> values = new LinkedList<>();
 		if(bundleValues != null){

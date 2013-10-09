@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
 
-public abstract class BundleValues {
+public class BundleValues {
 	
-	/*private LinkedList<? extends BundleValue> bundleValues;
+	private LinkedList<? extends BundleValue> bundleValues;
 	
-	public LinkedList<String> getValues() {
+	/*public LinkedList<String> getValues() {
 		LinkedList<String> values = new LinkedList<>();
 		if(bundleValues != null){
 			for(BundleValue value : bundleValues){
@@ -28,5 +28,7 @@ public abstract class BundleValues {
 	public void setBundleValues(LinkedList<? extends BundleValue> bv) {
 		this.bundleValues = bv;
 	}*/
-	public abstract LinkedList<String> getValues();
+	public LinkedList<String> getValues(){
+		return null;
+	}
 }

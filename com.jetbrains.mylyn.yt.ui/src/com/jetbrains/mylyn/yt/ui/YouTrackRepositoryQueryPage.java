@@ -62,6 +62,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.TouchEvent;
+import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -133,7 +135,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	/**
 	 * Determines whether a 'Refresh' button is shown on the page.
 	 */
-	private boolean needsRefresh = true;
+	private boolean needsRefresh = false;
 
 	private ProgressContainer progressContainer;
 
@@ -211,11 +213,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 					recursiveSetEnabled(customQueryComposite, false);
 					numberOfIssues1.setEnabled(false);
 		        } else {
-		        	setMessage("Enter query into search box (press Ctrl+Space for query completion).");
 		        	recursiveSetEnabled(fastQueryComposite, false);
 					recursiveSetEnabled(customQueryComposite, true);
 					numberOfIssues2.setEnabled(false);
 					setQueryTitle("");
+					setMessage("Enter query into search box (press Ctrl+Space for query completion).");
 		        }
 			}
 			
@@ -241,9 +243,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		Composite numberOfIssuesComposite = new Composite(fastQueryComposite, SWT.NONE);
 		numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 		
-		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
-		
-		numberOfIssues1 = new Text(numberOfIssuesComposite, SWT.SINGLE);
+		numberOfIssues1 = new Text(fastQueryComposite, SWT.SINGLE |  SWT.FILL);
+		numberOfIssues1.setLayoutData(gd);
 		numberOfIssues1.setEnabled(false);
 		
 		savedSearchesCombo.addListener(SWT.Selection, new Listener() {
@@ -336,11 +337,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
         }
         );
 		
-		Composite numberOfIssuesComposite = new Composite(customQueryComposite, SWT.NONE);
-		numberOfIssuesComposite.setLayout(new GridLayout(2, false));
-		
-		Label labelIssues = new Label(numberOfIssuesComposite, SWT.NONE);
-		numberOfIssues2 = new Text(numberOfIssuesComposite, SWT.SINGLE);
+		numberOfIssues2 = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
+		numberOfIssues2.setLayoutData(gd);
 		numberOfIssues2.setEnabled(false);
 		
 		createTitleGroup(customQueryComposite);
@@ -419,9 +417,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		try {
 			int queryIssuesAmount = 
 					((YouTrackConnector) getConnector()).queryIssuesAmount(null, searchBoxText.getText(), getTaskRepository());
-			
 			if(queryIssuesAmount == -1){
-				numberOfIssues2.setText("Can't get number of issues. Please retry to select.");
+				numberOfIssues2.setText("Can't get number of issues. Please try another query.");
 			} else if(queryIssuesAmount == 1){
 				numberOfIssues2.setText("1 issue");
 			} else {

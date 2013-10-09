@@ -412,8 +412,6 @@ public class TestClientMethods {
 		} catch(Exception e){
 		}
 		
-		System.err.println(client.getStateBundleValues("States").getStateValues().size());
-		
 		bundleValues = ((BundleValues) client.getStateBundleValues("States")).getValues();
 		
 		assertEquals(13, bundleValues.size());

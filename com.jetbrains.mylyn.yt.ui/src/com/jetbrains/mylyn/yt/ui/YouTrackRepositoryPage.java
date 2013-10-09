@@ -24,7 +24,7 @@ public class YouTrackRepositoryPage extends AbstractRepositorySettingsPage {
 	public YouTrackRepositoryPage(TaskRepository taskRepository) {
 		super("YouTrack Connector Settings", "Specify YouTrack host (e.g. 'me.myjetbrains.com/youtrack/')", taskRepository);
 		setNeedsAnonymousLogin(true);
-		setNeedsAdvanced(true);
+		setNeedsAdvanced(false);
 		setNeedsEncoding(false);
 		setNeedsHttpAuth(false);
 		setNeedsProxy(false);
