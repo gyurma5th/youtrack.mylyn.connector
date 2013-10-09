@@ -28,8 +28,11 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -75,8 +78,10 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.UISynchronizer;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.jetbrains.mylyn.yt.core.YouTrackConnector;
@@ -143,11 +148,14 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 
 	private Text titleText;
 	
+//	private int queryIssuesAmount;
+	
 	public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository, IRepositoryQuery query) {
 		super("youtrack.repository.query.page", repository, query);
 		this.connector = TasksUi.getRepositoryConnector(getTaskRepository().getConnectorKind());
 		this.repository = repository;
 		setTitle("YouTrack Repository Query");
+//		queryIssuesAmount = 0;
 	}
 
 	protected void doRefreshControls(){
@@ -276,6 +284,60 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	    });
 	}
 	
+	
+	public class ModifyAdapter implements ModifyListener{
+
+		public final Text searchBox;
+		
+		public String queryFilter;
+		
+		public int queryIssuesAmount;
+		
+		public ModifyAdapter(Text setText){
+			this.searchBox = setText;
+			this.queryIssuesAmount = 0;
+		}
+		
+		@Override
+		public void modifyText(ModifyEvent e) {
+			
+			queryFilter = ((Text) e.getSource()).getText();
+			
+			Job job = new Job("Count Number of Issues") {
+			      @Override
+			      protected IStatus run(IProgressMonitor monitor) {
+			    	 try {
+						queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
+					} catch (CoreException e) {
+			  			throw new RuntimeException(e.getMessage());
+					}
+			    	 syncWithUi();
+			        return Status.OK_STATUS;
+			      }
+
+			    };
+			    job.setUser(true);
+			    job.schedule();
+		}
+		
+		private void syncWithUi() {
+			Display.getDefault().asyncExec(new Runnable() {
+  			  @Override
+  			  public void run() {
+	  				if(queryIssuesAmount == -1){
+	  					  searchBox.setText("Can't get number of issues. Please try another query.");
+	  				} else if(queryIssuesAmount == 1){
+	  					searchBox.setText("1 issue");
+	  				} else {
+	  					searchBox.setText(queryIssuesAmount + " issues");
+	  				}
+				}
+		    });
+		}
+		
+	}
+	
+	
 	protected void createCustomizeQueryContent(SectionComposite parent){
 	
 		customizeQueryCheckbox = new Button(parent.getContent(), SWT.RADIO);
@@ -289,19 +351,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		gd.horizontalAlignment = SWT.FILL;
 		customQueryComposite.setLayoutData(gd);
 
-		Listener countSuitableIssuesListener = new Listener() {
-	        @Override
-	        public void handleEvent(Event arg0) {
-	        	countIssuesInListeners();
-	        }
-	    };
-	    
 	    Label searchBoxLabel = new Label(customQueryComposite, SWT.NONE);
 	    searchBoxLabel.setText("Search Box:");
 	    
 		searchBoxText = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
 		searchBoxText.setLayoutData(gd);
-		searchBoxText.addListener(SWT.CHANGED, countSuitableIssuesListener);
 		
 		try {
 			intellisense = getClient().intellisenseSearchValues(searchBoxText.getText());   
@@ -347,6 +401,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		createTitleGroup(customQueryComposite);
 
 		recursiveSetEnabled(customQueryComposite, false);
+		searchBoxText.addModifyListener(new ModifyAdapter(numberOfIssues2));
 	}
 	
 	private YouTrackClient getClient() throws CoreException {
@@ -414,23 +469,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 				proposal.getContent() + beforeInsertion.substring(item.getCompletionPositions().getEnd());
 		searchBoxText.setText(afterInsertion);
 		searchBoxText.setSelection(Integer.parseInt(item.getCaret()));
-	}
-	
-	private void countIssuesInListeners(){
-		try {
-			int queryIssuesAmount = 
-					((YouTrackConnector) getConnector()).queryIssuesAmount(null, searchBoxText.getText(), getTaskRepository());
-			if(queryIssuesAmount == -1){
-				numberOfIssues2.setText("Can't get number of issues. Please try another query.");
-			} else if(queryIssuesAmount == 1){
-				numberOfIssues2.setText("1 issue");
-			} else {
-				numberOfIssues2.setText(queryIssuesAmount + " issues");
-			}
-		} catch (CoreException e) {
-			numberOfIssues2.setText("");
-			throw new RuntimeException(e.getMessage());
-		}
 	}
 	
 	/*
