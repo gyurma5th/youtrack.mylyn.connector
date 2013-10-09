@@ -239,6 +239,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		savedSearchesCombo.setLayoutData(gd);
 		
 		fillSearches();
+		for(SavedSearch search : this.searches){
+			savedSearchesCombo.add(search.getName());
+		}
 		
 		Composite numberOfIssuesComposite = new Composite(fastQueryComposite, SWT.NONE);
 		numberOfIssuesComposite.setLayout(new GridLayout(2, false));

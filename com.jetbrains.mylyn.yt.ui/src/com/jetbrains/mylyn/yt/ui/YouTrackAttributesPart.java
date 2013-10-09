@@ -10,6 +10,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 
+import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
+import com.jetbrains.youtrack.javarest.client.YouTrackProject;
+
 
 public class YouTrackAttributesPart extends AbstractTaskEditorPart {
 
@@ -54,7 +58,8 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
 		addAttribute(attributesComposite, toolkit, getTaskData().getRoot().getMappedAttribute(TaskAttribute.PRODUCT));
 		
 		for(String key : getTaskData().getRoot().getAttributes().keySet()){
-			if(key.startsWith("CustomField")){
+			if(getTaskData().getRoot().getMappedAttribute(key).getMetaData().getKind() != null && 
+					getTaskData().getRoot().getMappedAttribute(key).getMetaData().getKind().equals(YouTrackTaskDataHandler.CUSTOM_FIELD_KIND)){
 				addAttribute(attributesComposite, toolkit, getTaskData().getRoot().getMappedAttribute(key));
 			}
 		}
