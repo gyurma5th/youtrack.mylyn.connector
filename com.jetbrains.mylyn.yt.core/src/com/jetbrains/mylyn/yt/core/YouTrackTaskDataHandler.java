@@ -192,8 +192,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 				return false;
 			}
 			
-			
 			YouTrackProject project = YouTrackConnector.getProject(repository,  product);
+			
+			if(project == null){
+				return false;
+			}
 			
 			if(!project.isCustomFieldsUpdated()){
 				project.updateCustomFields(YouTrackConnector.getClient(repository));

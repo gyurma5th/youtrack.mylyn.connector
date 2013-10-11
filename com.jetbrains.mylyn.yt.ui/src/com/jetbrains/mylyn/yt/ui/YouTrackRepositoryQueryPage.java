@@ -154,14 +154,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 
 	private Text titleText;
 	
-//	private int queryIssuesAmount;
-	
 	public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository, IRepositoryQuery query) {
 		super("youtrack.repository.query.page", repository, query);
 		this.connector = TasksUi.getRepositoryConnector(getTaskRepository().getConnectorKind());
 		this.repository = repository;
 		setTitle("YouTrack Repository Query");
-//		queryIssuesAmount = 0;
 	}
 
 	protected void doRefreshControls(){

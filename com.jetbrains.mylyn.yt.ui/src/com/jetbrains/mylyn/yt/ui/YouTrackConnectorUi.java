@@ -41,7 +41,7 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
 
 	@Override
 	public IWizard getNewTaskWizard(TaskRepository repository, ITaskMapping selection) {
-		return new NewIssueWizard(repository, selection);
+		return new NewYouTrackIssueWizard(repository, selection);
 	}
 
 	@Override
