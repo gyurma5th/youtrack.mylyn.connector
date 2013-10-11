@@ -58,8 +58,14 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositoryQueryPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.GestureEvent;
+import org.eclipse.swt.events.GestureListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -235,6 +241,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		});
 		customizeQueryCheckbox.setSelection(true);
 		
+		
 		fastQueryComposite = new Group(parent.getContent(), SWT.NONE);
 		fastQueryComposite.setLayout(new GridLayout(1, false));
 		
@@ -247,10 +254,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		savedSearchesCombo.setLayoutData(gd);
 		
 		fillSearches();
-		for(SavedSearch search : this.searches){
-			savedSearchesCombo.add(search.getName());
-		}
 		
+		// added for vertical indent
 		Composite numberOfIssuesComposite = new Composite(fastQueryComposite, SWT.NONE);
 		numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 		
@@ -260,28 +265,38 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		
 		savedSearchesCombo.addListener(SWT.Selection, new Listener() {
 	        @Override
-	        public void handleEvent(Event arg0) {
+	        public void handleEvent(Event event) {
 	        	
-	        	if(getQueryTitle() == null || getQueryTitle().length() == 0){
-	        		setQueryTitle(savedSearchesCombo.getText());
-	        	}
+	        	if(savedSearchesCombo.getItemCount() > 0 && savedSearchesCombo.getSelectionIndex() != -1){
+	        		if(getQueryTitle() == null || getQueryTitle().length() == 0){
+		        		setQueryTitle(savedSearchesCombo.getText());
+		        	}
 
-	        	int queryIssuesAmount;
-				try {
-					queryIssuesAmount = getClient().getNumberOfIssues(searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
-					if(queryIssuesAmount == -1){
-						numberOfIssues1.setText("Can't get number of issues. Please retry to select.");
-					} else if(queryIssuesAmount == 1){
-						numberOfIssues1.setText("1 issue");
-					} else {
-						numberOfIssues1.setText(queryIssuesAmount + " issues");
+		        	int queryIssuesAmount;
+					try {
+						queryIssuesAmount = getClient().getNumberOfIssues(searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
+						if(queryIssuesAmount == -1){
+							numberOfIssues1.setText("Can't get number of issues. Please retry to select.");
+						} else if(queryIssuesAmount == 1){
+							numberOfIssues1.setText("1 issue");
+						} else {
+							numberOfIssues1.setText(queryIssuesAmount + " issues");
+						}
+					} catch (CoreException e) {
+						numberOfIssues1.setText("");
+						throw new RuntimeException(e.getMessage());
 					}
-				} catch (CoreException e) {
-					numberOfIssues1.setText("");
-					throw new RuntimeException(e.getMessage());
-				}
+	        	}
 	        }
 	    });
+		
+		savedSearchesCombo.addListener(SWT.DROP_DOWN, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				numberOfIssues1.setText("");
+				fillSearches();
+			}
+		});
 	}
 	
 	
@@ -302,16 +317,17 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 		public void modifyText(ModifyEvent e) {
 			
 			queryFilter = ((Text) e.getSource()).getText();
+   		 	searchBox.setText("");
 			
 			Job job = new Job("Count Number of Issues") {
 			      @Override
 			      protected IStatus run(IProgressMonitor monitor) {
 			    	 try {
-						queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
+			    		 queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
 					} catch (CoreException e) {
 			  			throw new RuntimeException(e.getMessage());
 					}
-			    	 syncWithUi();
+			    	syncWithUi();
 			        return Status.OK_STATUS;
 			      }
 
@@ -409,13 +425,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	}
 	
 	protected void doPartialRefresh() {
-		savedSearchesCombo.removeAll();
 		numberOfIssues1.setText("");
 		fillSearches();
-		for(SavedSearch search : this.searches){
-			savedSearchesCombo.add(search.getName());
-		}
-		
 		searchBoxText.setText("");
 		numberOfIssues2.setText("");
 	}
@@ -428,6 +439,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 	
 	protected void fillSearches(){
 		try{
+			savedSearchesCombo.removeAll();
 			if(repository.getUserName() != null){
 					searches = new LinkedList<>();
 					LinkedList<UserSavedSearch> userSearches = getClient().getSavedSearchesForUser(repository.getUserName());
@@ -436,6 +448,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage{
 					}
 			} else {
 				searches = getClient().getSavedSearches();
+			}
+			for(SavedSearch search : searches){
+				savedSearchesCombo.add(search.getName());
 			}
 		} catch (CoreException e) {
 			throw new RuntimeException("Exception while refreshing" + e.toString());

@@ -343,7 +343,7 @@ public class YouTrackClient {
 		
 		int number;
 		int attemptCount = 0;
-		while((number = resource.accept("application/xml").get(XmlNumberOfIssuesParser.class).getNumber()) == -1 && attemptCount++ < 20){
+		while((number = resource.accept("application/xml").get(XmlNumberOfIssuesParser.class).getNumber()) == -1 && attemptCount++ < 10){
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
