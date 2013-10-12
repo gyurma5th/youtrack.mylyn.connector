@@ -42,6 +42,8 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	private final YouTrackTaskDataHandler taskDataHandler;
 	
 	private static final int ISSUES_PER_ONE_QUERY = 20;
+	
+	public final static String ISSUE_URL_PREFIX = "/issue/";
 
 	public YouTrackConnector() {
 		taskDataHandler = new YouTrackTaskDataHandler(this);
@@ -156,6 +158,9 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 		if(taskId.contains("-")){
 			realIssueId = taskId;
 		} else {
+			if(TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), taskId) == null){
+				return null;
+			}
 			realIssueId = TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), taskId).getTaskKey();
 		}
 		
@@ -176,8 +181,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
 	@Override
 	public String getTaskUrl(String repositoryUrl, String taskId) {
-		// ignore
-		return null;
+		return repositoryUrl + ISSUE_URL_PREFIX + taskId;
 	}
 
 	@Override
@@ -272,5 +276,4 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 			return null;
 		}
 	}
-
 }
