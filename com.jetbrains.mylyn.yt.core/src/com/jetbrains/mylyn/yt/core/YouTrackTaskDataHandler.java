@@ -214,6 +214,12 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 						customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
 					}
 				}
+				if(project.getModelIssue().getProperties().containsKey(field.getName())){
+					customFieldAttribute.setValue(project.getModelIssue().property(field.getName()).toString());
+				} else {
+					customFieldAttribute.setValue(field.getEmptyText());
+				}
+				
 			}
 			
 			attribute = data.getRoot().getMappedAttribute(TaskAttribute.PRODUCT);
@@ -475,6 +481,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler{
 						YouTrackCustomField customField = project.getCustomFieldsMap().get(customFieldName);
 						if(!YouTrackCustomFieldType.getTypeByName(customField.getType()).isSimple()){
 							LinkedList<String> values  = customField.getBundle().getValues();
+							if(customField.getEmptyText() != null){
+								attr.putOption(customField.getEmptyText(), customField.getEmptyText());
+							}
 							if(values != null){
 								for(String value: values){
 									attr.putOption(value, value);
