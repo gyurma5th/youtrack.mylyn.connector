@@ -151,7 +151,7 @@ public class YouTrackClient {
 	}
     }
 
-    public static ClientResponse check(ClientResponse response, int code,
+    public static ClientResponse checkClientResponse(ClientResponse response, int code,
 	    String message) {
 	if (response.getStatus() != code) {
 	    throw new RuntimeException(message + "\nRESPONSE CODE: "
@@ -165,7 +165,7 @@ public class YouTrackClient {
 		|| "".equals(password)) {
 	    throw new RuntimeException("Failed : NULL username or password ");
 	} else {
-	    check(service.path("/user/login").queryParam("login", username)
+	    checkClientResponse(service.path("/user/login").queryParam("login", username)
 		    .queryParam("password", password)
 		    .post(ClientResponse.class), 200, "Failed to login");
 	}
@@ -287,7 +287,7 @@ public class YouTrackClient {
 		resource = resource.queryParam("description",
 			issue.getDescription());
 	    }
-	    ClientResponse response = check(resource.put(ClientResponse.class),
+	    ClientResponse response = checkClientResponse(resource.put(ClientResponse.class),
 		    201, "Failed put new issue");
 	    return YouTrackIssue.getIdFromResponse(response);
 	} else {
@@ -299,7 +299,7 @@ public class YouTrackClient {
     public void deleteIssue(final String issueId) {
 	if (issueId != null) {
 	    WebResource resource = service.path("/issue/").path(issueId);
-	    check(resource.delete(ClientResponse.class), 200,
+	    checkClientResponse(resource.delete(ClientResponse.class), 200,
 		    "Failed delete issue " + issueId);
 	} else {
 	    throw new RuntimeException("Null issue id");
@@ -310,7 +310,7 @@ public class YouTrackClient {
 	if (issueId != null && command != null) {
 	    WebResource resource = service.path("/issue/").path(issueId)
 		    .path("/execute").queryParam("command", command);
-	    check(resource.post(ClientResponse.class), 200,
+	    checkClientResponse(resource.post(ClientResponse.class), 200,
 		    "Failed apply command " + command + " to issue " + issueId);
 	} else {
 	    throw new RuntimeException(
@@ -472,7 +472,7 @@ public class YouTrackClient {
 	    WebResource resource = service.path("/issue/").path(issueId)
 		    .path("/execute").queryParam("comment", comment);
 
-	    check(resource.post(ClientResponse.class), 200,
+	    checkClientResponse(resource.post(ClientResponse.class), 200,
 		    "Failed add comment to issue " + issueId);
 	} else {
 	    throw new RuntimeException("Null issue id or comment body.");
@@ -576,7 +576,7 @@ public class YouTrackClient {
 		    "Failed to update issue: summary cant be empty");
 	}
 
-	check(resource.post(ClientResponse.class), 200,
+	checkClientResponse(resource.post(ClientResponse.class), 200,
 		"Failed to update issue description and summary ");
     }
 
