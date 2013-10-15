@@ -263,6 +263,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 		    customFieldAttribute.setValue(project.getModelIssue()
 			    .property(field.getName()).toString());
 		} else {
+		    // customFieldAttribute.putOption(field.getEmptyText(),
+		    // field.getEmptyText());
 		    customFieldAttribute.setValue(field.getEmptyText());
 		}
 
@@ -337,6 +339,12 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
 	attribute = taskData.getRoot().getAttribute(TaskAttribute.PRODUCT);
 	attribute.setValue(issue.property("projectShortName").toString());
+	YouTrackProject project = connector.getProject(repository, taskData
+		.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue());
+
+	if (!project.isCustomFieldsUpdated()) {
+	    project.updateCustomFields(connector.getClient(repository));
+	}
 	// TODO: change everywhere project name to full project name
 	// attribute.setValue(connector.getProject(repository,
 	// issue.getProjectName()).getProjectFullName());
@@ -347,9 +355,13 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
 	// Duplicate field from custom fileds
 	// because 'priority' icon needs priority level
-	attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
-	attribute.setValue(connector.toPriorityLevel(
-		issue.property("Priority").toString()).toString());
+	if (issue.getProperties().containsKey("Priority")) {
+	    attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
+	    attribute.setValue(connector.toPriorityLevel(
+		    issue.property("Priority").toString(),
+		    project.getCustomFieldsMap().get("Priority").getBundle()
+			    .getValues()).toString());
+	}
 
 	attribute = taskData.getRoot().getAttribute("ISSUE_URL");
 	attribute.setValue("<a href=\"" + taskData.getRepositoryUrl()
@@ -381,13 +393,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 		mapper.applyTo(commentAttribute);
 		count++;
 	    }
-	}
-
-	YouTrackProject project = connector.getProject(repository, taskData
-		.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue());
-
-	if (!project.isCustomFieldsUpdated()) {
-	    project.updateCustomFields(connector.getClient(repository));
 	}
 
 	for (YouTrackCustomField field : project.getCustomFields()) {

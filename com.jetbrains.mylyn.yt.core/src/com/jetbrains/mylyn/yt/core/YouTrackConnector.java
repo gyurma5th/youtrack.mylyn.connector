@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -263,20 +264,47 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 	return taskDataHandler;
     }
 
-    public PriorityLevel toPriorityLevel(String priority) {
-	switch (priority) {
-	case "Show-stopper":
+    /**
+     * @param priority
+     * @param priorities
+     *            - priorities in descending order
+     * @return Mylyn PriorityLevel of priority
+     */
+    public PriorityLevel toPriorityLevel(String priority,
+	    LinkedList<String> priorities) {
+	int level;
+	int count = priorities.size();
+	level = (priorities.indexOf(priority) + 1)
+		/ ((int) Math.ceil((double) count / 5));
+
+	switch (level) {
+	case 1:
 	    return PriorityLevel.P1;
-	case "Critical":
+	case 2:
 	    return PriorityLevel.P2;
-	case "Major":
+	case 3:
 	    return PriorityLevel.P3;
-	case "Normal":
+	case 4:
 	    return PriorityLevel.P4;
-	case "Minor":
+	case 5:
 	    return PriorityLevel.P5;
 	default:
-	    return null;
+	    return PriorityLevel.P4;
 	}
+
+	// switch (priority) {
+	// case "Show-stopper":
+	// return PriorityLevel.P1;
+	// case "Critical":
+	// return PriorityLevel.P2;
+	// case "Major":
+	// return PriorityLevel.P3;
+	// case "Normal":
+	// return PriorityLevel.P4;
+	// case "Minor":
+	// return PriorityLevel.P5;
+	// default:
+	// return null;
+	// }
     }
 }
