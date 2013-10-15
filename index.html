@@ -1,91 +1,131 @@
 <!doctype html>
 <html>
-   <head>
-      <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="chrome=1">
-      <title>Youtrack.mylyn.connector by Amarchuk</title>
-      <link rel="stylesheet" href="stylesheets/styles.css">
-      <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-      <script src="javascripts/respond.js"></script>
-      <!--[if lt IE 9]>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Youtrack.mylyn.connector by Amarchuk</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-      <![endif]-->
-      <!--[if lt IE 8]>
-      <link rel="stylesheet" href="stylesheets/ie.css">
-      <![endif]-->
-      <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-   </head>
-   <body>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
       <div id="header">
-         <nav>
-            <li class="fork"><a href="https://github.com/Amarchuk/youtrack.mylyn.connector">View On GitHub</a></li>
-            <li class="downloads"><a href="https://github.com/Amarchuk/youtrack.mylyn.connector/zipball/master">ZIP</a></li>
-            <li class="downloads"><a href="https://github.com/Amarchuk/youtrack.mylyn.connector/tarball/master">TAR</a></li>
-            <li class="title">DOWNLOADS</li>
-         </nav>
-      </div>
-      <!-- end header -->
-      <div class="wrapper">
-         <section>
-            <div id="title">
-               <h1>Youtrack.mylyn.connector</h1>
-               <p>Eclipse plugin connector for YouTrack bugtracker using Mylyn</p>
-               <hr>
-               <span class="credits left">Project maintained by <a href="https://github.com/Amarchuk">Amarchuk</a></span>
-               <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
-            </div>
-            <h1>Welcome to YouTrack Mylyn Connector Project.</h1>
-            
-            <h2>Installation</h2>
-            <p>You can install the editor either using the "update site" method or manually by copying the associated jar files; see below sections for details.</p>
-            <p>The update site method allows for updating the plugin within Eclipse IDE:</p>
-            <pre><code>Help -> Check for Updates
+        <nav>
+          <li class="fork"><a href="https://github.com/Amarchuk/youtrack.mylyn.connector">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/Amarchuk/youtrack.mylyn.connector/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/Amarchuk/youtrack.mylyn.connector/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Youtrack.mylyn.connector</h1>
+          <p>Eclipse plugin connector for YouTrack bugtracker using Mylyn</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/Amarchuk">Amarchuk</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>Eclipse IDE version &gt;= 4.2 with installed Mylyn (<a href="http://wiki.eclipse.org/Mylyn/FAQ#Installation">http://wiki.eclipse.org/Mylyn/FAQ#Installation</a>).</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>You can install the editor either using the "update site" method or manually by copying the associated jar files; see below sections for details.</p>
+
+<p>The update site method allows for updating the plugin within Eclipse IDE:</p>
+
+<pre><code>Help -&gt; Check for Updates
 </code></pre>
-            <h3>Installing using update site</h3>
-            <ol>
-               <li>Start Eclipse, then select Help -> Install New Software.</li>
-               <li>Click Add, in the top-right corner.
-                  In the Add Repository dialog that appears, enter "YouTrack Mylyn Connector" for the Name and the following URL for the Location:
-                  <i>http://amarchuk.github.io/youtrack.mylyn.connector/updatesite/update/</i>
-               </li>
-               <li>Click OK.</li>
-               <li>In the Available Software dialog, select the checkbox next to YouTrack Mylyn Connector and click Next.</li>
-               <li>If not content found, deselect Group items by category.</li>
-               <li>In the next window, you'll see a list of the tools to be downloaded. Click Next.</li>
-               <li>Read and accept the license agreements, then click Finish.</li>
-               <li>When the installation completes, restart Eclipse.</li>
-               <li>See usage for more information about using the plugin.</li>
-            </ol>
-            
-            <h3>Installing manually</h3>
-            <p>Download the jar file of the feature version wanted from <a href="https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/features">https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/features</a>.</p>
-            <p>Then download 3 jars of the plugins with the same version as the feature from <a href="https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/plugins/">https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/plugins/</a></p>
-            <p>Close your Eclipse and copy the feature jar file to your Eclipse's features directory and the second jars to your Eclipse's plugins directory. You can find the feature and plugin directories under your Eclipse installation directory, eg. <i>~/eclipse/features</i> and <i>~/eclipse/plugins</i>.</p>
-            <p>
-               Restart your Eclipse and you can now works with connector.
-            </p>
-            <h2>Uninstallation</h2>
-            <h3>Uninstallation when installed using update-site</h3>
-            <ol>
-               <li>Start Eclipse, select Help -> About Eclipse.</li>
-               <li>Click Installation Details.</li>
-               <li>In the pre-selected Installed Software tab, select the line with "YouTrack Mylyn Connector".</li>
-               <li>Click Uninstall...</li>
-               <li>In the Uninstal Details dialog click Finish.</li>
-               <li>Restart Eclipse to complete uninstallation.</li>
-            </ol>
-            <h3>Uninstalling manually installed plugin</h3>
-            <p>Close your Eclipse and go to your Eclipse plugin directory, usually something like <i>~/eclipse/plugins</i> and delete or move 3 plugin files. The plugin names are following:<pre><code>
-	       com.jetbrains.mylyn.yt.core_[version].jar,<br>
-               com.jetbrains.mylyn.yt.ui_[version].jar,<br>
-               com.jetbrains.youtrack.javarest_[version].jar
-			   </code></pre>
-            </p>
-            <p>Also delete feature jar from <i>~/eclipse/features</i> and all mentions in <i>artifacts.xml</i> (do it on your own risk).</p>
-            <p>Next time you start Eclipse, YouTrack Mylyn Connector has been uninstalled.</p>
-         </section>
-      </div>
-      <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-   </body>
+
+<h3>
+<a name="installing-using-update-site" class="anchor" href="#installing-using-update-site"><span class="octicon octicon-link"></span></a>Installing using update site</h3>
+
+<ol>
+<li>Start Eclipse, then select Help -&gt; Install New Software.</li>
+<li>Click Add, in the top-right corner. In the Add Repository dialog that appears, enter "YouTrack Mylyn Connector" for the Name and the following URL for the Location:
+<em><a href="http://amarchuk.github.io/youtrack.mylyn.connector/updatesite/update/">http://amarchuk.github.io/youtrack.mylyn.connector/updatesite/update/</a></em>
+</li>
+<li>Click OK.</li>
+<li>In the Available Software dialog, select the checkbox next to YouTrack Mylyn Connector and click Next.
+If content not found, deselect <em>Group items by category</em>.</li>
+<li>In the next window, you'll see a list of the tools to be downloaded. Click Next.</li>
+<li>Read and accept the license agreements, then click Finish.</li>
+<li>When the installation completes, restart Eclipse.</li>
+<li>See usage for more information about using the plugin.</li>
+</ol><h3>
+<a name="installing-manually" class="anchor" href="#installing-manually"><span class="octicon octicon-link"></span></a>Installing manually</h3>
+
+<p>Download the jar file of the feature version wanted from <a href="https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/features">https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/features</a>.</p>
+
+<p>Then download 3 jars of the plugins with the same version as the feature from <a href="https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/plugins/">https://github.com/Amarchuk/youtrack.mylyn.connector/tree/gh-pages/updatesite/update/plugins/</a>.</p>
+
+<p>Close your Eclipse and copy the feature jar file to your Eclipse's features directory and the second jars to your Eclipse's plugins directory. You can find the feature and plugin directories under your Eclipse installation directory, eg. <em>~/eclipse/features</em> and <em>~/eclipse/plugins</em>.</p>
+
+<p>Restart your Eclipse and you can now works with connector.</p>
+
+<h2>
+<a name="uninstallation" class="anchor" href="#uninstallation"><span class="octicon octicon-link"></span></a>Uninstallation</h2>
+
+<h3>
+<a name="uninstallation-when-installed-using-update-site" class="anchor" href="#uninstallation-when-installed-using-update-site"><span class="octicon octicon-link"></span></a>Uninstallation when installed using update-site</h3>
+
+<ol>
+<li>Start Eclipse, select Help -&gt; About Eclipse.</li>
+<li>Click Installation Details.</li>
+<li>In the pre-selected Installed Software tab, select the line with "YouTrack Mylyn Connector".</li>
+<li>Click Uninstall...</li>
+<li>In the Uninstal Details dialog click Finish.</li>
+<li>Restart Eclipse to complete uninstallation.</li>
+</ol><h3>
+<a name="uninstalling-manually-installed-plugin" class="anchor" href="#uninstalling-manually-installed-plugin"><span class="octicon octicon-link"></span></a>Uninstalling manually installed plugin</h3>
+
+<p>Close your Eclipse and go to your Eclipse plugin directory, usually something like <em>~/eclipse/plugins</em> and delete or move 3 plugin files. The plugin names are following:</p>
+
+<pre><code>com.jetbrains.mylyn.yt.core_[version].jar,
+com.jetbrains.mylyn.yt.ui_[version].jar,
+com.jetbrains.youtrack.javarest_[version].jar
+</code></pre>
+
+<p>Also delete feature jar from <em>~/eclipse/features</em> and all mentions in <em>artifacts.xml</em> (do it on your own risk).</p>
+
+<p>Next time you start Eclipse, YouTrack Mylyn Connector has been uninstalled.</p>
+
+<h2>
+<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h2>
+
+<p>Alexander Marchuk (<a href="https://github.com/Amarchuk" class="user-mention">@Amarchuk</a>) in <a href="https://github.com/JetBrains" class="user-mention">@JetBrains</a>, 2013.</p>
+
+<h2>
+<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h2>
+
+<p>Having trouble with Connector or YouTrack? Check out the documentation </p>
+
+<ul>
+<li>Mylyn: <a href="http://www.eclipse.org/mylyn/start/">http://www.eclipse.org/mylyn/start/</a>
+</li>
+<li>YouTrack: <a href="http://www.jetbrains.com/youtrack/">http://www.jetbrains.com/youtrack/</a>
+</li>
+</ul><p>or contact me <a href="mailto:alexander.marchuk@jetbrains.com">alexander.marchuk@jetbrains.com</a> and I’ll help you if I can.</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
 </html>
