@@ -47,6 +47,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     private static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
 
+    private static final String LINK_PREFIX = "TaskAttribute.LINK";
+
     public static final String CUSTOM_FIELD_KIND = "TaslAttributeKind.CUSTOM_FIELD_KIND";
 
     public YouTrackTaskDataHandler(YouTrackConnector connector) {
@@ -191,7 +193,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 	attribute = data.getRoot().createAttribute(TaskAttribute.COMPONENT);
 	attribute.getMetaData().setReadOnly(true)
 		.setType(TaskAttribute.TYPE_TASK_DEPENDENCY)
-		.setLabel("Related to:");
+		.setLabel("Relates to:");
 
 	attribute = data.getRoot().createAttribute(TaskAttribute.PRIORITY);
 	attribute.getMetaData().setReadOnly(true)
@@ -263,8 +265,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 		    customFieldAttribute.setValue(project.getModelIssue()
 			    .property(field.getName()).toString());
 		} else {
-		    // customFieldAttribute.putOption(field.getEmptyText(),
-		    // field.getEmptyText());
 		    customFieldAttribute.setValue(field.getEmptyText());
 		}
 
@@ -368,11 +368,26 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 		+ "/issue/" + issue.getId() + "\">" + issue.getId() + "</a>");
 
 	attribute = taskData.getRoot().getAttribute(TaskAttribute.COMPONENT);
-	if (issue.property("links") instanceof String) {
-	    attribute.addValue(issue.property("links").toString());
-	} else {
-	    for (String value : (Iterable<String>) issue.property("links")) {
-		attribute.addValue(value);
+	if (issue.getProperties().containsKey("links")) {
+	    int count = 0;
+	    if (issue.property("links") instanceof String) {
+
+		TaskAttribute attr = taskData.getRoot().createAttribute(
+			LINK_PREFIX + count);
+		attribute.getMetaData().setReadOnly(true)
+			.setType(TaskAttribute.TYPE_TASK_DEPENDENCY);
+		attr.addValue(issue.property("links").toString());
+		attribute.addValue(attr.getValue());
+	    } else {
+		for (String value : (Iterable<String>) issue.property("links")) {
+		    TaskAttribute attr = taskData.getRoot().createAttribute(
+			    LINK_PREFIX + count);
+		    attribute.getMetaData().setReadOnly(true)
+			    .setType(TaskAttribute.TYPE_TASK_DEPENDENCY);
+		    attr.addValue(value);
+		    attribute.addValue("\n" + attr.getValue());
+		    count++;
+		}
 	    }
 	}
 
