@@ -99,7 +99,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 		if (project.getModelIssue() != null) {
 		    String modelIssueId = project.getModelIssue().getId();
 		    client.updateIssue(modelIssueId, issue);
-		    project.setModelIssue(null);
+		    // project.setModelIssue(null);
 		    return new RepositoryResponse(ResponseKind.TASK_CREATED,
 			    modelIssueId);
 		} else {

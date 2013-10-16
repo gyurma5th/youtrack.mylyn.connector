@@ -151,11 +151,20 @@ public class YouTrackClient {
 	}
     }
 
-    public static ClientResponse checkClientResponse(ClientResponse response, int code,
-	    String message) {
+    public static ClientResponse checkClientResponse(ClientResponse response,
+	    int code, String message) {
 	if (response.getStatus() != code) {
-	    throw new RuntimeException(message + "\nRESPONSE CODE: "
-		    + response.getStatus());
+	    String responseBody = response.getEntity(String.class);
+	    if (responseBody != null && responseBody.length() > 0
+		    && responseBody.contains("<error>"))
+		throw new RuntimeException(message
+			+ "\nRESPONSE CODE: "
+			+ response.getStatus()
+			+ "\nRESPONSE DATA:"
+			+ responseBody.substring(
+				responseBody.indexOf("<error>")
+					+ "<error>".length(),
+				responseBody.indexOf("</error>")));
 	}
 	return response;
     }
@@ -165,9 +174,10 @@ public class YouTrackClient {
 		|| "".equals(password)) {
 	    throw new RuntimeException("Failed : NULL username or password ");
 	} else {
-	    checkClientResponse(service.path("/user/login").queryParam("login", username)
-		    .queryParam("password", password)
-		    .post(ClientResponse.class), 200, "Failed to login");
+	    checkClientResponse(
+		    service.path("/user/login").queryParam("login", username)
+			    .queryParam("password", password)
+			    .post(ClientResponse.class), 200, "Failed to login");
 	}
 
 	this.setPassword(password);
@@ -287,8 +297,9 @@ public class YouTrackClient {
 		resource = resource.queryParam("description",
 			issue.getDescription());
 	    }
-	    ClientResponse response = checkClientResponse(resource.put(ClientResponse.class),
-		    201, "Failed put new issue");
+	    ClientResponse response = checkClientResponse(
+		    resource.put(ClientResponse.class), 201,
+		    "Failed put new issue");
 	    return YouTrackIssue.getIdFromResponse(response);
 	} else {
 	    throw new RuntimeException(
