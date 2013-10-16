@@ -84,7 +84,7 @@ public class YouTrackProject {
 	this.customFieldsUpdatedDate = customFieldsUpdatedDate;
     }
 
-    public void updateCustomFields(YouTrackClient client) {
+    public synchronized void updateCustomFields(final YouTrackClient client) {
 
 	if (client != null) {
 
@@ -96,6 +96,7 @@ public class YouTrackProject {
 		    YouTrackCustomField fullField = client
 			    .getProjectCustomField(projectShortName,
 				    field.getName());
+
 		    if (!YouTrackCustomFieldType.getTypeByName(
 			    fullField.getType()).isSimple()) {
 			fullField.findBundle();
