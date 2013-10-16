@@ -648,6 +648,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 				.getMappedAttribute(TaskAttribute.PRODUCT)
 				.getValue());
 
+		if (isEnableEditMode() && !project.isCustomFieldsUpdated()) {
+		    project.updateCustomFields(YouTrackConnector
+			    .getClient(taskRepository));
+		}
+
 		for (TaskAttribute attr : taskData.getRoot().getAttributes()
 			.values()) {
 		    if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
@@ -667,7 +672,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 				customField.getType()).isSimple()) {
 			    LinkedList<String> values = customField.getBundle()
 				    .getValues();
-			    if (customField.getEmptyText() != null) {
+			    if (customField.getEmptyText() != null
+				    && !attr.getOptions().containsKey(
+					    customField.getEmptyText())) {
 				attr.putOption(customField.getEmptyText(),
 					customField.getEmptyText());
 			    }
