@@ -51,6 +51,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     public static final String CUSTOM_FIELD_KIND = "TaslAttributeKind.CUSTOM_FIELD_KIND";
 
+    public static final String SUMMARY_CREATED_FROM_ECLIPSE = "<Issue created from Eclipse Connector. Please specify issue summary.>";
+
     public YouTrackTaskDataHandler(YouTrackConnector connector) {
 	this.connector = connector;
     }
@@ -94,34 +96,43 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
 	    if (taskData.isNew()) {
 
-		String uploadedIssueId = client.putNewIssue(issue);
-		issue.setId(uploadedIssueId);
+		if (project.getModelIssue() != null) {
+		    String modelIssueId = project.getModelIssue().getId();
+		    client.updateIssue(modelIssueId, issue);
+		    project.setModelIssue(null);
+		    return new RepositoryResponse(ResponseKind.TASK_CREATED,
+			    modelIssueId);
+		} else {
+		    String uploadedIssueId = client.putNewIssue(issue);
+		    issue.setId(uploadedIssueId);
 
-		StringBuilder addCFsCommand = new StringBuilder();
+		    StringBuilder addCFsCommand = new StringBuilder();
 
-		for (String name : issue.getProperties().keySet()) {
-		    if (isCustomField(project, name)) {
-			if (issue.getProperties().get(name) instanceof String) {
-			    addCFsCommand.append(name
-				    + ": "
-				    + issue.getProperties().get(name)
-					    .toString() + " ");
-			} else {
-			    addCFsCommand.append(name + " ");
-			    for (String value : (LinkedList<String>) issue
-				    .getProperties().get(name)) {
-				addCFsCommand.append(value + " ");
+		    for (String name : issue.getProperties().keySet()) {
+			if (isCustomField(project, name)) {
+			    if (issue.getProperties().get(name) instanceof String) {
+				addCFsCommand.append(name
+					+ ": "
+					+ issue.getProperties().get(name)
+						.toString() + " ");
+			    } else {
+				addCFsCommand.append(name + " ");
+				for (String value : (LinkedList<String>) issue
+					.getProperties().get(name)) {
+				    addCFsCommand.append(value + " ");
+				}
 			    }
 			}
 		    }
+
+		    if (addCFsCommand.toString() != null) {
+			client.applyCommand(issue.getId(),
+				addCFsCommand.toString());
+		    }
+		    return new RepositoryResponse(ResponseKind.TASK_CREATED,
+			    issue.getId());
 		}
 
-		if (addCFsCommand.toString() != null) {
-		    client.applyCommand(issue.getId(), addCFsCommand.toString());
-		}
-
-		return new RepositoryResponse(ResponseKind.TASK_CREATED,
-			issue.getId());
 	    } else {
 		// upload new comments
 		String newComment = getNewComment(taskData);
@@ -156,6 +167,29 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     public boolean initializeTaskData(TaskRepository repository, TaskData data,
 	    ITaskMapping initializationData, IProgressMonitor monitor)
 	    throws CoreException {
+
+	if (data.isNew() && initializationData.getProduct() != null) {
+	    YouTrackProject project = YouTrackConnector.getProject(repository,
+		    initializationData.getProduct());
+	    TaskAttribute attribute = data.getRoot().createAttribute(
+		    TaskAttribute.SUMMARY);
+	    attribute.setValue(SUMMARY_CREATED_FROM_ECLIPSE);
+	    attribute = data.getRoot().createAttribute(TaskAttribute.PRODUCT);
+	    attribute.setValue(initializationData.getProduct());
+	    attribute = data.getRoot().createAttribute(
+		    TaskAttribute.DESCRIPTION);
+	    attribute.setValue("");
+	    YouTrackIssue issue;
+	    try {
+		issue = buildIssue(repository, data);
+		YouTrackClient client = YouTrackConnector.getClient(repository);
+		String uploadedIssueId = client.putNewIssue(issue);
+		issue = client.getIssue(uploadedIssueId);
+		project.setModelIssue(issue);
+	    } catch (CoreException e) {
+		throw new RuntimeException(e.getMessage());
+	    }
+	}
 
 	TaskAttribute attribute = data.getRoot().createAttribute(
 		TaskAttribute.SUMMARY);
@@ -260,12 +294,14 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 				TaskAttribute.TYPE_MULTI_SELECT);
 		    }
 		}
-		if (project.getModelIssue().getProperties()
-			.containsKey(field.getName())) {
-		    customFieldAttribute.setValue(project.getModelIssue()
-			    .property(field.getName()).toString());
-		} else {
-		    customFieldAttribute.setValue(field.getEmptyText());
+		if (project.getModelIssue() != null) {
+		    if (project.getModelIssue().getProperties()
+			    .containsKey(field.getName())) {
+			customFieldAttribute.setValue(project.getModelIssue()
+				.property(field.getName()).toString());
+		    } else {
+			customFieldAttribute.setValue(field.getEmptyText());
+		    }
 		}
 
 	    }

@@ -1,6 +1,6 @@
 /**
 @author: amarch
-*/
+ */
 
 package com.jetbrains.mylyn.yt.ui;
 
@@ -15,32 +15,35 @@ import org.eclipse.ui.forms.editor.IFormPage;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 
-public class YouTrackTaskEditorPageFactory extends AbstractTaskEditorPageFactory {
+public class YouTrackTaskEditorPageFactory extends
+	AbstractTaskEditorPageFactory {
 
-		@Override
-		public boolean canCreatePageFor(TaskEditorInput input) {
-			return (input.getTask().getConnectorKind().equals(YouTrackCorePlugin.CONNECTOR_KIND) || TasksUiUtil.isOutgoingNewTask(
-					input.getTask(), YouTrackCorePlugin.CONNECTOR_KIND));
-		}
+    @Override
+    public boolean canCreatePageFor(TaskEditorInput input) {
+	return (input.getTask().getConnectorKind()
+		.equals(YouTrackCorePlugin.CONNECTOR_KIND) || TasksUiUtil
+		.isOutgoingNewTask(input.getTask(),
+			YouTrackCorePlugin.CONNECTOR_KIND));
+    }
 
-		@Override
-		public IFormPage createPage(TaskEditor editor) {
-			return new YouTrackTaskEditorPage(editor);
-		}
+    @Override
+    public IFormPage createPage(TaskEditor editor) {
+	return new YouTrackTaskEditorPage(editor);
+    }
 
-		@Override
-		public Image getPageImage() {
-			return CommonImages.getImage(TasksUiImages.REPOSITORY_SMALL);
-		}
+    @Override
+    public Image getPageImage() {
+	return CommonImages.getImage(TasksUiImages.REPOSITORY_SMALL);
+    }
 
-		@Override
-		public String getPageText() {
-			return "YouTrack";
-		}
-		
-		@Override
-		public int getPriority() {
-			return PRIORITY_TASK;
-		}
+    @Override
+    public String getPageText() {
+	return "YouTrack";
+    }
+
+    @Override
+    public int getPriority() {
+	return PRIORITY_TASK;
+    }
 
 }
