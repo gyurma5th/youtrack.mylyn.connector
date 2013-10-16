@@ -168,7 +168,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 	    ITaskMapping initializationData, IProgressMonitor monitor)
 	    throws CoreException {
 
-	if (data.isNew() && initializationData.getProduct() != null) {
+	if (data.isNew() && initializationData.getProduct() != null
+		&& initializationData.getProduct().length() > 0) {
 	    YouTrackProject project = YouTrackConnector.getProject(repository,
 		    initializationData.getProduct());
 	    TaskAttribute attribute = data.getRoot().createAttribute(
