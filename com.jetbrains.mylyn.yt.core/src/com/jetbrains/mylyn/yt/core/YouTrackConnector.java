@@ -38,7 +38,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
     private static Map<TaskRepository, YouTrackClient> clientByRepository = new HashMap<TaskRepository, YouTrackClient>();
 
-    private static Map<TaskRepository, HashSet<YouTrackProject>> projectsByRepository = new HashMap<>();
+    private static Map<TaskRepository, HashSet<YouTrackProject>> projectsByRepository = new HashMap<TaskRepository, HashSet<YouTrackProject>>();
 
     private final YouTrackTaskDataHandler taskDataHandler;
 

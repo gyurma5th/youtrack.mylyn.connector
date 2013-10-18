@@ -86,7 +86,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 	    issue = buildIssue(repository, taskData);
 	    YouTrackProject project = YouTrackConnector.getProject(repository,
 		    issue.property("projectShortName").toString());
-	    Map<String, Object> changedCF = new HashMap<>();
+	    Map<String, Object> changedCF = new HashMap<String, Object>();
 	    for (String name : issue.getProperties().keySet()) {
 		if (isCustomField(project, name)) {
 		    changedCF.put(name, issue.getProperties().get(name));
@@ -594,7 +594,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 		    try {
 			if (attribute.getMetaData().getType()
 				.equals(TaskAttribute.TYPE_MULTI_SELECT)) {
-			    LinkedList<String> multiValues = new LinkedList<>();
+			    LinkedList<String> multiValues = new LinkedList<String>();
 			    for (String value : attribute.getValues()) {
 				multiValues.add(value);
 			    }

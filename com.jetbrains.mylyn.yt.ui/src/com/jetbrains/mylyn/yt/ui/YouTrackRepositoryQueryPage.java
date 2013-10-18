@@ -436,7 +436,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 	try {
 	    savedSearchesCombo.removeAll();
 	    if (repository.getUserName() != null) {
-		searches = new LinkedList<>();
+		searches = new LinkedList<SavedSearch>();
 		LinkedList<UserSavedSearch> userSearches = getClient()
 			.getSavedSearchesForUser(repository.getUserName());
 		for (UserSavedSearch userSearch : userSearches) {

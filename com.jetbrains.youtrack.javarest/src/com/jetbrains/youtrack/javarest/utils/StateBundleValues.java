@@ -1,6 +1,6 @@
 /**
 @author: amarch
-*/
+ */
 
 package com.jetbrains.youtrack.javarest.utils;
 
@@ -10,23 +10,23 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "stateBundle")
-public class StateBundleValues extends BundleValues{
-	
-	@XmlElement(name = "state", type = StateValue.class)
-	private LinkedList<StateValue> bundleValues;
+public class StateBundleValues extends BundleValues {
 
-	public LinkedList<StateValue> getStateValues() {
-		return bundleValues;
+    @XmlElement(name = "state", type = StateValue.class)
+    private LinkedList<StateValue> bundleValues;
+
+    public LinkedList<StateValue> getStateValues() {
+	return bundleValues;
+    }
+
+    @Override
+    public LinkedList<String> getValues() {
+	LinkedList<String> values = new LinkedList<String>();
+	if (bundleValues != null) {
+	    for (BundleValue value : bundleValues) {
+		values.add(value.getValue());
+	    }
 	}
-	
-	@Override
-	public LinkedList<String> getValues() {
-		LinkedList<String> values = new LinkedList<>();
-		if(bundleValues != null){
-			for(BundleValue value : bundleValues){
-				values.add(value.getValue());
-			}
-		}
-		return values;
-	}
+	return values;
+    }
 }

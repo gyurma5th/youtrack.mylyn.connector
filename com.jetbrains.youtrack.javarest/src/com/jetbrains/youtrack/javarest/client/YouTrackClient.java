@@ -432,7 +432,7 @@ public class YouTrackClient {
 
     public Set<String> getProjectCustomFieldNames(String projectname) {
 	LinkedList<YouTrackCustomField> cfs = getProjectCustomFields(projectname);
-	Set<String> cfNames = new HashSet<>();
+	Set<String> cfNames = new HashSet<String>();
 
 	for (YouTrackCustomField cf : cfs) {
 	    cfNames.add(cf.getName());
@@ -626,7 +626,7 @@ public class YouTrackClient {
 			command.append(customFieldName + ": " + newValue + " ");
 		    }
 		} else {
-		    LinkedList<String> oldValues = new LinkedList<>();
+		    LinkedList<String> oldValues = new LinkedList<String>();
 		    if (oldIssue.getProperties().containsKey(customFieldName)) {
 			if (oldIssue.getProperties().get(customFieldName) instanceof String) {
 			    oldValues.add(oldIssue.getProperties()
@@ -637,7 +637,7 @@ public class YouTrackClient {
 			}
 		    }
 
-		    LinkedList<String> selectedValues = new LinkedList<>();
+		    LinkedList<String> selectedValues = new LinkedList<String>();
 		    if (newIssue.getProperties().containsKey(customFieldName)) {
 			if (newIssue.getProperties().get(customFieldName) instanceof String) {
 			    selectedValues.add(newIssue.getProperties()
@@ -648,10 +648,10 @@ public class YouTrackClient {
 			}
 		    }
 
-		    LinkedList<String> newValues = new LinkedList<>(
+		    LinkedList<String> newValues = new LinkedList<String>(
 			    selectedValues);
 		    newValues.removeAll(oldValues);
-		    LinkedList<String> removeValues = new LinkedList<>(
+		    LinkedList<String> removeValues = new LinkedList<String>(
 			    oldValues);
 		    removeValues.removeAll(selectedValues);
 

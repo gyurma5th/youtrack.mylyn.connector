@@ -172,7 +172,7 @@ public class TestClientMethods {
     @Test
     public void testGetProjects() {
 	List<YouTrackProject> projects = client.getProjects();
-	Set<String> projectsShortNamesSet = new HashSet<>();
+	Set<String> projectsShortNamesSet = new HashSet<String>();
 	for (YouTrackProject project : projects) {
 	    projectsShortNamesSet.add(project.getProjectShortName());
 	}
