@@ -104,9 +104,6 @@ public class YouTrackIssue {
     }
   }
 
-  /*
-   * Add new property, not update
-   */
   public void addProperty(String newProperty, Object value) {
     if (newProperty != null && !properties.containsKey(newProperty)) {
       properties.put(newProperty, value);
