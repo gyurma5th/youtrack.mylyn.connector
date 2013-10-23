@@ -15,7 +15,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.junit.Test;
 
-import com.jetbrains.youtrack.javarest.client.Field;
+import com.jetbrains.youtrack.javarest.client.IssueSchemaField;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 
 public class CorrectIssueJaxbBinding {
@@ -33,7 +33,7 @@ public class CorrectIssueJaxbBinding {
 			assertEquals("Mylyn Concepts and Usage", issue.property("summary").toString());
 			assertEquals(1366278449653L, Long.parseLong(issue.property("created").toString()));
 			assertEquals("root", issue.getComments().get(0).getAuthorName());
-			for(Field field : issue.fields){
+			for(IssueSchemaField field : issue.fields){
 				if(field.getName().equals("summary")){
 					assertEquals("SingleField", field.getType());
 				}

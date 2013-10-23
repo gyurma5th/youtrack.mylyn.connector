@@ -33,653 +33,590 @@ import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 
 public class YouTrackClient {
 
-    private String username = null;
+  private String username = null;
 
-    private String password = null;
+  private String password = null;
 
-    private String host;
+  private String host;
 
-    private int port;
+  private int port;
 
-    private final String baseServerURL;
+  private final String baseServerURL;
 
-    private final static String DEFAULT_SCHEME = "http";
+  private final static String DEFAULT_SCHEME = "http";
 
-    private final static String DEFAULT_HOST = "localhost";
+  private final static String DEFAULT_HOST = "localhost";
 
-    private final static int DEFAULT_PORT = 80;
+  private final static int DEFAULT_PORT = 80;
 
-    private ClientConfig config;
+  private ClientConfig config;
 
-    private ApacheHttpClient jerseyClient;
+  private ApacheHttpClient jerseyClient;
 
-    private WebResource service;
+  private WebResource service;
 
-    public YouTrackClient() {
-	this.host = DEFAULT_HOST;
-	this.port = DEFAULT_PORT;
-	this.baseServerURL = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":"
-		+ Integer.toString(DEFAULT_PORT) + "/rest";
-	setClientConfigs();
+  public YouTrackClient() {
+    this.host = DEFAULT_HOST;
+    this.port = DEFAULT_PORT;
+    this.baseServerURL =
+        DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + Integer.toString(DEFAULT_PORT) + "/rest";
+    setClientConfigs();
+  }
+
+  public YouTrackClient(String hostname, int port, String scheme) {
+    try {
+      URI validator = new URI(buildBaseURL(hostname, port, scheme));
+
+      this.host = hostname;
+      this.port = port;
+      baseServerURL = validator.toString();
+
+    } catch (URISyntaxException e) {
+      throw new RuntimeException("Incorrect host or port, cant create new client");
     }
 
-    public YouTrackClient(String hostname, int port, String scheme) {
-	try {
-	    URI validator = new URI(buildBaseURL(hostname, port, scheme));
+    setClientConfigs();
+  }
 
-	    this.host = hostname;
-	    this.port = port;
-	    baseServerURL = validator.toString();
+  private String buildBaseURL(String hostname, int port, String scheme) throws URISyntaxException {
 
-	} catch (URISyntaxException e) {
-	    throw new RuntimeException(
-		    "Incorrect host or port, cant create new client");
-	}
+    StringBuilder uri = new StringBuilder(scheme);
+    uri.append("://");
 
-	setClientConfigs();
+    if (new URI(uri.toString() + hostname).getHost().toString().equals(hostname)) {
+      uri.append(hostname).append(":").append(port);
+    } else {
+      if (hostname.contains("/")) {
+        String realHost = hostname.substring(0, hostname.indexOf("/"));
+        String afterHostPart = hostname.substring(hostname.indexOf("/"));
+        uri.append(realHost).append(":").append(port).append(afterHostPart);
+      } else {
+        throw new RuntimeException("Incorrect host or port, cant create new client");
+      }
     }
 
-    private String buildBaseURL(String hostname, int port, String scheme)
-	    throws URISyntaxException {
+    if (!uri.toString().endsWith("/")) {
+      uri.append("/");
+    }
+    uri.append("rest");
+    return uri.toString();
+  }
 
-	StringBuilder uri = new StringBuilder(scheme);
-	uri.append("://");
+  private void setClientConfigs() {
+    setConfig(new DefaultApacheHttpClientConfig());
+    getConfig().getProperties().put(ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
+    this.jerseyClient = ApacheHttpClient.create(getConfig());
+    jerseyClient.addFilter(new LoggingFilter(System.out));
+    service = jerseyClient.resource(this.getBaseServerURL());
+  }
 
-	if (new URI(uri.toString() + hostname).getHost().toString()
-		.equals(hostname)) {
-	    uri.append(hostname).append(":").append(port);
-	} else {
-	    if (hostname.contains("/")) {
-		String realHost = hostname.substring(0, hostname.indexOf("/"));
-		String afterHostPart = hostname
-			.substring(hostname.indexOf("/"));
-		uri.append(realHost).append(":").append(port)
-			.append(afterHostPart);
-	    } else {
-		throw new RuntimeException(
-			"Incorrect host or port, cant create new client");
-	    }
-	}
+  public static YouTrackClient createClient(String url) {
+    URI uri;
+    try {
+      if (url.contains("://")) {
+        uri = new URI(url);
+      } else {
+        uri = new URI(DEFAULT_SCHEME + "://" + url);
+      }
 
-	if (!uri.toString().endsWith("/")) {
-	    uri.append("/");
-	}
-	uri.append("rest");
-	return uri.toString();
+      String host = "";
+      if (uri.getHost() != null) {
+        host = uri.getHost();
+      }
+      if (uri.getPath() != null) {
+        host += uri.getPath();
+      }
+
+      String scheme = uri.getScheme();
+      if (scheme == null) {
+        scheme = DEFAULT_SCHEME;
+      }
+
+      int port = uri.getPort();
+      if (port == -1) {
+        port = DEFAULT_PORT;
+      }
+
+      return new YouTrackClient(host, port, scheme);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException("Incorrect host or port, can't create new client");
+    }
+  }
+
+  public static ClientResponse checkClientResponse(ClientResponse response, int code, String message) {
+    if (response.getStatus() != code) {
+      String responseBody = response.getEntity(String.class);
+      if (responseBody != null && responseBody.length() > 0 && responseBody.contains("<error>"))
+        throw new RuntimeException(message
+            + "\nRESPONSE CODE: "
+            + response.getStatus()
+            + "\nRESPONSE DATA:"
+            + responseBody.substring(responseBody.indexOf("<error>") + "<error>".length(),
+                responseBody.indexOf("</error>")));
+    }
+    return response;
+  }
+
+  public boolean login(final String username, final String password) {
+    if (username == null || password == null || "".equals(username) || "".equals(password)) {
+      throw new RuntimeException("Failed : NULL username or password ");
+    } else {
+      checkClientResponse(
+          service.path("/user/login").queryParam("login", username)
+              .queryParam("password", password).post(ClientResponse.class), 200, "Failed to login");
     }
 
-    private void setClientConfigs() {
-	setConfig(new DefaultApacheHttpClientConfig());
-	getConfig().getProperties().put(
-		ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
-	this.jerseyClient = ApacheHttpClient.create(getConfig());
-	jerseyClient.addFilter(new LoggingFilter(System.out));
-	service = jerseyClient.resource(this.getBaseServerURL());
+    this.setPassword(password);
+    this.setUsername(username);
+    return true;
+  }
+
+  public boolean loginWithCredentials() {
+    return login(getUsername(), getPassword());
+  }
+
+  public boolean issueExist(String issueId) {
+    return service.path("/issue/").path(issueId).path("/exists").get(ClientResponse.class)
+        .getStatus() == 200;
+  }
+
+  public YouTrackIssue getIssue(String id) {
+    if (id == null) {
+      throw new RuntimeException("Null issue id");
+    } else {
+      if (!issueExist(id)) {
+        throw new RuntimeException("Issue with such id dont exist in tracker.");
+      } else {
+        return service.path("/issue/").path(id).accept("application/xml").get(YouTrackIssue.class);
+      }
     }
 
-    public static YouTrackClient createClient(String url) {
-	URI uri;
-	try {
-	    if (url.contains("://")) {
-		uri = new URI(url);
-	    } else {
-		uri = new URI(DEFAULT_SCHEME + "://" + url);
-	    }
+  }
 
-	    String host = "";
-	    if (uri.getHost() != null) {
-		host = uri.getHost();
-	    }
-	    if (uri.getPath() != null) {
-		host += uri.getPath();
-	    }
+  public List<YouTrackIssue> getIssuesInProject(String projectname, String filter, int after,
+      int max, long updatedAfter) {
+    try {
+      return service.path("/issue/byproject/").path(projectname).queryParam("filter", filter)
+          .queryParam("after", Integer.toString(after)).queryParam("max", Integer.toString(max))
+          .queryParam("updatedAfter", Long.toString(updatedAfter)).accept("application/xml")
+          .get(YouTrackIssuesList.class).getIssues();
+    } catch (RuntimeException e) {
+      throw new RuntimeException("Exception while get list of issues in project :\n"
+          + e.getMessage(), e);
+    }
+  }
 
-	    String scheme = uri.getScheme();
-	    if (scheme == null) {
-		scheme = DEFAULT_SCHEME;
-	    }
+  public List<YouTrackIssue> getIssuesInProject(String projectname, int max) {
+    return getIssuesInProject(projectname, "", 0, max, 0);
+  }
 
-	    int port = uri.getPort();
-	    if (port == -1) {
-		port = DEFAULT_PORT;
-	    }
+  /*
+   * returns 10 or less issues
+   */
+  public List<YouTrackIssue> getIssuesInProject(String projectname) {
+    return getIssuesInProject(projectname, "", 0, 10, 0);
+  }
 
-	    return new YouTrackClient(host, port, scheme);
-	} catch (URISyntaxException e) {
-	    throw new RuntimeException(
-		    "Incorrect host or port, can't create new client");
-	}
+  public String getBaseServerURL() {
+    return baseServerURL;
+  }
+
+  public ClientConfig getConfig() {
+    return config;
+  }
+
+  public void setConfig(ClientConfig config) {
+    this.config = config;
+  }
+
+  public String getPassword() {
+    if (password == null) {
+      throw new RuntimeException("Attempt to get null password.");
+    } else {
+      return password;
+    }
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public String getUsername() {
+    if (username == null) {
+      throw new RuntimeException("Attemp to get null username");
+    } else {
+      return username;
+    }
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public List<YouTrackProject> getProjects() {
+    try {
+      return service.path("/project/all").accept("application/xml").get(YouTrackProjectsList.class)
+          .getProjects();
+    } catch (Exception e) {
+      throw new RuntimeException("Exception while get list of projects\n" + e.getMessage());
+    }
+  }
+
+  /**
+   * @param issue
+   * @return new issue id from tracker, if successfully uploaded
+   */
+  public String putNewIssue(final YouTrackIssue issue) {
+    if (issue != null && issue.getProjectName() != null && issue.getSummary() != null) {
+      WebResource resource =
+          service.path("/issue").queryParam("project", issue.getProjectName())
+              .queryParam("summary", issue.getSummary());
+      if (issue.getDescription() != null) {
+        resource = resource.queryParam("description", issue.getDescription());
+      }
+      ClientResponse response =
+          checkClientResponse(resource.put(ClientResponse.class), 201, "Failed put new issue");
+      return YouTrackIssue.getIdFromResponse(response);
+    } else {
+      throw new RuntimeException("Issue's project and summary can't be null.");
+    }
+  }
+
+  public void deleteIssue(final String issueId) {
+    if (issueId != null) {
+      WebResource resource = service.path("/issue/").path(issueId);
+      checkClientResponse(resource.delete(ClientResponse.class), 200, "Failed delete issue "
+          + issueId);
+    } else {
+      throw new RuntimeException("Null issue id");
+    }
+  }
+
+  public void applyCommand(final String issueId, final String command) {
+    if (issueId != null && command != null) {
+      WebResource resource =
+          service.path("/issue/").path(issueId).path("/execute").queryParam("command", command);
+      checkClientResponse(resource.post(ClientResponse.class), 200, "Failed apply command "
+          + command + " to issue " + issueId);
+    } else {
+      throw new RuntimeException("Null issue id or command while apply command.");
+    }
+  }
+
+  /**
+   * @param filterQuery
+   * @return number of relevant issues or all issues, if filter string is null return -1 if reach
+   *         max number of attempts
+   */
+  public int getNumberOfIssues(String filterQuery) {
+    WebResource resource = service.path("/issue/count");
+    if (filterQuery != null) {
+      resource = resource.queryParam("filter", filterQuery);
+    } else {
+      resource = resource.queryParam("filter", "");
     }
 
-    public static ClientResponse checkClientResponse(ClientResponse response,
-	    int code, String message) {
-	if (response.getStatus() != code) {
-	    String responseBody = response.getEntity(String.class);
-	    if (responseBody != null && responseBody.length() > 0
-		    && responseBody.contains("<error>"))
-		throw new RuntimeException(message
-			+ "\nRESPONSE CODE: "
-			+ response.getStatus()
-			+ "\nRESPONSE DATA:"
-			+ responseBody.substring(
-				responseBody.indexOf("<error>")
-					+ "<error>".length(),
-				responseBody.indexOf("</error>")));
-	}
-	return response;
+    int number;
+    int attemptCount = 0;
+    while ((number =
+        resource.accept("application/xml").get(XmlNumberOfIssuesParser.class).getNumber()) == -1
+        && attemptCount++ < 10) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        break;
+      }
     }
+    return number;
+  }
 
-    public boolean login(final String username, final String password) {
-	if (username == null || password == null || "".equals(username)
-		|| "".equals(password)) {
-	    throw new RuntimeException("Failed : NULL username or password ");
-	} else {
-	    checkClientResponse(
-		    service.path("/user/login").queryParam("login", username)
-			    .queryParam("password", password)
-			    .post(ClientResponse.class), 200, "Failed to login");
-	}
-
-	this.setPassword(password);
-	this.setUsername(username);
-	return true;
-    }
-
-    public boolean loginWithCredentials() {
-	return login(getUsername(), getPassword());
-    }
-
-    public boolean issueExist(String issueId) {
-	return service.path("/issue/").path(issueId).path("/exists")
-		.get(ClientResponse.class).getStatus() == 200;
-    }
-
-    public YouTrackIssue getIssue(String id) {
-	if (id == null) {
-	    throw new RuntimeException("Null issue id");
-	} else {
-	    if (!issueExist(id)) {
-		throw new RuntimeException(
-			"Issue with such id dont exist in tracker.");
-	    } else {
-		return service.path("/issue/").path(id)
-			.accept("application/xml").get(YouTrackIssue.class);
-	    }
-	}
-
-    }
-
-    public List<YouTrackIssue> getIssuesInProject(String projectname,
-	    String filter, int after, int max, long updatedAfter) {
-	try {
-	    return service.path("/issue/byproject/").path(projectname)
-		    .queryParam("filter", filter)
-		    .queryParam("after", Integer.toString(after))
-		    .queryParam("max", Integer.toString(max))
-		    .queryParam("updatedAfter", Long.toString(updatedAfter))
-		    .accept("application/xml").get(YouTrackIssuesList.class)
-		    .getIssues();
-	} catch (RuntimeException e) {
-	    throw new RuntimeException(
-		    "Exception while get list of issues in project :\n"
-			    + e.getMessage(), e);
-	}
-    }
-
-    public List<YouTrackIssue> getIssuesInProject(String projectname, int max) {
-	return getIssuesInProject(projectname, "", 0, max, 0);
-    }
+  @XmlRootElement(name = "int")
+  private static class XmlNumberOfIssuesParser {
 
     /*
-     * returns 10 or less issues
+     * TODO: fix, too many strings of code for a simple action: get number from <int>1</int>
      */
-    public List<YouTrackIssue> getIssuesInProject(String projectname) {
-	return getIssuesInProject(projectname, "", 0, 10, 0);
+
+    @XmlValue
+    private int number;
+
+    private int getNumber() {
+      return this.number;
     }
 
-    public String getBaseServerURL() {
-	return baseServerURL;
+  }
+
+  public List<YouTrackIssue> getIssuesByFilter(String filterQuery, int max) {
+    WebResource resource;
+    if (filterQuery != null) {
+      resource = service.path("/issue").queryParam("filter", filterQuery);
+    } else {
+      resource = service.path("/issue").queryParam("filter", "");
     }
 
-    public ClientConfig getConfig() {
-	return config;
+    if (max != -1) {
+      resource = resource.queryParam("max", Integer.toString(max));
     }
 
-    public void setConfig(ClientConfig config) {
-	this.config = config;
+    return resource.accept("application/xml").get(IssueCompactsList.class).getIssues();
+  }
+
+  public List<YouTrackIssue> getIssuesByFilter(String filterQuery) {
+    return getIssuesByFilter(filterQuery, -1);
+  }
+
+  public LinkedList<YouTrackCustomField> getProjectCustomFields(String projectname) {
+    if (projectname != null) {
+      try {
+        return service.path("/admin/project/").path(projectname).path("/customfield")
+            .accept("application/xml").get(YouTrackCustomFieldsList.class).getCustomFields();
+      } catch (Exception e) {
+        throw new RuntimeException("Exception while get project custom fields:\n" + e.getMessage());
+      }
+    } else {
+      throw new RuntimeException("Null projectname while get project custom fields.");
+    }
+  }
+
+  public YouTrackCustomField getProjectCustomField(String projectname, String fieldname) {
+    if (projectname != null && fieldname != null) {
+      try {
+        return service.path("/admin/project/").path(projectname).path("/customfield/")
+            .path(fieldname).accept("application/xml").get(YouTrackCustomField.class);
+      } catch (Exception e) {
+        throw new RuntimeException("Exception while get project custom field:\n" + e.getMessage());
+      }
+    } else {
+      throw new RuntimeException("Null projectname or fieldname while get project custom field.");
+    }
+  }
+
+  public Set<String> getProjectCustomFieldNames(String projectname) {
+    LinkedList<YouTrackCustomField> cfs = getProjectCustomFields(projectname);
+    Set<String> cfNames = new HashSet<String>();
+
+    for (YouTrackCustomField cf : cfs) {
+      cfNames.add(cf.getName());
+    }
+    return cfNames;
+  }
+
+  public EnumerationBundleValues getEnumerationBundleValues(String bundlename) {
+    return service.path("/admin/customfield/bundle/").path(bundlename).accept("application/xml")
+        .get(EnumerationBundleValues.class);
+  }
+
+  public OwnedFieldBundleValues getOwnedFieldBundleValues(String bundlename) {
+    return service.path("/admin/customfield/ownedFieldBundle/").path(bundlename)
+        .accept("application/xml").get(OwnedFieldBundleValues.class);
+  }
+
+  public BuildBundleValues getBuildBundleValues(String bundlename) {
+    return service.path("/admin/customfield/buildBundle/").path(bundlename)
+        .accept("application/xml").get(BuildBundleValues.class);
+  }
+
+  public StateBundleValues getStateBundleValues(String bundlename) {
+    return service.path("/admin/customfield/stateBundle/").path(bundlename)
+        .accept("application/xml").get(StateBundleValues.class);
+  }
+
+  public boolean isStateResolved(String bundlename, String state) {
+    return service.path("/admin/customfield/stateBundle/").path(bundlename).path(state)
+        .accept("application/xml").get(StateValue.class).isResolved();
+  }
+
+  public VersionBundleValues getVersionBundleValues(String bundlename) {
+    return service.path("/admin/customfield/versionBundle/").path(bundlename)
+        .accept("application/xml").get(VersionBundleValues.class);
+  }
+
+  public UserBundleValues getUserBundleValues(String bundlename) {
+    return service.path("/admin/customfield/userBundle/").path(bundlename)
+        .accept("application/xml").get(UserBundleValues.class);
+  }
+
+  public void addComment(final String issueId, final String comment) {
+    if (issueId != null && comment != null) {
+      WebResource resource =
+          service.path("/issue/").path(issueId).path("/execute").queryParam("comment", comment);
+
+      checkClientResponse(resource.post(ClientResponse.class), 200, "Failed add comment to issue "
+          + issueId);
+    } else {
+      throw new RuntimeException("Null issue id or comment body.");
+    }
+  }
+
+  public String[] intellisenseOptions(String filter) {
+    return intellisenseOptions(filter, filter.length());
+  }
+
+  public LinkedList<IntellisenseItem> intellisenseItems(String filter) {
+    return intellisenseItems(filter, filter.length());
+  }
+
+  public String[] intellisenseOptions(String filter, int caret) {
+    return service.path("/issue/intellisense").queryParam("filter", filter)
+        .queryParam("caret", String.valueOf(caret)).accept("application/xml")
+        .get(IntellisenseSearchValues.class).getOptions();
+  }
+
+  public LinkedList<IntellisenseItem> intellisenseItems(String filter, int caret) {
+    return service.path("/issue/intellisense").queryParam("filter", filter)
+        .queryParam("caret", String.valueOf(caret)).accept("application/xml")
+        .get(IntellisenseSearchValues.class).getIntellisenseItems();
+  }
+
+  public IntellisenseSearchValues intellisenseSearchValues(String filter, int caret) {
+    return service.path("/issue/intellisense").queryParam("filter", filter)
+        .queryParam("caret", String.valueOf(caret)).accept("application/xml")
+        .get(IntellisenseSearchValues.class).getIntellisenseSearchValues();
+  }
+
+  public IntellisenseSearchValues intellisenseSearchValues(String filter) {
+    return intellisenseSearchValues(filter, filter.length());
+  }
+
+  public LinkedList<String> getSavedSearchesNames() {
+    return service.path("/user/search").accept("application/xml").get(SavedSearches.class)
+        .getSearchNames();
+  }
+
+  public LinkedList<SavedSearch> getSavedSearches() {
+    return service.path("/user/search").accept("application/xml").get(SavedSearches.class)
+        .getSearches();
+  }
+
+  public SavedSearch getSavedSearch(String searchname) {
+    if (searchname != null) {
+      return service.path("/user/search/").path(searchname).accept("application/xml")
+          .get(SavedSearch.class);
+    } else {
+      throw new RuntimeException("Null saved search name.");
+    }
+  }
+
+  public LinkedList<UserSavedSearch> getSavedSearchesForUser(String username) {
+    if (username != null) {
+      return service.path("/user/").path(username).path("/filter").accept("application/xml")
+          .get(UserSavedSearches.class).getUserSearches();
+    } else {
+      throw new RuntimeException("Can't get saved searches for null username.");
+    }
+  }
+
+  public LinkedList<String> getSavedSearchesNamesForUser(String username) {
+    if (username != null) {
+      return service.path("/user/").path(username).path("/filter").accept("application/xml")
+          .get(UserSavedSearches.class).getUserSearchesNames();
+    } else {
+      throw new RuntimeException("Can't get saved searches for null username.");
+    }
+  }
+
+  /**
+   * summary can't be empty by rest restriction
+   * 
+   * @param issueId
+   * @param newSummary
+   * @param newDescription new description if null, not changed
+   */
+  public void updateIssueSummaryAndDescription(final String issueId, final String newSummary,
+      final String newDescription) {
+    WebResource resource = service.path("/issue/").path(issueId);
+    if (newSummary != null && newSummary.length() > 0) {
+      resource = resource.queryParam("summary", newSummary);
+      if (newDescription != null) {
+        resource = resource.queryParam("description", newDescription);
+      }
+    } else {
+      throw new RuntimeException("Failed to update issue: summary cant be empty");
     }
 
-    public String getPassword() {
-	if (password == null) {
-	    throw new RuntimeException("Attempt to get null password.");
-	} else {
-	    return password;
-	}
+    checkClientResponse(resource.post(ClientResponse.class), 200,
+        "Failed to update issue description and summary ");
+  }
+
+  /**
+   * If issue not update fully, make incomplete update
+   * 
+   * @param oldIssueId
+   * @param newIssue
+   */
+  public void updateIssue(String oldIssueId, YouTrackIssue newIssue) {
+    if (oldIssueId != null) {
+
+      YouTrackIssue oldIssue = this.getIssue(oldIssueId);
+
+      if (newIssue.getSummary() != null
+          && newIssue.getSummary().length() > 0
+          && (!oldIssue.getSummary().equals(newIssue.getSummary()) || (newIssue.getDescription() != null && (oldIssue
+              .getDescription() == null || !oldIssue.getDescription().equals(
+              newIssue.getDescription()))))) {
+        updateIssueSummaryAndDescription(oldIssueId, newIssue.getSummary(),
+            newIssue.getDescription());
+      }
+
+      String project = newIssue.getProjectName();
+      Set<String> customFieldsNames = getProjectCustomFieldNames(project);
+
+      StringBuilder command = new StringBuilder();
+      for (String customFieldName : customFieldsNames) {
+        if (newIssue.getProperties().get(customFieldName) instanceof String) {
+
+          String newValue = newIssue.getProperties().get(customFieldName).toString();
+          if (!oldIssue.getProperties().containsKey(customFieldName)
+              || !newValue.equals(oldIssue.getProperties().get(customFieldName).toString())) {
+            command.append(customFieldName + ": " + newValue + " ");
+          }
+        } else {
+          LinkedList<String> oldValues = new LinkedList<String>();
+          if (oldIssue.getProperties().containsKey(customFieldName)) {
+            if (oldIssue.getProperties().get(customFieldName) instanceof String) {
+              oldValues.add(oldIssue.getProperties().get(customFieldName).toString());
+            } else {
+              oldValues = (LinkedList<String>) oldIssue.getProperties().get(customFieldName);
+            }
+          }
+
+          LinkedList<String> selectedValues = new LinkedList<String>();
+          if (newIssue.getProperties().containsKey(customFieldName)) {
+            if (newIssue.getProperties().get(customFieldName) instanceof String) {
+              selectedValues.add(newIssue.getProperties().get(customFieldName).toString());
+            } else {
+              selectedValues = (LinkedList<String>) newIssue.getProperties().get(customFieldName);
+            }
+          }
+
+          LinkedList<String> newValues = new LinkedList<String>(selectedValues);
+          newValues.removeAll(oldValues);
+          LinkedList<String> removeValues = new LinkedList<String>(oldValues);
+          removeValues.removeAll(selectedValues);
+
+          if (removeValues.size() > 0) {
+            StringBuilder removeCommand = new StringBuilder();
+            removeCommand.append("Remove " + customFieldName + " ");
+            for (String value : removeValues) {
+              removeCommand.append(value + " ");
+            }
+            applyCommand(oldIssueId, removeCommand.toString());
+          }
+
+          if (newValues.size() > 0) {
+            command.append("add " + customFieldName + " ");
+            for (String value : newValues) {
+              command.append(value + " ");
+            }
+          }
+
+        }
+      }
+      if (command.toString() != null) {
+        this.applyCommand(oldIssueId, command.toString());
+      }
+    } else {
+      throw new RuntimeException("Null target issue id while update issue.");
     }
-
-    public void setPassword(String password) {
-	this.password = password;
-    }
-
-    public String getUsername() {
-	if (username == null) {
-	    throw new RuntimeException("Attemp to get null username");
-	} else {
-	    return username;
-	}
-    }
-
-    public void setUsername(String username) {
-	this.username = username;
-    }
-
-    public List<YouTrackProject> getProjects() {
-	try {
-	    return service.path("/project/all").accept("application/xml")
-		    .get(YouTrackProjectsList.class).getProjects();
-	} catch (Exception e) {
-	    throw new RuntimeException("Exception while get list of projects\n"
-		    + e.getMessage());
-	}
-    }
-
-    /**
-     * @param issue
-     * @return new issue id from tracker, if successfully uploaded
-     */
-    public String putNewIssue(final YouTrackIssue issue) {
-	if (issue != null && issue.getProjectName() != null
-		&& issue.getSummary() != null) {
-	    WebResource resource = service.path("/issue")
-		    .queryParam("project", issue.getProjectName())
-		    .queryParam("summary", issue.getSummary());
-	    if (issue.getDescription() != null) {
-		resource = resource.queryParam("description",
-			issue.getDescription());
-	    }
-	    ClientResponse response = checkClientResponse(
-		    resource.put(ClientResponse.class), 201,
-		    "Failed put new issue");
-	    return YouTrackIssue.getIdFromResponse(response);
-	} else {
-	    throw new RuntimeException(
-		    "Issue's project and summary can't be null.");
-	}
-    }
-
-    public void deleteIssue(final String issueId) {
-	if (issueId != null) {
-	    WebResource resource = service.path("/issue/").path(issueId);
-	    checkClientResponse(resource.delete(ClientResponse.class), 200,
-		    "Failed delete issue " + issueId);
-	} else {
-	    throw new RuntimeException("Null issue id");
-	}
-    }
-
-    public void applyCommand(final String issueId, final String command) {
-	if (issueId != null && command != null) {
-	    WebResource resource = service.path("/issue/").path(issueId)
-		    .path("/execute").queryParam("command", command);
-	    checkClientResponse(resource.post(ClientResponse.class), 200,
-		    "Failed apply command " + command + " to issue " + issueId);
-	} else {
-	    throw new RuntimeException(
-		    "Null issue id or command while apply command.");
-	}
-    }
-
-    /**
-     * @param filterQuery
-     * @return number of relevant issues or all issues, if filter string is null
-     *         return -1 if reach max number of attempts
-     */
-    public int getNumberOfIssues(String filterQuery) {
-	WebResource resource = service.path("/issue/count");
-	if (filterQuery != null) {
-	    resource = resource.queryParam("filter", filterQuery);
-	} else {
-	    resource = resource.queryParam("filter", "");
-	}
-
-	int number;
-	int attemptCount = 0;
-	while ((number = resource.accept("application/xml")
-		.get(XmlNumberOfIssuesParser.class).getNumber()) == -1
-		&& attemptCount++ < 10) {
-	    try {
-		Thread.sleep(1000);
-	    } catch (InterruptedException e) {
-		break;
-	    }
-	}
-	return number;
-    }
-
-    @XmlRootElement(name = "int")
-    private static class XmlNumberOfIssuesParser {
-
-	/*
-	 * TODO: fix, too many strings of code for a simple action: get number
-	 * from <int>1</int>
-	 */
-
-	@XmlValue
-	private int number;
-
-	private int getNumber() {
-	    return this.number;
-	}
-
-    }
-
-    public List<YouTrackIssue> getIssuesByFilter(String filterQuery, int max) {
-	WebResource resource;
-	if (filterQuery != null) {
-	    resource = service.path("/issue").queryParam("filter", filterQuery);
-	} else {
-	    resource = service.path("/issue").queryParam("filter", "");
-	}
-
-	if (max != -1) {
-	    resource = resource.queryParam("max", Integer.toString(max));
-	}
-
-	return resource.accept("application/xml").get(IssueCompactsList.class)
-		.getIssues();
-    }
-
-    public List<YouTrackIssue> getIssuesByFilter(String filterQuery) {
-	return getIssuesByFilter(filterQuery, -1);
-    }
-
-    public LinkedList<YouTrackCustomField> getProjectCustomFields(
-	    String projectname) {
-	if (projectname != null) {
-	    try {
-		return service.path("/admin/project/").path(projectname)
-			.path("/customfield").accept("application/xml")
-			.get(YouTrackCustomFieldsList.class).getCustomFields();
-	    } catch (Exception e) {
-		throw new RuntimeException(
-			"Exception while get project custom fields:\n"
-				+ e.getMessage());
-	    }
-	} else {
-	    throw new RuntimeException(
-		    "Null projectname while get project custom fields.");
-	}
-    }
-
-    public YouTrackCustomField getProjectCustomField(String projectname,
-	    String fieldname) {
-	if (projectname != null && fieldname != null) {
-	    try {
-		return service.path("/admin/project/").path(projectname)
-			.path("/customfield/").path(fieldname)
-			.accept("application/xml")
-			.get(YouTrackCustomField.class);
-	    } catch (Exception e) {
-		throw new RuntimeException(
-			"Exception while get project custom field:\n"
-				+ e.getMessage());
-	    }
-	} else {
-	    throw new RuntimeException(
-		    "Null projectname or fieldname while get project custom field.");
-	}
-    }
-
-    public Set<String> getProjectCustomFieldNames(String projectname) {
-	LinkedList<YouTrackCustomField> cfs = getProjectCustomFields(projectname);
-	Set<String> cfNames = new HashSet<String>();
-
-	for (YouTrackCustomField cf : cfs) {
-	    cfNames.add(cf.getName());
-	}
-	return cfNames;
-    }
-
-    public EnumerationBundleValues getEnumerationBundleValues(String bundlename) {
-	return service.path("/admin/customfield/bundle/").path(bundlename)
-		.accept("application/xml").get(EnumerationBundleValues.class);
-    }
-
-    public OwnedFieldBundleValues getOwnedFieldBundleValues(String bundlename) {
-	return service.path("/admin/customfield/ownedFieldBundle/")
-		.path(bundlename).accept("application/xml")
-		.get(OwnedFieldBundleValues.class);
-    }
-
-    public BuildBundleValues getBuildBundleValues(String bundlename) {
-	return service.path("/admin/customfield/buildBundle/").path(bundlename)
-		.accept("application/xml").get(BuildBundleValues.class);
-    }
-
-    public StateBundleValues getStateBundleValues(String bundlename) {
-	return service.path("/admin/customfield/stateBundle/").path(bundlename)
-		.accept("application/xml").get(StateBundleValues.class);
-    }
-
-    public boolean isStateResolved(String bundlename, String state) {
-	return service.path("/admin/customfield/stateBundle/").path(bundlename)
-		.path(state).accept("application/xml").get(StateValue.class)
-		.isResolved();
-    }
-
-    public VersionBundleValues getVersionBundleValues(String bundlename) {
-	return service.path("/admin/customfield/versionBundle/")
-		.path(bundlename).accept("application/xml")
-		.get(VersionBundleValues.class);
-    }
-
-    public UserBundleValues getUserBundleValues(String bundlename) {
-	return service.path("/admin/customfield/userBundle/").path(bundlename)
-		.accept("application/xml").get(UserBundleValues.class);
-    }
-
-    public void addComment(final String issueId, final String comment) {
-	if (issueId != null && comment != null) {
-	    WebResource resource = service.path("/issue/").path(issueId)
-		    .path("/execute").queryParam("comment", comment);
-
-	    checkClientResponse(resource.post(ClientResponse.class), 200,
-		    "Failed add comment to issue " + issueId);
-	} else {
-	    throw new RuntimeException("Null issue id or comment body.");
-	}
-    }
-
-    public String[] intellisenseOptions(String filter) {
-	return intellisenseOptions(filter, filter.length());
-    }
-
-    public LinkedList<IntellisenseItem> intellisenseItems(String filter) {
-	return intellisenseItems(filter, filter.length());
-    }
-
-    public String[] intellisenseOptions(String filter, int caret) {
-	return service.path("/issue/intellisense").queryParam("filter", filter)
-		.queryParam("caret", String.valueOf(caret))
-		.accept("application/xml").get(IntellisenseSearchValues.class)
-		.getOptions();
-    }
-
-    public LinkedList<IntellisenseItem> intellisenseItems(String filter,
-	    int caret) {
-	return service.path("/issue/intellisense").queryParam("filter", filter)
-		.queryParam("caret", String.valueOf(caret))
-		.accept("application/xml").get(IntellisenseSearchValues.class)
-		.getIntellisenseItems();
-    }
-
-    public IntellisenseSearchValues intellisenseSearchValues(String filter,
-	    int caret) {
-	return service.path("/issue/intellisense").queryParam("filter", filter)
-		.queryParam("caret", String.valueOf(caret))
-		.accept("application/xml").get(IntellisenseSearchValues.class)
-		.getIntellisenseSearchValues();
-    }
-
-    public IntellisenseSearchValues intellisenseSearchValues(String filter) {
-	return intellisenseSearchValues(filter, filter.length());
-    }
-
-    public LinkedList<String> getSavedSearchesNames() {
-	return service.path("/user/search").accept("application/xml")
-		.get(SavedSearches.class).getSearchNames();
-    }
-
-    public LinkedList<SavedSearch> getSavedSearches() {
-	return service.path("/user/search").accept("application/xml")
-		.get(SavedSearches.class).getSearches();
-    }
-
-    public SavedSearch getSavedSearch(String searchname) {
-	if (searchname != null) {
-	    return service.path("/user/search/").path(searchname)
-		    .accept("application/xml").get(SavedSearch.class);
-	} else {
-	    throw new RuntimeException("Null saved search name.");
-	}
-    }
-
-    public LinkedList<UserSavedSearch> getSavedSearchesForUser(String username) {
-	if (username != null) {
-	    return service.path("/user/").path(username).path("/filter")
-		    .accept("application/xml").get(UserSavedSearches.class)
-		    .getUserSearches();
-	} else {
-	    throw new RuntimeException(
-		    "Can't get saved searches for null username.");
-	}
-    }
-
-    public LinkedList<String> getSavedSearchesNamesForUser(String username) {
-	if (username != null) {
-	    return service.path("/user/").path(username).path("/filter")
-		    .accept("application/xml").get(UserSavedSearches.class)
-		    .getUserSearchesNames();
-	} else {
-	    throw new RuntimeException(
-		    "Can't get saved searches for null username.");
-	}
-    }
-
-    /**
-     * summary can't be empty by rest restriction
-     * 
-     * @param issueId
-     * @param newSummary
-     * @param newDescription
-     *            new description if null, not changed
-     */
-    public void updateIssueSummaryAndDescription(final String issueId,
-	    final String newSummary, final String newDescription) {
-	WebResource resource = service.path("/issue/").path(issueId);
-	if (newSummary != null && newSummary.length() > 0) {
-	    resource = resource.queryParam("summary", newSummary);
-	    if (newDescription != null) {
-		resource = resource.queryParam("description", newDescription);
-	    }
-	} else {
-	    throw new RuntimeException(
-		    "Failed to update issue: summary cant be empty");
-	}
-
-	checkClientResponse(resource.post(ClientResponse.class), 200,
-		"Failed to update issue description and summary ");
-    }
-
-    /**
-     * If issue not update fully, make incomplete update
-     * 
-     * @param oldIssueId
-     * @param newIssue
-     */
-    public void updateIssue(String oldIssueId, YouTrackIssue newIssue) {
-	if (oldIssueId != null) {
-
-	    YouTrackIssue oldIssue = this.getIssue(oldIssueId);
-
-	    if (newIssue.getSummary() != null
-		    && newIssue.getSummary().length() > 0
-		    && (!oldIssue.getSummary().equals(newIssue.getSummary()) || (newIssue
-			    .getDescription() != null && (oldIssue
-			    .getDescription() == null || !oldIssue
-			    .getDescription().equals(newIssue.getDescription()))))) {
-		updateIssueSummaryAndDescription(oldIssueId,
-			newIssue.getSummary(), newIssue.getDescription());
-	    }
-
-	    String project = newIssue.getProjectName();
-	    Set<String> customFieldsNames = getProjectCustomFieldNames(project);
-
-	    StringBuilder command = new StringBuilder();
-	    for (String customFieldName : customFieldsNames) {
-		if (newIssue.getProperties().get(customFieldName) instanceof String) {
-		    String newValue = newIssue.getProperties()
-			    .get(customFieldName).toString();
-		    if (!oldIssue.getProperties().containsKey(customFieldName)
-			    || !newValue.equals(oldIssue.getProperties()
-				    .get(customFieldName).toString())) {
-			command.append(customFieldName + ": " + newValue + " ");
-		    }
-		} else {
-		    LinkedList<String> oldValues = new LinkedList<String>();
-		    if (oldIssue.getProperties().containsKey(customFieldName)) {
-			if (oldIssue.getProperties().get(customFieldName) instanceof String) {
-			    oldValues.add(oldIssue.getProperties()
-				    .get(customFieldName).toString());
-			} else {
-			    oldValues = (LinkedList<String>) oldIssue
-				    .getProperties().get(customFieldName);
-			}
-		    }
-
-		    LinkedList<String> selectedValues = new LinkedList<String>();
-		    if (newIssue.getProperties().containsKey(customFieldName)) {
-			if (newIssue.getProperties().get(customFieldName) instanceof String) {
-			    selectedValues.add(newIssue.getProperties()
-				    .get(customFieldName).toString());
-			} else {
-			    selectedValues = (LinkedList<String>) newIssue
-				    .getProperties().get(customFieldName);
-			}
-		    }
-
-		    LinkedList<String> newValues = new LinkedList<String>(
-			    selectedValues);
-		    newValues.removeAll(oldValues);
-		    LinkedList<String> removeValues = new LinkedList<String>(
-			    oldValues);
-		    removeValues.removeAll(selectedValues);
-
-		    if (removeValues.size() > 0) {
-			StringBuilder removeCommand = new StringBuilder();
-			removeCommand.append("Remove " + customFieldName + " ");
-			for (String value : removeValues) {
-			    removeCommand.append(value + " ");
-			}
-			applyCommand(oldIssueId, removeCommand.toString());
-		    }
-
-		    if (newValues.size() > 0) {
-			command.append("add " + customFieldName + " ");
-			for (String value : newValues) {
-			    command.append(value + " ");
-			}
-		    }
-
-		}
-	    }
-	    if (command.toString() != null) {
-		this.applyCommand(oldIssueId, command.toString());
-	    }
-	} else {
-	    throw new RuntimeException(
-		    "Null target issue id while update issue.");
-	}
-    }
-
+  }
 }
