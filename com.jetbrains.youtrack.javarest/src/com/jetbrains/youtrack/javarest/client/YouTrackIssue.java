@@ -10,8 +10,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.api.client.ClientResponse;
 
+/**
+ * @author Alexander Marchuk
+ * 
+ */
 @XmlRootElement(name = "issue")
 public class YouTrackIssue {
+
+  public static final String PROJECT_NAME_FIELD = "projectShortName";
+
+  public static final String PROJECT_SUMMARY_FIELD = "summary";
+
+  public static final String PROJECT_DESCRIPTION_FIELD = "description";
 
   private String id;
 
@@ -22,14 +32,15 @@ public class YouTrackIssue {
 
   private LinkedList<IssueLink> links;
 
-  private Map<String, YouTrackCustomField> customFields;
+  private HashMap<String, YouTrackCustomField> customFieldsInfo;
+
+  private HashMap<String, LinkedList<String>> customFieldsValues;
 
   private Map<String, String> singleFields;
 
   @XmlElement(name = "tag")
   private LinkedList<String> tags;
 
-  private Map<String, Object> properties = new HashMap<String, Object>();
 
   public YouTrackIssue(String newId) {
     this.setId(newId);
@@ -40,7 +51,8 @@ public class YouTrackIssue {
     setField(new LinkedList<IssueSchemaField>());
     setComment(new LinkedList<YouTrackComment>());
     setLinks(new LinkedList<IssueLink>());
-    setCustomFields(new HashMap<String, YouTrackCustomField>());
+    setCustomFieldsInfo(new HashMap<String, YouTrackCustomField>());
+    setCustomFieldsValues(new HashMap<String, LinkedList<String>>());
     setSingleFields(new HashMap<String, String>());
   }
 
@@ -61,29 +73,6 @@ public class YouTrackIssue {
     this.setComments(comments);
   }
 
-  public Object property(String property) {
-    if (properties.size() == 0) {
-      this.mapProperties();
-    }
-    if (properties.containsKey(property)) {
-      return properties.get(property);
-    } else {
-      return "";
-    }
-  }
-
-  public void mapProperties() {
-    if (fields.size() > 0) {
-      for (IssueSchemaField f : fields) {
-        if (f.getValues().size() == 1) {
-          properties.put(f.getName(), f.getValues().get(0).getValue());
-        } else {
-          properties.put(f.getName(), f.getStringValues());
-        }
-      }
-    }
-  }
-
   public void mapFields() {
     if (fields.size() > 0) {
       for (IssueSchemaField field : fields) {
@@ -96,32 +85,23 @@ public class YouTrackIssue {
             addLink(link);
           }
         } else if (field.getType().equals(IssueSchemaField.TYPE_CUSTOM_FIELD)) {
-          addCustomField(field.getName(), null);
+          addCustomField(field.getName(), field.getStringValues(), null);
         } else if (field.getType().equals(IssueSchemaField.TYPE_SINGLE_FIELD)) {
-          addSingleField(field.getName(), field.getValues().get(0).getValue());
+          addSingleField(field.getName(), field.getStringValues().get(0));
         }
       }
     }
   }
 
-  public void addProperty(String newProperty, Object value) {
-    if (newProperty != null && !properties.containsKey(newProperty)) {
-      properties.put(newProperty, value);
+  public void fillCustomFieldsFromProject(YouTrackProject project, YouTrackClient client) {
+    if (!project.isCustomFieldsUpdated()) {
+      project.updateCustomFields(client);
+    }
+    for (YouTrackCustomField field : project.getCustomFields()) {
+      getCustomFieldsInfo().put(field.getName(), field);
     }
   }
 
-  public void updateProperty(String property, Object newValue) {
-    if (properties.containsKey(property)) {
-      properties.put(property, newValue);
-    }
-  }
-
-  public Map<String, Object> getProperties() {
-    if (properties.size() == 0) {
-      this.mapProperties();
-    }
-    return this.properties;
-  }
 
   @XmlElement(name = "comment")
   public LinkedList<YouTrackComment> getComments() {
@@ -140,40 +120,27 @@ public class YouTrackIssue {
     return getIdFromUrl(response.getHeaders().get("Location").get(0));
   }
 
-  public String getProjectName() {
-    if (properties.size() == 0) {
-      this.mapProperties();
+  public String getSingleField(String name) {
+    if (singleFields.size() == 0) {
+      this.mapFields();
     }
-    if (properties.size() > 0 && properties.containsKey("projectShortName")
-        && properties.get("projectShortName") != null) {
-      return this.property("projectShortName").toString();
+    if (singleFields.size() > 0 && singleFields.containsKey(name) && singleFields.get(name) != null) {
+      return this.singleFields.get(name);
     } else {
       return null;
     }
+  }
+
+  public String getProjectName() {
+    return getSingleField(PROJECT_NAME_FIELD);
   }
 
   public String getSummary() {
-    if (properties.size() == 0) {
-      this.mapProperties();
-    }
-    if (properties.size() > 0 && properties.containsKey("summary")
-        && properties.get("summary") != null) {
-      return this.property("summary").toString();
-    } else {
-      return null;
-    }
+    return getSingleField(PROJECT_SUMMARY_FIELD);
   }
 
   public String getDescription() {
-    if (properties.size() == 0) {
-      this.mapProperties();
-    }
-    if (properties.size() > 0 && properties.containsKey("description")
-        && properties.get("description") != null) {
-      return this.property("description").toString();
-    } else {
-      return null;
-    }
+    return getSingleField(PROJECT_DESCRIPTION_FIELD);
   }
 
   public LinkedList<String> getTags() {
@@ -200,20 +167,14 @@ public class YouTrackIssue {
     this.links = links;
   }
 
-  public Map<String, YouTrackCustomField> getCustomFields() {
-    return customFields != null ? customFields : new HashMap<String, YouTrackCustomField>();
-  }
-
-  public void addCustomField(String name, YouTrackCustomField field) {
+  public void addCustomField(String name, LinkedList<String> values, YouTrackCustomField field) {
     if (name != null) {
-      getCustomFields().put(name, field);
+      getCustomFieldsInfo().put(name, field);
+      getCustomFieldsValues().put(name, values);
     } else if (field != null && field.getName() != null) {
-      getCustomFields().put(field.getName(), field);
+      getCustomFieldsInfo().put(field.getName(), field);
+      getCustomFieldsValues().put(field.getName(), values);
     }
-  }
-
-  public void setCustomFields(Map<String, YouTrackCustomField> customFields) {
-    this.customFields = customFields;
   }
 
   public Map<String, String> getSingleFields() {
@@ -228,6 +189,52 @@ public class YouTrackIssue {
 
   public void setSingleFields(Map<String, String> singleFields) {
     this.singleFields = singleFields;
+  }
+
+  public LinkedList<String> getCustomFieldValue(String name) {
+    if (customFieldsValues.size() == 0) {
+      this.mapFields();
+    }
+    if (customFieldsValues.size() > 0 && customFieldsValues.containsKey(name)
+        && customFieldsValues.get(name) != null) {
+      return customFieldsValues.get(name);
+    } else {
+      return null;
+    }
+  }
+
+  public boolean isCustomFieldSingle(String name) {
+    return customFieldsValues.containsKey(name) && customFieldsValues.get(name).size() == 1;
+  }
+
+  public String getSingleCustomFieldValue(String name) {
+    if (customFieldsValues.size() == 0) {
+      this.mapFields();
+    }
+    if (customFieldsValues != null && isCustomFieldSingle(name)
+        && customFieldsValues.get(name) != null) {
+      return customFieldsValues.get(name).get(0);
+    } else {
+      return null;
+    }
+  }
+
+  public HashMap<String, YouTrackCustomField> getCustomFieldsInfo() {
+    return customFieldsInfo != null ? customFieldsInfo : new HashMap<String, YouTrackCustomField>();
+  }
+
+  public void setCustomFieldsInfo(HashMap<String, YouTrackCustomField> customFieldsInfo) {
+    this.customFieldsInfo = customFieldsInfo;
+  }
+
+  public HashMap<String, LinkedList<String>> getCustomFieldsValues() {
+    return customFieldsValues != null
+        ? customFieldsValues
+        : new HashMap<String, LinkedList<String>>();
+  }
+
+  public void setCustomFieldsValues(HashMap<String, LinkedList<String>> customFieldsValues) {
+    this.customFieldsValues = customFieldsValues;
   }
 
 }
