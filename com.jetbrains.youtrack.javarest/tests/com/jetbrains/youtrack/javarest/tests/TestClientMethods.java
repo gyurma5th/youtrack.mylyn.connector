@@ -165,6 +165,12 @@ public class TestClientMethods {
   }
 
   @Test
+  public void testGetProject() {
+    YouTrackProject project = client.getProject(TEST_PROJECT_NAME);
+    assertEquals(project.getProjectShortName(), TEST_PROJECT_NAME);
+  }
+
+  @Test
   public void testPutNewIssue() {
     YouTrackIssue issue = new YouTrackIssue();
     issue.addSingleField("projectShortName", TEST_PROJECT_NAME);
@@ -581,19 +587,22 @@ public class TestClientMethods {
   @Test
   public void testUpdateIssue() {
     YouTrackIssue issue = client.getIssue(TEST_PROJECT_NAME + "-1");
-    assertEquals("Task", issue.getSingleCustomFieldValue("Type"));
-    issue.addSingleField("Type", "Bug");
+    YouTrackProject project = client.getProject(issue.getProjectName());
+    project.updateCustomFields(client);
+    issue.fillCustomFieldsFromProject(project, client);
+    issue.addCustomFieldValue("Type", "Bug");
     client.updateIssue(issue.getId(), issue);
     issue = client.getIssue(TEST_PROJECT_NAME + "-1");
+    issue.fillCustomFieldsFromProject(project, client);
     assertEquals("Bug", issue.getSingleCustomFieldValue("Type"));
 
     try {
-      issue.addSingleField("Type", "");
+      issue.addCustomFieldValue("Type", "");
       client.updateIssue(issue.getId(), issue);
       fail("Exception expected while upload incorrect value of custom field.");
     } catch (Exception e) {}
 
-    issue.addSingleField("Type", "Task");
+    issue.addCustomFieldValue("Type", "Task");
     client.updateIssue(issue.getId(), issue);
 
     try {

@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
+import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
 import com.jetbrains.youtrack.javarest.utils.BuildBundleValues;
 import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
@@ -187,7 +188,10 @@ public class YouTrackClient {
       if (!issueExist(id)) {
         throw new RuntimeException("Issue with such id dont exist in tracker.");
       } else {
-        return service.path("/issue/").path(id).accept("application/xml").get(YouTrackIssue.class);
+        YouTrackIssue issue =
+            service.path("/issue/").path(id).accept("application/xml").get(YouTrackIssue.class);
+        issue.mapFields();
+        return issue;
       }
     }
 
@@ -259,6 +263,18 @@ public class YouTrackClient {
           .getProjects();
     } catch (Exception e) {
       throw new RuntimeException("Exception while get list of projects\n" + e.getMessage());
+    }
+  }
+
+  public YouTrackProject getProject(String projectId) {
+    try {
+      YouTrackProject project =
+          service.path("/admin/project/").path(projectId).accept("application/xml")
+              .get(YouTrackProject.class);
+      project.setProjectShortName(projectId);
+      return project;
+    } catch (Exception e) {
+      throw new RuntimeException("Exception while get project by id\n" + e.getMessage());
     }
   }
 
@@ -538,82 +554,121 @@ public class YouTrackClient {
         "Failed to update issue description and summary ");
   }
 
+  public boolean needUpdateSummary(YouTrackIssue oldIssue, YouTrackIssue newIssue) {
+    return newIssue.getSummary() != null && newIssue.getSummary().length() > 0
+        && !oldIssue.getSummary().equals(newIssue.getSummary());
+  }
+
+  public boolean needUpdateDescription(YouTrackIssue oldIssue, YouTrackIssue newIssue) {
+    return newIssue.getDescription() != null
+        && (oldIssue.getDescription() == null || !oldIssue.getDescription().equals(
+            newIssue.getDescription()));
+  }
+
+  public boolean needUpdateCustomField(YouTrackIssue oldIssue, YouTrackIssue newIssue,
+      String customFieldName) {
+    YouTrackCustomField customFieldInfo = newIssue.getCustomFieldInfo(customFieldName);
+    if (customFieldInfo.isSingle()) {
+      return newIssue.getSingleCustomFieldValue(customFieldName) != null
+          && (oldIssue.getSingleCustomFieldValue(customFieldName) == null || !oldIssue
+              .getSingleCustomFieldValue(customFieldName).equals(
+                  newIssue.getSingleCustomFieldValue(customFieldName)));
+    } else {
+
+      boolean equalSize;
+
+      LinkedList<String> newValues = new LinkedList<String>();
+      if (!newIssue.getCustomFieldsValues().containsKey(customFieldName)
+          || newIssue.getCustomFieldValue(customFieldName) == null) {
+        return false;
+      } else {
+        newValues = newIssue.getCustomFieldValue(customFieldName);
+      }
+
+      LinkedList<String> oldValues = new LinkedList<String>();
+      if (!oldIssue.getCustomFieldsValues().containsKey(customFieldName)
+          || oldIssue.getCustomFieldValue(customFieldName) == null) {
+        return true;
+      } else {
+        oldValues = oldIssue.getCustomFieldValue(customFieldName);
+      }
+
+      equalSize = newValues.size() == oldValues.size();
+      oldValues.removeAll(newValues);
+
+      return !equalSize || oldValues.size() > 0;
+    }
+  }
+
   /**
    * If issue not update fully, make incomplete update
-   * 
-   * @param oldIssueId
-   * @param newIssue
    */
   public void updateIssue(String oldIssueId, YouTrackIssue newIssue) {
+
     if (oldIssueId != null) {
 
       YouTrackIssue oldIssue = this.getIssue(oldIssueId);
 
-      if (newIssue.getSummary() != null
-          && newIssue.getSummary().length() > 0
-          && (!oldIssue.getSummary().equals(newIssue.getSummary()) || (newIssue.getDescription() != null && (oldIssue
-              .getDescription() == null || !oldIssue.getDescription().equals(
-              newIssue.getDescription()))))) {
+      if (needUpdateSummary(oldIssue, newIssue) || needUpdateDescription(oldIssue, newIssue)) {
         updateIssueSummaryAndDescription(oldIssueId, newIssue.getSummary(),
             newIssue.getDescription());
       }
 
-      String project = newIssue.getProjectName();
-      Set<String> customFieldsNames = getProjectCustomFieldNames(project);
+      StringBuilder addCFCommand = new StringBuilder();
 
-      StringBuilder command = new StringBuilder();
-      for (String customFieldName : customFieldsNames) {
-        if (newIssue.getProperties().get(customFieldName) instanceof String) {
+      for (String customFieldName : newIssue.getCustomFieldsValues().keySet()) {
 
-          String newValue = newIssue.getProperties().get(customFieldName).toString();
-          if (!oldIssue.getProperties().containsKey(customFieldName)
-              || !newValue.equals(oldIssue.getProperties().get(customFieldName).toString())) {
-            command.append(customFieldName + ": " + newValue + " ");
-          }
-        } else {
-          LinkedList<String> oldValues = new LinkedList<String>();
-          if (oldIssue.getProperties().containsKey(customFieldName)) {
-            if (oldIssue.getProperties().get(customFieldName) instanceof String) {
-              oldValues.add(oldIssue.getProperties().get(customFieldName).toString());
+        if (!newIssue.isCustomFieldsDataConsistent(customFieldName)) {
+          return;
+        }
+        YouTrackCustomField customFieldInfo = newIssue.getCustomFieldInfo(customFieldName);
+
+        if (needUpdateCustomField(oldIssue, newIssue, customFieldName)) {
+          if (customFieldInfo.isSingle()) {
+            if (customFieldInfo.getType().equals(YouTrackCustomFieldType.STRING.getName())) {
+              this.applyCommand(oldIssueId,
+                  customFieldName + ": " + newIssue.getSingleCustomFieldValue(customFieldName));
             } else {
-              oldValues = (LinkedList<String>) oldIssue.getProperties().get(customFieldName);
+              addCFCommand.append(customFieldName + ": "
+                  + newIssue.getSingleCustomFieldValue(customFieldName) + " ");
+            }
+          } else {
+
+            LinkedList<String> selectedValues = new LinkedList<String>();
+            if (newIssue.getCustomFieldValue(customFieldName) != null) {
+              selectedValues = newIssue.getCustomFieldValue(customFieldName);
+            }
+
+            LinkedList<String> oldValues = new LinkedList<String>();
+            if (oldIssue.getCustomFieldValue(customFieldName) != null) {
+              oldValues = oldIssue.getCustomFieldValue(customFieldName);
+            }
+
+            LinkedList<String> newValues = new LinkedList<String>(selectedValues);
+            newValues.removeAll(oldValues);
+            LinkedList<String> removeValues = new LinkedList<String>(oldValues);
+            removeValues.removeAll(selectedValues);
+
+            if (removeValues.size() > 0) {
+              StringBuilder removeCommand = new StringBuilder();
+              removeCommand.append("Remove " + customFieldName + " ");
+              for (String value : removeValues) {
+                removeCommand.append(value + " ");
+              }
+              applyCommand(oldIssueId, removeCommand.toString());
+            }
+
+            if (newValues.size() > 0) {
+              addCFCommand.append("add " + customFieldName + " ");
+              for (String value : newValues) {
+                addCFCommand.append(value + " ");
+              }
             }
           }
-
-          LinkedList<String> selectedValues = new LinkedList<String>();
-          if (newIssue.getProperties().containsKey(customFieldName)) {
-            if (newIssue.getProperties().get(customFieldName) instanceof String) {
-              selectedValues.add(newIssue.getProperties().get(customFieldName).toString());
-            } else {
-              selectedValues = (LinkedList<String>) newIssue.getProperties().get(customFieldName);
-            }
-          }
-
-          LinkedList<String> newValues = new LinkedList<String>(selectedValues);
-          newValues.removeAll(oldValues);
-          LinkedList<String> removeValues = new LinkedList<String>(oldValues);
-          removeValues.removeAll(selectedValues);
-
-          if (removeValues.size() > 0) {
-            StringBuilder removeCommand = new StringBuilder();
-            removeCommand.append("Remove " + customFieldName + " ");
-            for (String value : removeValues) {
-              removeCommand.append(value + " ");
-            }
-            applyCommand(oldIssueId, removeCommand.toString());
-          }
-
-          if (newValues.size() > 0) {
-            command.append("add " + customFieldName + " ");
-            for (String value : newValues) {
-              command.append(value + " ");
-            }
-          }
-
         }
       }
-      if (command.toString() != null) {
-        this.applyCommand(oldIssueId, command.toString());
+      if (addCFCommand.toString() != null) {
+        this.applyCommand(oldIssueId, addCFCommand.toString());
       }
     } else {
       throw new RuntimeException("Null target issue id while update issue.");

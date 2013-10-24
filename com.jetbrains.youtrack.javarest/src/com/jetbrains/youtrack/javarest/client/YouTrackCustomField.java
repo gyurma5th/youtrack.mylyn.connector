@@ -84,6 +84,10 @@ public class YouTrackCustomField {
       this.fieldValuesClass = fieldValuesClass;
     }
 
+    public String toString() {
+      return name;
+    }
+
   }
 
   private URL fullURL;
@@ -148,6 +152,10 @@ public class YouTrackCustomField {
 
   public void setBundle(YouTrackCustomFieldBundle bundle) {
     this.bundle = bundle;
+  }
+
+  public boolean isSingle() {
+    return YouTrackCustomFieldType.getTypeByName(type).singleField();
   }
 
 }

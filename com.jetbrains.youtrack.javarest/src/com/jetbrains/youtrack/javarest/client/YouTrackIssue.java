@@ -38,6 +38,8 @@ public class YouTrackIssue {
 
   private Map<String, String> singleFields;
 
+  private boolean mapped = false;
+
   @XmlElement(name = "tag")
   private LinkedList<String> tags;
 
@@ -74,22 +76,25 @@ public class YouTrackIssue {
   }
 
   public void mapFields() {
-    if (fields.size() > 0) {
-      for (IssueSchemaField field : fields) {
-        if (field.getType().equals(IssueSchemaField.TYPE_LINK_FIELD)) {
-          for (IssueSchemaValue linkValue : field.getValues()) {
-            IssueLink link = new IssueLink();
-            link.setRole(linkValue.getRole());
-            link.setType(linkValue.getType());
-            link.setValue(linkValue.getValue());
-            addLink(link);
+    if (!mapped) {
+      if (fields.size() > 0) {
+        for (IssueSchemaField field : fields) {
+          if (field.getType().equals(IssueSchemaField.TYPE_LINK_FIELD)) {
+            for (IssueSchemaValue linkValue : field.getValues()) {
+              IssueLink link = new IssueLink();
+              link.setRole(linkValue.getRole());
+              link.setType(linkValue.getType());
+              link.setValue(linkValue.getValue());
+              addLink(link);
+            }
+          } else if (field.getType().equals(IssueSchemaField.TYPE_CUSTOM_FIELD)) {
+            addCustomField(field.getName(), field.getStringValues(), null);
+          } else if (field.getType().equals(IssueSchemaField.TYPE_SINGLE_FIELD)) {
+            addSingleField(field.getName(), field.getStringValues().get(0));
           }
-        } else if (field.getType().equals(IssueSchemaField.TYPE_CUSTOM_FIELD)) {
-          addCustomField(field.getName(), field.getStringValues(), null);
-        } else if (field.getType().equals(IssueSchemaField.TYPE_SINGLE_FIELD)) {
-          addSingleField(field.getName(), field.getStringValues().get(0));
         }
       }
+      mapped = true;
     }
   }
 
@@ -140,7 +145,9 @@ public class YouTrackIssue {
   }
 
   public String getDescription() {
-    return getSingleField(PROJECT_DESCRIPTION_FIELD);
+    return getSingleField(PROJECT_DESCRIPTION_FIELD) == null
+        ? ""
+        : getSingleField(PROJECT_DESCRIPTION_FIELD);
   }
 
   public LinkedList<String> getTags() {
@@ -174,6 +181,26 @@ public class YouTrackIssue {
     } else if (field != null && field.getName() != null) {
       getCustomFieldsInfo().put(field.getName(), field);
       getCustomFieldsValues().put(field.getName(), values);
+    }
+  }
+
+  public void addCustomFieldValue(String name, LinkedList<String> values) {
+    if (name != null) {
+      getCustomFieldsValues().put(name, values);
+      if (!getCustomFieldsInfo().containsKey(name)) {
+        getCustomFieldsInfo().put(name, null);
+      }
+    }
+  }
+
+  public void addCustomFieldValue(String name, String value) {
+    if (name != null) {
+      LinkedList<String> values = new LinkedList<String>();
+      values.add(value);
+      getCustomFieldsValues().put(name, values);
+      if (!getCustomFieldsInfo().containsKey(name)) {
+        getCustomFieldsInfo().put(name, null);
+      }
     }
   }
 
@@ -223,6 +250,10 @@ public class YouTrackIssue {
     return customFieldsInfo != null ? customFieldsInfo : new HashMap<String, YouTrackCustomField>();
   }
 
+  public YouTrackCustomField getCustomFieldInfo(String name) {
+    return customFieldsInfo.containsKey(name) ? customFieldsInfo.get(name) : null;
+  }
+
   public void setCustomFieldsInfo(HashMap<String, YouTrackCustomField> customFieldsInfo) {
     this.customFieldsInfo = customFieldsInfo;
   }
@@ -237,4 +268,22 @@ public class YouTrackIssue {
     this.customFieldsValues = customFieldsValues;
   }
 
+  public boolean isCustomFieldsDataConsistent() {
+    if (customFieldsInfo != null && customFieldsValues != null
+        && customFieldsInfo.size() == customFieldsValues.size()) {
+      for (String name : customFieldsValues.keySet()) {
+        if (!customFieldsInfo.containsKey(name) || customFieldsInfo.get(name) == null) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean isCustomFieldsDataConsistent(String name) {
+    return customFieldsInfo != null && customFieldsValues != null
+        && customFieldsInfo.containsKey(name) && customFieldsInfo.get(name) != null;
+  }
 }
