@@ -30,6 +30,8 @@ public class YouTrackIssue {
 
   private LinkedList<YouTrackComment> comments;
 
+  private LinkedList<IssueTag> tags;
+
   private LinkedList<IssueLink> links;
 
   private HashMap<String, YouTrackCustomField> customFieldsInfo;
@@ -40,10 +42,6 @@ public class YouTrackIssue {
 
   private boolean mapped = false;
 
-  @XmlElement(name = "tag")
-  private LinkedList<String> tags;
-
-
   public YouTrackIssue(String newId) {
     this.setId(newId);
   }
@@ -52,6 +50,7 @@ public class YouTrackIssue {
     setId(null);
     setField(new LinkedList<IssueSchemaField>());
     setComment(new LinkedList<YouTrackComment>());
+    setTags(new LinkedList<IssueTag>());
     setLinks(new LinkedList<IssueLink>());
     setCustomFieldsInfo(new HashMap<String, YouTrackCustomField>());
     setCustomFieldsValues(new HashMap<String, LinkedList<String>>());
@@ -150,13 +149,11 @@ public class YouTrackIssue {
         : getSingleField(PROJECT_DESCRIPTION_FIELD);
   }
 
-  public LinkedList<String> getTags() {
-    return tags;
-  }
-
   public void addTag(String tag) {
-    if (tags != null) {
-      tags.add(tag);
+    if (getTags() != null) {
+      IssueTag additionTag = new IssueTag();
+      additionTag.setText(tag);
+      getTags().add(additionTag);
     }
   }
 
@@ -286,4 +283,14 @@ public class YouTrackIssue {
     return customFieldsInfo != null && customFieldsValues != null
         && customFieldsInfo.containsKey(name) && customFieldsInfo.get(name) != null;
   }
+
+  @XmlElement(name = "tag")
+  public LinkedList<IssueTag> getTags() {
+    return tags;
+  }
+
+  public void setTags(LinkedList<IssueTag> tag) {
+    this.tags = tag;
+  }
+
 }

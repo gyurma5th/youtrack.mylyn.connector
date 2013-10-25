@@ -29,6 +29,7 @@ import org.eclipse.osgi.util.NLS;
 import util.CastCheck;
 
 import com.jetbrains.youtrack.javarest.client.IssueLink;
+import com.jetbrains.youtrack.javarest.client.IssueTag;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.client.YouTrackComment;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
@@ -44,9 +45,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   private static boolean enableEditMode = false;
 
-  private static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
+  public static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
 
-  private static final String LINK_PREFIX = "TaskAttribute.LINK";
+  public static final String LINK_PREFIX = "TaskAttribute.LINK";
+
+  public static final String TAG_PREFIX = "TaskAttribute.TAG";
 
   public static final String CUSTOM_FIELD_KIND = "TaslAttributeKind.CUSTOM_FIELD_KIND";
 
@@ -349,6 +352,17 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         count++;
       }
     }
+
+    if (issue.getTags() != null && issue.getTags().size() > 0) {
+      int count = 0;
+      for (IssueTag tag : issue.getTags()) {
+        TaskAttribute attr = taskData.getRoot().createAttribute(TAG_PREFIX + count);
+        attr.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT);
+        attr.addValue(tag.getText());
+        count++;
+      }
+    }
+
 
     if (issue.getComments() != null && issue.getComments().size() > 0) {
 

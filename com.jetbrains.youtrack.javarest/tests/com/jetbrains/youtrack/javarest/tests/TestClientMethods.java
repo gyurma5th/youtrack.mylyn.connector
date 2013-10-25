@@ -97,6 +97,7 @@ public class TestClientMethods {
     assertEquals("mylyn-10", i1.getId());
     assertEquals("Fixed", i1.getSingleCustomFieldValue("State"));
     assertEquals("Task", i1.getSingleCustomFieldValue("Type"));
+    assertEquals(2, i1.getTags().size());
     try {
       i1 = client.getIssue(null);
       fail("Exception expected when issue id null.");
