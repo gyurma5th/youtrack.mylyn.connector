@@ -481,7 +481,7 @@ public class TestClientMethods {
   @Test
   public void testIntellisenseSearch() {
 
-    String[] intellisenseOptions = client.intellisenseOptions("created");
+    String[] intellisenseOptions = client.intellisenseFullOptions("created");
     boolean containsCreatedBy = false;
     for (String option : intellisenseOptions) {
       containsCreatedBy = containsCreatedBy || option.equals("created by: ");
@@ -489,7 +489,7 @@ public class TestClientMethods {
     assertTrue(containsCreatedBy);
 
     try {
-      intellisenseOptions = client.intellisenseOptions(null);
+      intellisenseOptions = client.intellisenseFullOptions(null);
       fail("Exception expected while get intellisense options for null filter.");
     } catch (Exception e) {}
 
@@ -504,7 +504,7 @@ public class TestClientMethods {
     }
     assertTrue(containsUnreadOption);
 
-    intellisenseOptions = client.intellisenseOptions(" Un");
+    intellisenseOptions = client.intellisenseFullOptions(" Un");
     assertEquals(items.size(), intellisenseOptions.length);
 
     try {

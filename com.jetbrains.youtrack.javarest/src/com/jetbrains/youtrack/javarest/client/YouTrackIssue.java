@@ -289,6 +289,14 @@ public class YouTrackIssue {
     return tags;
   }
 
+  public LinkedList<String> getStringTags() {
+    LinkedList<String> result = new LinkedList<String>();
+    for (IssueTag tag : tags) {
+      result.add(tag.getText());
+    }
+    return result;
+  }
+
   public void setTags(LinkedList<IssueTag> tag) {
     this.tags = tag;
   }

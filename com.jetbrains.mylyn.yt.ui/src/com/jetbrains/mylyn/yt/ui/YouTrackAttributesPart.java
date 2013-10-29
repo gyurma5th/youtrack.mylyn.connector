@@ -43,7 +43,7 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
   @Override
   public void createControl(Composite parent, FormToolkit toolkit) {
     Section section = createSection(parent, toolkit, true);
-    Composite attributesComposite = toolkit.createComposite(section);
+    final Composite attributesComposite = toolkit.createComposite(section);
     GridLayout layout = new GridLayout(2, false);
     layout.marginWidth = 5;
     attributesComposite.setLayout(layout);
@@ -65,9 +65,46 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
     addAttribute(attributesComposite, toolkit,
         getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX));
 
+
+
+    // ToolBar toolbar = new ToolBar(attributesComposite, SWT.FLAT);
+    // ToolItem itemDrop = new ToolItem(toolbar, SWT.DROP_DOWN);
+    // itemDrop.setText("drop menu");
+    //
+    // itemDrop.addSelectionListener(new SelectionAdapter() {
+    //
+    // Menu dropMenu = null;
+    //
+    // @Override
+    // public void widgetSelected(SelectionEvent e) {
+    // if (dropMenu == null) {
+    // dropMenu = new Menu(attributesComposite.getShell(), SWT.POP_UP | SWT.SEARCH);
+    // attributesComposite.getShell().setMenu(dropMenu);
+    // MenuItem itemCheck = new MenuItem(dropMenu, SWT.CHECK);
+    // itemCheck.setText("checkbox");
+    // MenuItem itemRadio = new MenuItem(dropMenu, SWT.RADIO);
+    // itemRadio.setText("radio1");
+    // MenuItem itemRadio2 = new MenuItem(dropMenu, SWT.RADIO);
+    // itemRadio2.setText("radio2");
+    // }
+    //
+    // if (e.detail == SWT.ARROW) {
+    // // Position the menu below and vertically aligned with the the drop down tool button.
+    // final ToolItem toolItem = (ToolItem) e.widget;
+    // final ToolBar toolBar = toolItem.getParent();
+    //
+    // Point point = toolBar.toDisplay(new Point(e.x, e.y));
+    // dropMenu.setLocation(point.x, point.y);
+    // dropMenu.setVisible(true);
+    // }
+    //
+    // }
+    //
+    // });
+
+
     toolkit.paintBordersFor(attributesComposite);
     section.setClient(attributesComposite);
     setSection(toolkit, section);
   }
-
 }

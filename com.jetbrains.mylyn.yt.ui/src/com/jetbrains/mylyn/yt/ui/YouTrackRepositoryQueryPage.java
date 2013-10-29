@@ -370,7 +370,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 	try {
 	    intellisense = getClient().intellisenseSearchValues(
 		    searchBoxText.getText());
-	    scp = new SimpleContentProposalProvider(intellisense.getOptions());
+	    scp = new SimpleContentProposalProvider(intellisense.getFullOptions());
 	    KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
 	    ContentProposalAdapter adapter = new ContentProposalAdapter(
 		    searchBoxText, new TextContentAdapter(), scp, ks, null);
@@ -397,7 +397,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 			itemByNameMap.put(items.get(ind).getFullOption(),
 				items.get(ind));
 		    }
-		    scp.setProposals(intellisense.getOptions());
+		    scp.setProposals(intellisense.getFullOptions());
 		} catch (CoreException e) {
 		    throw new RuntimeException(e);
 		}

@@ -6,6 +6,12 @@ public class IssueTag {
 
   private String text;
 
+  public IssueTag() {}
+
+  public IssueTag(String text) {
+    setText(text);
+  }
+
   @XmlValue
   public String getText() {
     return text;
@@ -13,6 +19,10 @@ public class IssueTag {
 
   public void setText(String tag) {
     this.text = tag;
+  }
+
+  public int hashCode() {
+    return text.hashCode();
   }
 
 }

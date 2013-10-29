@@ -515,6 +515,17 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     issue.fillCustomFieldsFromProject(project, YouTrackConnector.getClient(repository));
+    if (taskData.getRoot().getMappedAttribute(TAG_PREFIX) != null
+        && taskData.getRoot().getMappedAttribute(TAG_PREFIX).getValues() != null) {
+      LinkedList<IssueTag> tags = new LinkedList<IssueTag>();
+      for (String tag : taskData.getRoot().getMappedAttribute(TAG_PREFIX).getValues()) {
+        tags.add(new IssueTag(tag));
+      }
+      if (tags.size() > 0) {
+        issue.setTags(tags);
+      }
+    }
+
     return issue;
   }
 
@@ -545,6 +556,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
           project.updateCustomFields(YouTrackConnector.getClient(taskRepository));
         }
 
+        String[] tags = YouTrackConnector.getClient(taskRepository).getAllSuitableTags();
+
         for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
           if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
             attr.getMetaData().setReadOnly(false);
@@ -552,6 +565,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             attr.getMetaData().setReadOnly(false);
           } else if (TAG_PREFIX.equals(attr.getId())) {
             attr.getMetaData().setReadOnly(false);
+            for (String tag : tags) {
+              if (!tag.equals("tag")) {
+                attr.putOption(tag, tag);
+              }
+            }
           } else if (isCustomField(project, attr.getId())) {
             attr.getMetaData().setReadOnly(false);
             String customFieldName = getNameFromLabel(attr);

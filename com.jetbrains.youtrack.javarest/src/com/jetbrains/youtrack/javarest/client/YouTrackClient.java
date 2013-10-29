@@ -464,12 +464,22 @@ public class YouTrackClient {
     }
   }
 
+  public String[] intellisenseFullOptions(String filter) {
+    return intellisenseFullOptions(filter, filter.length());
+  }
+
   public String[] intellisenseOptions(String filter) {
     return intellisenseOptions(filter, filter.length());
   }
 
   public LinkedList<IntellisenseItem> intellisenseItems(String filter) {
     return intellisenseItems(filter, filter.length());
+  }
+
+  public String[] intellisenseFullOptions(String filter, int caret) {
+    return service.path("/issue/intellisense").queryParam("filter", filter)
+        .queryParam("caret", String.valueOf(caret)).accept("application/xml")
+        .get(IntellisenseSearchValues.class).getFullOptions();
   }
 
   public String[] intellisenseOptions(String filter, int caret) {
@@ -529,6 +539,22 @@ public class YouTrackClient {
     } else {
       throw new RuntimeException("Can't get saved searches for null username.");
     }
+  }
+
+  public void addNewTag(String issueId, String tagName) {
+    if (tagName != null && tagName.length() > 0) {
+      applyCommand(issueId, "tag " + tagName);
+    }
+  }
+
+  public void removeTag(String issueId, String tagName) {
+    if (tagName != null && tagName.length() > 0) {
+      applyCommand(issueId, "remove tag " + tagName);
+    }
+  }
+
+  public String[] getAllSuitableTags() {
+    return intellisenseOptions("tag");
   }
 
   /**
@@ -670,6 +696,33 @@ public class YouTrackClient {
       if (addCFCommand.toString() != null) {
         this.applyCommand(oldIssueId, addCFCommand.toString());
       }
+
+      LinkedList<String> selectedTags = new LinkedList<String>();
+      if (newIssue.getTags() != null && newIssue.getTags().size() > 0) {
+        selectedTags = newIssue.getStringTags();
+      }
+      LinkedList<String> oldTags = new LinkedList<String>();
+      if (oldIssue.getTags() != null) {
+        oldTags = oldIssue.getStringTags();
+      }
+      LinkedList<String> newTags = new LinkedList<String>(selectedTags);
+      newTags.remove(oldTags);
+      LinkedList<String> removeTags = new LinkedList<String>(oldTags);
+      removeTags.removeAll(selectedTags);
+
+      StringBuilder modifyTagsCommand = new StringBuilder();
+      for (String newTag : newTags) {
+        this.applyCommand(oldIssueId, " add tag " + newTag);
+      }
+
+      for (String tagToRemove : removeTags) {
+        modifyTagsCommand.append(" remove tag " + tagToRemove);
+      }
+
+      if (modifyTagsCommand.toString() != null) {
+        this.applyCommand(oldIssueId, modifyTagsCommand.toString());
+      }
+
     } else {
       throw new RuntimeException("Null target issue id while update issue.");
     }
