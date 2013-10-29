@@ -179,10 +179,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
         .setLabel("Assignee:");
 
-    attribute = data.getRoot().createAttribute(TaskAttribute.COMPONENT);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_TASK_DEPENDENCY)
-        .setLabel("Relates to:");
-
     attribute = data.getRoot().createAttribute(TaskAttribute.PRIORITY);
     attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
         .setLabel("Priority level:");
@@ -337,7 +333,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     attribute.setValue("<a href=\"" + taskData.getRepositoryUrl() + "/issue/" + issue.getId()
         + "\">" + issue.getId() + "</a>");
 
-    attribute = taskData.getRoot().getAttribute(TaskAttribute.COMPONENT);
+    attribute = taskData.getRoot().createAttribute(TaskAttribute.COMPONENT);
+    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_TASK_DEPENDENCY)
+        .setLabel("Relates to:");
     if (issue.getLinks() != null && issue.getLinks().size() > 0) {
       int count = 0;
       for (IssueLink link : issue.getLinks()) {
@@ -353,12 +351,17 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
     }
 
+    attribute = taskData.getRoot().createAttribute(TAG_PREFIX);
+    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_MULTI_SELECT)
+        .setLabel("Tags:");
     if (issue.getTags() != null && issue.getTags().size() > 0) {
       int count = 0;
       for (IssueTag tag : issue.getTags()) {
         TaskAttribute attr = taskData.getRoot().createAttribute(TAG_PREFIX + count);
         attr.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT);
         attr.addValue(tag.getText());
+        attribute.putOption(attr.getValue(), attr.getValue());
+        attribute.addValue("\n" + attr.getValue());
         count++;
       }
     }
@@ -433,61 +436,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         }
       }
     }
-
-    // for (YouTrackCustomField field : project.getCustomFields()) {
-    // TaskAttribute customFieldAttribute = taskData.getRoot().createAttribute(field.getName());
-    // customFieldAttribute.getMetaData().setReadOnly(true).setLabel(labelFromName(field.getName()))
-    // .setKind(CUSTOM_FIELD_KIND);
-    // if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
-    // customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
-    // } else {
-    // if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
-    // customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
-    // } else {
-    // customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
-    // }
-    // }
-    //
-    // if (issue.getProperties().containsKey(field.getName())) {
-    //
-    // // check if issue complete
-    // if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
-    // YouTrackCustomFieldType.STATE)) {
-    // LinkedList<StateValue> states =
-    // ((StateBundleValues) field.getBundle().getBundleValues()).getStateValues();
-    // for (StateValue state : states) {
-    // if (state.getValue().equals(issue.property("State").toString())) {
-    // if (state.isResolved()) {
-    // attribute = taskData.getRoot().createAttribute(TaskAttribute.DATE_COMPLETION);
-    // attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME)
-    // .setLabel("Completed date:");
-    // taskData.getAttributeMapper().setDateValue(
-    // attribute,
-    // taskData.getAttributeMapper().getDateValue(
-    // taskData.getRoot().getAttribute(TaskAttribute.DATE_MODIFICATION)));
-    // attribute = taskData.getRoot().getAttribute(TaskAttribute.STATUS);
-    // attribute.setValue("true");
-    // } else {
-    // break;
-    // }
-    // }
-    // }
-    // }
-    //
-    // if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()
-    // || !(issue.property(field.getName()) instanceof List<?>)) {
-    // customFieldAttribute.setValue(issue.property(field.getName()).toString());
-    // } else {
-    // customFieldAttribute.setValues((List<String>) issue.property(field.getName()));
-    // }
-    // } else {
-    // customFieldAttribute.setValue("");
-    // if (project.getCustomFieldsMap().get(field.getName()).getEmptyText() != null) {
-    // customFieldAttribute.setValue(project.getCustomFieldsMap().get(field.getName())
-    // .getEmptyText());
-    // }
-    // }
-    // }
 
     return taskData;
   }
@@ -601,6 +549,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
           if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
             attr.getMetaData().setReadOnly(false);
           } else if (TaskAttribute.SUMMARY.equals(attr.getId())) {
+            attr.getMetaData().setReadOnly(false);
+          } else if (TAG_PREFIX.equals(attr.getId())) {
             attr.getMetaData().setReadOnly(false);
           } else if (isCustomField(project, attr.getId())) {
             attr.getMetaData().setReadOnly(false);

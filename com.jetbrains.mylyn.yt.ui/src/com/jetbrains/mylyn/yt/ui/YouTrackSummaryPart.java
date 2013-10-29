@@ -182,7 +182,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
         if (attributeName.startsWith(YouTrackTaskDataHandler.TAG_PREFIX)) {
           attribute = getTaskData().getRoot().getMappedAttribute(attributeName);
           if (attribute != null) {
-            addTag(secondLineComposite, attribute, 0, count);
+            // addTag(secondLineComposite, attribute, 0, count);
             count++;
           }
         }
