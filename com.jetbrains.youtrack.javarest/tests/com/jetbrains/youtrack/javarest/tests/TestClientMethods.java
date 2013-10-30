@@ -553,6 +553,13 @@ public class TestClientMethods {
   }
 
   @Test
+  public void testGetUserTags() {
+    String[] tags = client.getAllSuitableTags();
+    assertTrue(tags.length > 0);
+    assertEquals("Star", tags[0]);
+  }
+
+  @Test
   public void testUpdateIssueSummaryAndDescription() {
     String testIssueId = TEST_PROJECT_NAME + "-100";
     YouTrackIssue issue = client.getIssue(testIssueId);

@@ -325,8 +325,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     // because 'priority' icon needs priority level
     if (issue.getCustomFieldsValues().containsKey("Priority")) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
-      attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),
-          project.getCustomFieldsMap().get("Priority").getBundle().getValues()).toString());
+      if (project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
+        attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),
+            project.getCustomFieldsMap().get("Priority").getBundle().getValues()).toString());
+      }
     }
 
     attribute = taskData.getRoot().getAttribute("ISSUE_URL");
@@ -365,7 +367,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         count++;
       }
     }
-
 
     if (issue.getComments() != null && issue.getComments().size() > 0) {
 

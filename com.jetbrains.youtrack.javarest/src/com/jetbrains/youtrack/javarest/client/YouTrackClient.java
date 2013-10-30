@@ -554,7 +554,7 @@ public class YouTrackClient {
   }
 
   public String[] getAllSuitableTags() {
-    return intellisenseOptions("tag");
+    return service.path("/user/tag").accept("application/xml").get(UserTagList.class).getOptions();
   }
 
   /**
@@ -712,11 +712,12 @@ public class YouTrackClient {
 
       StringBuilder modifyTagsCommand = new StringBuilder();
       for (String newTag : newTags) {
-        this.applyCommand(oldIssueId, " add tag " + newTag);
+        this.applyCommand(oldIssueId,
+            " add tag " + newTag.replace("\n", ""));
       }
 
       for (String tagToRemove : removeTags) {
-        modifyTagsCommand.append(" remove tag " + tagToRemove);
+        modifyTagsCommand.append(" remove tag " + tagToRemove.replace("\n", ""));
       }
 
       if (modifyTagsCommand.toString() != null) {

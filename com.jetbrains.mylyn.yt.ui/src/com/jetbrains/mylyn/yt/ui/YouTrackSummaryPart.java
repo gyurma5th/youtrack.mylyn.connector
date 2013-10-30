@@ -7,33 +7,48 @@ package com.jetbrains.mylyn.yt.ui;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorSummaryPart;
+import org.eclipse.mylyn.internal.tasks.ui.util.TasksUiInternal;
+import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
+import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
+import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
+import com.jetbrains.mylyn.yt.core.YouTrackConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
 
-
 public class YouTrackSummaryPart extends TaskEditorSummaryPart {
+
+  private static final String ADD_TAG_TEXT = "Add tag";
 
   private void addAttribute(Composite composite, FormToolkit toolkit, TaskAttribute attribute,
       boolean shouldInitializeGridData) {
@@ -72,10 +87,6 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
           Point eventLocation = new Point(label.getBounds().x + arg0.x, arg0.y);
 
           Image image = label.getImage();
-
-          System.err.println("eventLocation " + eventLocation);
-          System.err.println("label.getBounds() " + label.getBounds());
-          System.err.println("image.getBounds() " + image.getBounds());
 
           // check if click is on image
           if (eventLocation.x >= label.getBounds().x + image.getBounds().x
@@ -177,6 +188,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       GridDataFactory.fillDefaults().span(gLayout.numColumns, 1).applyTo(secondLineComposite);
       toolkit.adapt(secondLineComposite);
 
+
       int count = 0;
       for (String attributeName : getTaskData().getRoot().getAttributes().keySet()) {
         if (attributeName.startsWith(YouTrackTaskDataHandler.TAG_PREFIX)) {
@@ -187,6 +199,100 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
           }
         }
       }
+
+      Button addLink = new Button(secondLineComposite, SWT.NONE);
+      addLink.setText("Add link");
+
+      CCombo addTagCombo = new CCombo(secondLineComposite, SWT.DOWN | SWT.ARROW | SWT.BORDER);
+      addTagCombo.setText(ADD_TAG_TEXT);
+      addTagCombo.setEditable(false);
+
+      addTagCombo.addListener(SWT.DROP_DOWN, new Listener() {
+        @Override
+        public void handleEvent(Event event) {
+          CCombo combo = (CCombo) event.widget;
+          combo.setItems(YouTrackConnector.getClient(
+              getTaskEditorPage().getModel().getTaskRepository()).getAllSuitableTags());
+          combo.setText(ADD_TAG_TEXT);
+        }
+      });
+      addTagCombo.addSelectionListener(new SelectionListener() {
+
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+
+          CCombo combo = (CCombo) e.widget;
+          String selectedText = combo.getItem(combo.getSelectionIndex());
+
+          String taskId = getTaskData().getTaskId();
+          String realIssueId = "";
+          if (taskId.contains("-")) {
+            realIssueId = taskId;
+          } else {
+            if (TasksUiPlugin.getTaskList().getTask(
+                getTaskEditorPage().getModel().getTaskRepository().getRepositoryUrl(), taskId) != null) {
+              realIssueId =
+                  TasksUiPlugin
+                      .getTaskList()
+                      .getTask(
+                          getTaskEditorPage().getModel().getTaskRepository().getRepositoryUrl(),
+                          taskId).getTaskKey();
+            }
+          }
+
+          YouTrackConnector.getClient(getTaskEditorPage().getModel().getTaskRepository())
+              .addNewTag(realIssueId, selectedText);
+          combo.setText(ADD_TAG_TEXT);
+
+          TaskAttribute attribute =
+              getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX);
+          attribute.putOption(selectedText, selectedText);
+          attribute.addValue("\n" + selectedText);
+
+          final TaskEditor editor = getTaskEditorPage().getTaskEditor();
+          final ITask task = editor.getTaskEditorInput().getTask();
+          if (task == null) {
+            return;
+          }
+
+          AbstractRepositoryConnector connector =
+              TasksUi.getRepositoryManager().getRepositoryConnector(task.getConnectorKind());
+          if (connector == null) {
+            return;
+          }
+
+          TasksUiInternal.synchronizeTask(connector, task, true, new JobChangeAdapter() {
+            @Override
+            public void done(IJobChangeEvent event) {
+              PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+                public void run() {
+                  try {
+                    editor.refreshPages();
+                  } finally {
+                    if (editor != null) {
+                      editor.showBusy(false);
+                    }
+                  }
+                }
+              });
+            }
+          });
+          if (editor != null) {
+            editor.showBusy(true);
+          }
+        }
+
+        @Override
+        public void widgetDefaultSelected(SelectionEvent e) {
+          // TODO Auto-generated method stub
+        }
+      });
+
+
+
+      Button commandDialog = new Button(secondLineComposite, SWT.NONE);
+      commandDialog.setText("Command dialog");
+
     }
 
     return composite;
