@@ -141,5 +141,4 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
       newCommentPart.setFocus();
     }
   }
-
 }

@@ -1,25 +1,10 @@
 package com.jetbrains.mylyn.yt.ui;
 
-/*******************************************************************************
- * Copyright (c) 2004, 2009 Tasktop Technologies and others. All rights reserved. This program and
- * the accompanying materials are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
- * Contributors: Tasktop Technologies - initial API and implementation
- *******************************************************************************/
-
-/**
- * @author Original: Shawn Minto
- * @since 3.7
- */
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -29,8 +14,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.mylyn.commons.ui.dialogs.AbstractInPlaceDialog;
 import org.eclipse.mylyn.commons.workbench.EnhancedFilteredTree;
+import org.eclipse.mylyn.commons.workbench.InPlaceCheckBoxTreeDialog;
 import org.eclipse.mylyn.commons.workbench.SubstringPatternFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
@@ -44,7 +29,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 
-public class InPlaceCheckBoxesDialog extends AbstractInPlaceDialog {
+public class InPlaceAbleAdditionCheckBoxTreeDialog extends InPlaceCheckBoxTreeDialog {
 
   private Map<String, String> validValues;
 
@@ -87,16 +72,9 @@ public class InPlaceCheckBoxesDialog extends AbstractInPlaceDialog {
 
   }
 
-  public InPlaceCheckBoxesDialog(Shell shell, Control openControl, List<String> values,
+  public InPlaceAbleAdditionCheckBoxTreeDialog(Shell shell, Control openControl, List<String> values,
       Map<String, String> validValues, String dialogLabel) {
-    super(shell, SWT.RIGHT, openControl);
-    Assert.isNotNull(values);
-    Assert.isNotNull(validValues);
-    Assert.isNotNull(dialogLabel);
-    this.selectedValues = new HashSet<String>(values);
-    this.validValues = validValues;
-    this.dialogLabel = dialogLabel;
-    setShellStyle(getShellStyle());
+    super(shell, openControl, values, validValues, dialogLabel);
   }
 
   @Override
@@ -212,9 +190,4 @@ public class InPlaceCheckBoxesDialog extends AbstractInPlaceDialog {
 
     return valueTree;
   }
-
-  public Set<String> getSelectedValues() {
-    return new HashSet<String>(selectedValues);
-  }
-
 }

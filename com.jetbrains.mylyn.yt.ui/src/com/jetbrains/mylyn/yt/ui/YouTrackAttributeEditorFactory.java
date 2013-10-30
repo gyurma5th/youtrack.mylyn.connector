@@ -32,8 +32,8 @@ public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
 
     if (TaskAttribute.TYPE_MULTI_SELECT.equals(type)) {
       if (taskAttribute.getId().equals(YouTrackTaskDataHandler.TAG_PREFIX)) {
-        CheckboxMultiAttributeEditor attributeEditor =
-            new CheckboxMultiAttributeEditor(model, taskAttribute);
+        CheckboxMultiWithAdditionAttributeEditor attributeEditor =
+            new CheckboxMultiWithAdditionAttributeEditor(model, taskAttribute);
         attributeEditor.setLayoutHint(new LayoutHint(RowSpan.SINGLE, ColumnSpan.SINGLE));
         return attributeEditor;
       } else {
