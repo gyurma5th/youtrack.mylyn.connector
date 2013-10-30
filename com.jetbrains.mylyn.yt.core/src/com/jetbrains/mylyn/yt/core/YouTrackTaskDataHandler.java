@@ -571,6 +571,13 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                 attr.putOption(tag, tag);
               }
             }
+
+            for (int i = 0; i < attr.getValues().size(); i++) {
+              String value = attr.getValues().get(0);
+              attr.removeValue(value);
+              attr.addValue(value.replace("\n", ""));
+            }
+
           } else if (isCustomField(project, attr.getId())) {
             attr.getMetaData().setReadOnly(false);
             String customFieldName = getNameFromLabel(attr);

@@ -153,6 +153,7 @@ public class InPlaceCheckBoxesDialog extends AbstractInPlaceDialog {
       });
 
 
+      // key difference is here
       valueTree.getTextSearchControl().addTraverseListener(new TraverseListener() {
         @Override
         public void keyTraversed(TraverseEvent e) {
