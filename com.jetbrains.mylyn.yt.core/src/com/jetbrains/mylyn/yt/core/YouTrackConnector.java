@@ -140,19 +140,8 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
   public TaskData getTaskData(TaskRepository taskRepository, String taskId, IProgressMonitor monitor)
       throws CoreException {
 
-    String realIssueId;
-    if (taskId.contains("-")) {
-      realIssueId = taskId;
-    } else {
-      if (TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), taskId) == null) {
-        return null;
-      }
-      realIssueId =
-          TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), taskId)
-              .getTaskKey();
-    }
-
-    YouTrackIssue issue = getClient(taskRepository).getIssue(realIssueId);
+    YouTrackIssue issue =
+        getClient(taskRepository).getIssue(getRealIssueId(taskId, taskRepository));
     // stall a while to allow the UI to update
     monitor.worked(10);
     return taskDataHandler.readTaskData(taskRepository, issue, monitor);
@@ -285,5 +274,20 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
     // default:
     // return null;
     // }
+  }
+
+  public static String getRealIssueId(String pseudoIssueId, TaskRepository taskRepository) {
+    String realIssueId;
+    if (pseudoIssueId.contains("-")) {
+      realIssueId = pseudoIssueId;
+    } else {
+      if (TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId) == null) {
+        return null;
+      }
+      realIssueId =
+          TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId)
+              .getTaskKey();
+    }
+    return realIssueId;
   }
 }

@@ -1,19 +1,19 @@
 /*******************************************************************************
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Tasktop Technologies - initial API and implementation
- *     Frank Becker - improvements
- *     Alexander Marchuk - extension
+ * 
+ * Contributors: Tasktop Technologies - initial API and implementation Frank Becker - improvements
+ * Alexander Marchuk - extension
  *******************************************************************************/
 
 /*
  * @author: amarch
+ * 
  * @author Steffen Pingel
+ * 
  * @author Frank Becker
+ * 
  * @since 3.7
  */
 
@@ -89,773 +89,740 @@ import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
 
 public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
-    private TaskRepository repository;
+  private TaskRepository repository;
 
-    private List<SavedSearch> searches;
+  private List<SavedSearch> searches;
 
-    private Combo savedSearchesCombo;
+  private Combo savedSearchesCombo;
 
-    private Text numberOfIssues1;
+  private Text numberOfIssues1;
 
-    private Text numberOfIssues2;
+  private Text numberOfIssues2;
 
-    private Button customizeQueryCheckbox;
+  private Button customizeQueryCheckbox;
 
-    private Text searchBoxText;
+  private Text searchBoxText;
 
-    private final String KEY_PRESS = "Ctrl+Space";
+  private final String KEY_PRESS = "Ctrl+Space";
 
-    private LinkedList<IntellisenseItem> items;
+  private LinkedList<IntellisenseItem> items;
 
-    private Map<String, IntellisenseItem> itemByNameMap = new HashMap<String, IntellisenseItem>();
+  private Map<String, IntellisenseItem> itemByNameMap = new HashMap<String, IntellisenseItem>();
 
-    private IntellisenseSearchValues intellisense;
+  private IntellisenseSearchValues intellisense;
 
-    private SimpleContentProposalProvider scp;
+  private SimpleContentProposalProvider scp;
 
-    private Group fastQueryComposite;
+  private Group fastQueryComposite;
 
-    private Group customQueryComposite;
+  private Group customQueryComposite;
 
-    private final String defaultMessage = "Choose saved search or customize query.";
+  private final String defaultMessage = "Choose saved search or customize query.";
 
-    private Button cancelButton;
+  private Button cancelButton;
 
-    private final AbstractRepositoryConnector connector;
+  private final AbstractRepositoryConnector connector;
 
-    private boolean firstTime = true;
+  private boolean firstTime = true;
 
-    private SectionComposite innerComposite;
+  private SectionComposite innerComposite;
 
-    /**
-     * Determines whether a 'Clear Fields' button is shown on the page.
-     */
-    private boolean needsClear;
+  /**
+   * Determines whether a 'Clear Fields' button is shown on the page.
+   */
+  private boolean needsClear;
 
-    /**
-     * Determines whether a 'Refresh' button is shown on the page.
-     */
-    private boolean needsRefresh = false;
+  /**
+   * Determines whether a 'Refresh' button is shown on the page.
+   */
+  private boolean needsRefresh = false;
 
-    private ProgressContainer progressContainer;
+  private ProgressContainer progressContainer;
 
-    private Button refreshButton;
+  private Button refreshButton;
 
-    private Text titleText;
+  private Text titleText;
 
-    public YouTrackRepositoryQueryPage(String pageName,
-	    TaskRepository repository, IRepositoryQuery query) {
-	super("youtrack.repository.query.page", repository, query);
-	this.connector = TasksUi.getRepositoryConnector(getTaskRepository()
-		.getConnectorKind());
-	this.repository = repository;
-	setTitle("YouTrack Repository Query");
+  public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository,
+      IRepositoryQuery query) {
+    super("youtrack.repository.query.page", repository, query);
+    this.connector = TasksUi.getRepositoryConnector(getTaskRepository().getConnectorKind());
+    this.repository = repository;
+    setTitle("YouTrack Repository Query");
+  }
+
+  protected void doRefreshControls() {
+    doFullRefresh();
+  }
+
+  protected boolean hasRepositoryConfiguration() {
+    return true;
+  }
+
+  protected boolean restoreState(IRepositoryQuery query) {
+    String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
+    if (filter != null) {
+      if (customizeQueryCheckbox.getSelection()) {
+        searchBoxText.setText(filter);
+      } else {
+        for (SavedSearch savedSearch : searches) {
+          if (savedSearch.getSearchText().equals(filter)) {
+            savedSearchesCombo.setText(savedSearch.getName());
+            break;
+          }
+        }
+      }
     }
+    return true;
+  }
 
-    protected void doRefreshControls() {
-	doFullRefresh();
+  @Override
+  public void applyTo(IRepositoryQuery query) {
+    if (getQueryTitle() != null) {
+      query.setSummary(getQueryTitle());
     }
-
-    protected boolean hasRepositoryConfiguration() {
-	return true;
+    if (savedSearchesCombo.getText() != null && !customizeQueryCheckbox.getSelection()) {
+      query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER,
+          searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
     }
-
-    protected boolean restoreState(IRepositoryQuery query) {
-	String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
-	if (filter != null) {
-	    if (customizeQueryCheckbox.getSelection()) {
-		searchBoxText.setText(filter);
-	    } else {
-		for (SavedSearch savedSearch : searches) {
-		    if (savedSearch.getSearchText().equals(filter)) {
-			savedSearchesCombo.setText(savedSearch.getName());
-			break;
-		    }
-		}
-	    }
-	}
-	return true;
+    if (searchBoxText.getText() != null && customizeQueryCheckbox.getSelection()) {
+      query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER, searchBoxText.getText());
     }
+    setMessage(defaultMessage);
+  }
 
-    @Override
-    public void applyTo(IRepositoryQuery query) {
-	if (getQueryTitle() != null) {
-	    query.setSummary(getQueryTitle());
-	}
-	if (savedSearchesCombo.getText() != null
-		&& !customizeQueryCheckbox.getSelection()) {
-	    query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER, searches
-		    .get(savedSearchesCombo.getSelectionIndex())
-		    .getSearchText());
-	}
-	if (searchBoxText.getText() != null
-		&& customizeQueryCheckbox.getSelection()) {
-	    query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER,
-		    searchBoxText.getText());
-	}
-	setMessage(defaultMessage);
-    }
+  protected void createPageContent(SectionComposite parent) {
+    createFastQueryCompositeContent(parent);
+    createCustomizeQueryContent(parent);
+  }
 
-    protected void createPageContent(SectionComposite parent) {
-	createFastQueryCompositeContent(parent);
-	createCustomizeQueryContent(parent);
-    }
+  protected void createFastQueryCompositeContent(SectionComposite parent) {
 
-    protected void createFastQueryCompositeContent(SectionComposite parent) {
+    customizeQueryCheckbox = new Button(parent.getContent(), SWT.RADIO);
+    customizeQueryCheckbox.setText("Saved search");
+    customizeQueryCheckbox.addSelectionListener(new SelectionListener() {
 
-	customizeQueryCheckbox = new Button(parent.getContent(), SWT.RADIO);
-	customizeQueryCheckbox.setText("Saved search");
-	customizeQueryCheckbox.addSelectionListener(new SelectionListener() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
 
-	    @Override
-	    public void widgetSelected(SelectionEvent e) {
+        Button button = (Button) e.widget;
+        doPartialRefresh();
 
-		Button button = (Button) e.widget;
-		doPartialRefresh();
+        if (button.getSelection()) {
+          setMessage("Choose saved search.");
+          recursiveSetEnabled(fastQueryComposite, true);
+          recursiveSetEnabled(customQueryComposite, false);
+          numberOfIssues1.setEnabled(false);
+        } else {
+          recursiveSetEnabled(fastQueryComposite, false);
+          recursiveSetEnabled(customQueryComposite, true);
+          numberOfIssues2.setEnabled(false);
+          setQueryTitle("");
+          setMessage("Enter query into search box (press Ctrl+Space for query completion).");
+        }
+      }
 
-		if (button.getSelection()) {
-		    setMessage("Choose saved search.");
-		    recursiveSetEnabled(fastQueryComposite, true);
-		    recursiveSetEnabled(customQueryComposite, false);
-		    numberOfIssues1.setEnabled(false);
-		} else {
-		    recursiveSetEnabled(fastQueryComposite, false);
-		    recursiveSetEnabled(customQueryComposite, true);
-		    numberOfIssues2.setEnabled(false);
-		    setQueryTitle("");
-		    setMessage("Enter query into search box (press Ctrl+Space for query completion).");
-		}
-	    }
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {}
+    });
+    customizeQueryCheckbox.setSelection(true);
 
-	    @Override
-	    public void widgetDefaultSelected(SelectionEvent e) {
-	    }
-	});
-	customizeQueryCheckbox.setSelection(true);
+    fastQueryComposite = new Group(parent.getContent(), SWT.NONE);
+    fastQueryComposite.setLayout(new GridLayout(1, false));
 
-	fastQueryComposite = new Group(parent.getContent(), SWT.NONE);
-	fastQueryComposite.setLayout(new GridLayout(1, false));
+    GridData gd = new GridData(SWT.FILL);
+    gd.grabExcessHorizontalSpace = true;
+    gd.horizontalAlignment = SWT.FILL;
+    fastQueryComposite.setLayoutData(gd);
 
-	GridData gd = new GridData(SWT.FILL);
-	gd.grabExcessHorizontalSpace = true;
-	gd.horizontalAlignment = SWT.FILL;
-	fastQueryComposite.setLayoutData(gd);
+    savedSearchesCombo = new Combo(fastQueryComposite, SWT.FILL);
+    savedSearchesCombo.setLayoutData(gd);
 
-	savedSearchesCombo = new Combo(fastQueryComposite, SWT.FILL);
-	savedSearchesCombo.setLayoutData(gd);
+    fillSearches();
 
-	fillSearches();
+    // added for vertical indent
+    Composite numberOfIssuesComposite = new Composite(fastQueryComposite, SWT.NONE);
+    numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 
-	// added for vertical indent
-	Composite numberOfIssuesComposite = new Composite(fastQueryComposite,
-		SWT.NONE);
-	numberOfIssuesComposite.setLayout(new GridLayout(2, false));
+    numberOfIssues1 = new Text(fastQueryComposite, SWT.SINGLE | SWT.FILL);
+    numberOfIssues1.setLayoutData(gd);
+    numberOfIssues1.setEnabled(false);
 
-	numberOfIssues1 = new Text(fastQueryComposite, SWT.SINGLE | SWT.FILL);
-	numberOfIssues1.setLayoutData(gd);
-	numberOfIssues1.setEnabled(false);
+    savedSearchesCombo.addListener(SWT.Selection, new Listener() {
+      @Override
+      public void handleEvent(Event event) {
 
-	savedSearchesCombo.addListener(SWT.Selection, new Listener() {
-	    @Override
-	    public void handleEvent(Event event) {
+        if (savedSearchesCombo.getItemCount() > 0 && savedSearchesCombo.getSelectionIndex() != -1) {
+          if (getQueryTitle() == null || getQueryTitle().length() == 0) {
+            setQueryTitle(savedSearchesCombo.getText());
+          }
+        }
+      }
+    });
 
-		if (savedSearchesCombo.getItemCount() > 0
-			&& savedSearchesCombo.getSelectionIndex() != -1) {
-		    if (getQueryTitle() == null
-			    || getQueryTitle().length() == 0) {
-			setQueryTitle(savedSearchesCombo.getText());
-		    }
-		}
-	    }
-	});
+    savedSearchesCombo.addListener(SWT.DROP_DOWN, new Listener() {
+      @Override
+      public void handleEvent(Event event) {
+        numberOfIssues1.setText("");
+        fillSearches();
+      }
+    });
 
-	savedSearchesCombo.addListener(SWT.DROP_DOWN, new Listener() {
-	    @Override
-	    public void handleEvent(Event event) {
-		numberOfIssues1.setText("");
-		fillSearches();
-	    }
-	});
+    savedSearchesCombo.addModifyListener(new ModifyAdapter(numberOfIssues1, searches));
+  }
 
-	savedSearchesCombo.addModifyListener(new ModifyAdapter(numberOfIssues1,
-		searches));
-    }
+  public class ModifyAdapter implements ModifyListener {
 
-    public class ModifyAdapter implements ModifyListener {
+    public Text issuesCountText;
 
-	public Text issuesCountText;
+    public String queryFilter;
 
-	public String queryFilter;
+    public int queryIssuesAmount;
 
-	public int queryIssuesAmount;
+    public List<SavedSearch> searches;
 
-	public List<SavedSearch> searches;
-
-	public ModifyAdapter(Text setText, List<SavedSearch> searches) {
-	    this.issuesCountText = setText;
-	    this.searches = searches;
-	    this.queryIssuesAmount = 0;
-	}
-
-	@Override
-	public void modifyText(ModifyEvent e) {
-
-	    issuesCountText.setText("");
-	    if (e.getSource() instanceof Text) {
-		queryFilter = ((Text) e.getSource()).getText();
-	    } else {
-		if (e.getSource() instanceof Combo
-			&& ((Combo) e.getSource()).getSelectionIndex() > 0) {
-		    queryFilter = searches.get(
-			    ((Combo) e.getSource()).getSelectionIndex())
-			    .getSearchText();
-		}
-	    }
-
-	    Job job = new Job("Count Number of Issues") {
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-		    try {
-			queryIssuesAmount = getClient().getNumberOfIssues(
-				queryFilter);
-		    } catch (CoreException e) {
-			throw new RuntimeException(e.getMessage());
-		    }
-		    syncWithUi();
-		    return Status.OK_STATUS;
-		}
-
-	    };
-	    job.setUser(true);
-	    job.schedule();
-	}
-
-	private void syncWithUi() {
-	    Display.getDefault().asyncExec(new Runnable() {
-		@Override
-		public void run() {
-		    if (queryIssuesAmount == -1) {
-			issuesCountText
-				.setText("Can't get number of issues. Please try another query.");
-		    } else if (queryIssuesAmount == 1) {
-			issuesCountText.setText("1 issue");
-		    } else {
-			issuesCountText.setText(queryIssuesAmount + " issues");
-		    }
-		}
-	    });
-	}
-
-    }
-
-    protected void createCustomizeQueryContent(SectionComposite parent) {
-
-	customizeQueryCheckbox = new Button(parent.getContent(), SWT.RADIO);
-	customizeQueryCheckbox.setText("Custom query");
-
-	customQueryComposite = new Group(parent.getContent(), SWT.NONE);
-	customQueryComposite.setLayout(new GridLayout(1, false));
-
-	GridData gd = new GridData(SWT.FILL);
-	gd.grabExcessHorizontalSpace = true;
-	gd.horizontalAlignment = SWT.FILL;
-	customQueryComposite.setLayoutData(gd);
-
-	Label searchBoxLabel = new Label(customQueryComposite, SWT.NONE);
-	searchBoxLabel.setText("Search Box:");
-
-	searchBoxText = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
-	searchBoxText.setLayoutData(gd);
-
-	try {
-	    intellisense = getClient().intellisenseSearchValues(
-		    searchBoxText.getText());
-	    scp = new SimpleContentProposalProvider(intellisense.getFullOptions());
-	    KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
-	    ContentProposalAdapter adapter = new ContentProposalAdapter(
-		    searchBoxText, new TextContentAdapter(), scp, ks, null);
-	    adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
-	    adapter.addContentProposalListener(new IContentProposalListener() {
-
-		@Override
-		public void proposalAccepted(IContentProposal proposal) {
-		    insertAcceptedProposal(proposal);
-		}
-	    });
-	} catch (Exception e) {
-	    throw new RuntimeException(e);
-	}
-
-	searchBoxText.addKeyListener(new KeyAdapter() {
-	    public void keyReleased(KeyEvent ke) {
-		try {
-		    intellisense = getClient().intellisenseSearchValues(
-			    searchBoxText.getText(),
-			    searchBoxText.getCaretPosition());
-		    items = intellisense.getIntellisenseItems();
-		    for (int ind = 0; ind < items.size(); ind++) {
-			itemByNameMap.put(items.get(ind).getFullOption(),
-				items.get(ind));
-		    }
-		    scp.setProposals(intellisense.getFullOptions());
-		} catch (CoreException e) {
-		    throw new RuntimeException(e);
-		}
-	    }
-	});
-
-	numberOfIssues2 = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
-	numberOfIssues2.setLayoutData(gd);
-	numberOfIssues2.setEnabled(false);
-
-	createTitleGroup(customQueryComposite);
-
-	recursiveSetEnabled(customQueryComposite, false);
-	searchBoxText
-		.addModifyListener(new ModifyAdapter(numberOfIssues2, null));
-    }
-
-    private YouTrackClient getClient() throws CoreException {
-	return YouTrackConnector.getClient(getTaskRepository());
-    }
-
-    protected void doPartialRefresh() {
-	numberOfIssues1.setText("");
-	fillSearches();
-	searchBoxText.setText("");
-	numberOfIssues2.setText("");
-    }
-
-    protected void doFullRefresh() {
-	doPartialRefresh();
-	setQueryTitle("");
-	setMessage(defaultMessage);
-    }
-
-    protected void fillSearches() {
-	try {
-	    savedSearchesCombo.removeAll();
-	    if (repository.getUserName() != null) {
-		searches = new LinkedList<SavedSearch>();
-		LinkedList<UserSavedSearch> userSearches = getClient()
-			.getSavedSearchesForUser(repository.getUserName());
-		for (UserSavedSearch userSearch : userSearches) {
-		    searches.add(userSearch.convertIntoSavedSearch());
-		}
-	    } else {
-		searches = getClient().getSavedSearches();
-	    }
-	    for (SavedSearch search : searches) {
-		savedSearchesCombo.add(search.getName());
-	    }
-	} catch (CoreException e) {
-	    throw new RuntimeException("Exception while refreshing"
-		    + e.toString());
-	}
+    public ModifyAdapter(Text setText, List<SavedSearch> searches) {
+      this.issuesCountText = setText;
+      this.searches = searches;
+      this.queryIssuesAmount = 0;
     }
 
     @Override
-    public boolean canFlipToNextPage() {
-	return false;
+    public void modifyText(ModifyEvent e) {
+
+      issuesCountText.setText("");
+      if (e.getSource() instanceof Text) {
+        queryFilter = ((Text) e.getSource()).getText();
+      } else {
+        if (e.getSource() instanceof Combo && ((Combo) e.getSource()).getSelectionIndex() > 0) {
+          queryFilter = searches.get(((Combo) e.getSource()).getSelectionIndex()).getSearchText();
+        }
+      }
+
+      Job job = new Job("Count Number of Issues") {
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+          try {
+            queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
+          } catch (CoreException e) {
+            throw new RuntimeException(e.getMessage());
+          }
+          syncWithUi();
+          return Status.OK_STATUS;
+        }
+
+      };
+      job.setUser(true);
+      job.schedule();
     }
 
-    public void recursiveSetEnabled(Control ctrl, boolean enabled) {
-	if (ctrl instanceof Composite) {
-	    Composite comp = (Composite) ctrl;
-	    if (comp.getChildren().length == 0) {
-		comp.setEnabled(enabled);
-	    } else {
-		for (Control control : comp.getChildren()) {
-		    recursiveSetEnabled(control, enabled);
-		}
-	    }
-	} else {
-	    ctrl.setEnabled(enabled);
-	}
+    private void syncWithUi() {
+      Display.getDefault().asyncExec(new Runnable() {
+        @Override
+        public void run() {
+          if (queryIssuesAmount == -1) {
+            issuesCountText.setText("Can't get number of issues. Please try another query.");
+          } else if (queryIssuesAmount == 1) {
+            issuesCountText.setText("1 issue");
+          } else {
+            issuesCountText.setText(queryIssuesAmount + " issues");
+          }
+        }
+      });
     }
 
-    private void insertAcceptedProposal(IContentProposal proposal) {
-	IntellisenseItem item = itemByNameMap.get((proposal.getContent()));
-	String beforeInsertion = searchBoxText.getText();
-	String afterInsertion = beforeInsertion.substring(0, item
-		.getCompletionPositions().getStart())
-		+ proposal.getContent()
-		+ beforeInsertion.substring(item.getCompletionPositions()
-			.getEnd());
-	searchBoxText.setText(afterInsertion);
-	searchBoxText.setSelection(Integer.parseInt(item.getCaret()));
+  }
+
+  protected void createCustomizeQueryContent(SectionComposite parent) {
+
+    customizeQueryCheckbox = new Button(parent.getContent(), SWT.RADIO);
+    customizeQueryCheckbox.setText("Custom query");
+
+    customQueryComposite = new Group(parent.getContent(), SWT.NONE);
+    customQueryComposite.setLayout(new GridLayout(1, false));
+
+    GridData gd = new GridData(SWT.FILL);
+    gd.grabExcessHorizontalSpace = true;
+    gd.horizontalAlignment = SWT.FILL;
+    customQueryComposite.setLayoutData(gd);
+
+    Label searchBoxLabel = new Label(customQueryComposite, SWT.NONE);
+    searchBoxLabel.setText("Search Box:");
+
+    searchBoxText = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
+    searchBoxText.setLayoutData(gd);
+
+    try {
+      intellisense = getClient().intellisenseSearchValues(searchBoxText.getText());
+      scp = new SimpleContentProposalProvider(intellisense.getFullOptions());
+      KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
+      ContentProposalAdapter adapter =
+          new ContentProposalAdapter(searchBoxText, new TextContentAdapter(), scp, ks, null);
+      adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
+      adapter.addContentProposalListener(new IContentProposalListener() {
+
+        @Override
+        public void proposalAccepted(IContentProposal proposal) {
+          insertAcceptedProposal(proposal);
+        }
+      });
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
 
-    /*
-     * Code below is code from AbstractRepositoryQueryPage2
-     */
+    searchBoxText.addKeyListener(new KeyAdapter() {
+      public void keyReleased(KeyEvent ke) {
+        try {
+          intellisense =
+              getClient().intellisenseSearchValues(searchBoxText.getText(),
+                  searchBoxText.getCaretPosition());
+          items = intellisense.getIntellisenseItems();
+          for (int ind = 0; ind < items.size(); ind++) {
+            itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
+          }
+          scp.setProposals(intellisense.getFullOptions());
+        } catch (CoreException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
 
-    public void createControl(Composite parent) {
-	Composite composite = new Composite(parent, SWT.NONE);
-	GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL)
-		.grab(true, true).applyTo(composite);
-	GridLayout layout = new GridLayout(2, false);
-	if (inSearchContainer()) {
-	    layout.marginWidth = 0;
-	    layout.marginHeight = 0;
-	}
-	composite.setLayout(layout);
+    numberOfIssues2 = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
+    numberOfIssues2.setLayoutData(gd);
+    numberOfIssues2.setEnabled(false);
 
-	innerComposite = new SectionComposite(composite, SWT.NONE);
-	GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL)
-		.grab(true, true).span(2, 1).applyTo(innerComposite);
-	createPageContent(innerComposite);
+    createTitleGroup(customQueryComposite);
 
-	createButtonGroup(composite);
+    recursiveSetEnabled(customQueryComposite, false);
+    searchBoxText.addModifyListener(new ModifyAdapter(numberOfIssues2, null));
+  }
 
-	if (!needsRefresh) {
-	    setDescription(Messages.AbstractRepositoryQueryPage2_Create_a_Query_Page_Description);
-	}
+  private YouTrackClient getClient() throws CoreException {
+    return YouTrackConnector.getClient(getTaskRepository());
+  }
 
-	Dialog.applyDialogFont(composite);
-	setControl(composite);
+  protected void doPartialRefresh() {
+    numberOfIssues1.setText("");
+    fillSearches();
+    searchBoxText.setText("");
+    numberOfIssues2.setText("");
+  }
+
+  protected void doFullRefresh() {
+    doPartialRefresh();
+    setQueryTitle("");
+    setMessage(defaultMessage);
+  }
+
+  protected void fillSearches() {
+    try {
+      savedSearchesCombo.removeAll();
+      if (repository.getUserName() != null) {
+        searches = new LinkedList<SavedSearch>();
+        LinkedList<UserSavedSearch> userSearches =
+            getClient().getSavedSearchesForUser(repository.getUserName());
+        for (UserSavedSearch userSearch : userSearches) {
+          searches.add(userSearch.convertIntoSavedSearch());
+        }
+      } else {
+        searches = getClient().getSavedSearches();
+      }
+      for (SavedSearch search : searches) {
+        savedSearchesCombo.add(search.getName());
+      }
+    } catch (CoreException e) {
+      throw new RuntimeException("Exception while refreshing" + e.toString());
+    }
+  }
+
+  @Override
+  public boolean canFlipToNextPage() {
+    return false;
+  }
+
+  public void recursiveSetEnabled(Control ctrl, boolean enabled) {
+    if (ctrl instanceof Composite) {
+      Composite comp = (Composite) ctrl;
+      if (comp.getChildren().length == 0) {
+        comp.setEnabled(enabled);
+      } else {
+        for (Control control : comp.getChildren()) {
+          recursiveSetEnabled(control, enabled);
+        }
+      }
+    } else {
+      ctrl.setEnabled(enabled);
+    }
+  }
+
+  private void insertAcceptedProposal(IContentProposal proposal) {
+    IntellisenseItem item = itemByNameMap.get((proposal.getContent()));
+    String beforeInsertion = searchBoxText.getText();
+    String afterInsertion =
+        beforeInsertion.substring(0, item.getCompletionPositions().getStart())
+            + proposal.getContent()
+            + beforeInsertion.substring(item.getCompletionPositions().getEnd());
+    searchBoxText.setText(afterInsertion);
+    searchBoxText.setSelection(Integer.parseInt(item.getCaret()));
+  }
+
+  /*
+   * Code below is code from AbstractRepositoryQueryPage2
+   */
+
+  public void createControl(Composite parent) {
+    Composite composite = new Composite(parent, SWT.NONE);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
+    GridLayout layout = new GridLayout(2, false);
+    if (inSearchContainer()) {
+      layout.marginWidth = 0;
+      layout.marginHeight = 0;
+    }
+    composite.setLayout(layout);
+
+    innerComposite = new SectionComposite(composite, SWT.NONE);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(2, 1)
+        .applyTo(innerComposite);
+    createPageContent(innerComposite);
+
+    createButtonGroup(composite);
+
+    if (!needsRefresh) {
+      setDescription(Messages.AbstractRepositoryQueryPage2_Create_a_Query_Page_Description);
     }
 
-    @Override
-    public String getQueryTitle() {
-	return (titleText != null) ? titleText.getText() : null;
+    Dialog.applyDialogFont(composite);
+    setControl(composite);
+  }
+
+  @Override
+  public String getQueryTitle() {
+    return (titleText != null) ? titleText.getText() : null;
+  }
+
+  public boolean handleExtraButtonPressed(int buttonId) {
+    if (buttonId == QueryWizardDialog.REFRESH_BUTTON_ID) {
+      if (getTaskRepository() != null) {
+        refreshConfiguration(true);
+      } else {
+        MessageDialog
+            .openInformation(
+                Display.getCurrent().getActiveShell(),
+                Messages.AbstractRepositoryQueryPage2_Update_Attributes_Failed,
+                Messages.AbstractRepositoryQueryPage2_No_repository_available_please_add_one_using_the_Task_Repositories_view);
+      }
+      return true;
+    } else if (buttonId == QueryWizardDialog.CLEAR_BUTTON_ID) {
+      doClearControls();
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isPageComplete() {
+    if (titleText != null && titleText.getText().length() > 0) {
+      return true;
+    }
+    setMessage(defaultMessage);
+    return false;
+  }
+
+  public boolean needsClear() {
+    return needsClear;
+  }
+
+  public boolean needsRefresh() {
+    return needsRefresh;
+  }
+
+  @Override
+  public boolean performSearch() {
+    if (inSearchContainer()) {
+      saveState();
+    }
+    return super.performSearch();
+  }
+
+  @Override
+  public void saveState() {
+    if (inSearchContainer()) {
+      RepositoryQuery query = new RepositoryQuery(getTaskRepository().getConnectorKind(), "handle"); //$NON-NLS-1$
+      applyTo(query);
+
+      IDialogSettings settings = getDialogSettings();
+      if (settings != null) {
+        settings.put(getSavedStateSettingKey(), query.getUrl());
+      }
+    }
+  }
+
+  public void setExtraButtonState(Button button) {
+    Integer obj = (Integer) button.getData();
+    if (obj == QueryWizardDialog.REFRESH_BUTTON_ID) {
+      if (needsRefresh) {
+        if (!button.isVisible()) {
+          button.setVisible(true);
+        }
+        button.setEnabled(true);
+      } else {
+        if (button != null && button.isVisible()) {
+          button.setVisible(false);
+        }
+      }
+    } else if (obj == QueryWizardDialog.CLEAR_BUTTON_ID) {
+      if (!button.isVisible()) {
+        button.setVisible(true);
+      }
+      button.setEnabled(true);
     }
 
-    public boolean handleExtraButtonPressed(int buttonId) {
-	if (buttonId == QueryWizardDialog.REFRESH_BUTTON_ID) {
-	    if (getTaskRepository() != null) {
-		refreshConfiguration(true);
-	    } else {
-		MessageDialog
-			.openInformation(
-				Display.getCurrent().getActiveShell(),
-				Messages.AbstractRepositoryQueryPage2_Update_Attributes_Failed,
-				Messages.AbstractRepositoryQueryPage2_No_repository_available_please_add_one_using_the_Task_Repositories_view);
-	    }
-	    return true;
-	} else if (buttonId == QueryWizardDialog.CLEAR_BUTTON_ID) {
-	    doClearControls();
-	    return true;
-	}
-	return false;
+  }
+
+  public void setNeedsClear(boolean needsClearButton) {
+    this.needsClear = needsClearButton;
+  }
+
+  public void setNeedsRefresh(boolean needsRefresh) {
+    this.needsRefresh = needsRefresh;
+  }
+
+  public void setQueryTitle(String text) {
+    if (titleText != null) {
+      titleText.setText(text);
+    }
+  }
+
+  @Override
+  public void setVisible(boolean visible) {
+    super.setVisible(visible);
+
+    if (getSearchContainer() != null) {
+      getSearchContainer().setPerformActionEnabled(true);
     }
 
-    @Override
-    public boolean isPageComplete() {
-	if (titleText != null && titleText.getText().length() > 0) {
-	    return true;
-	}
-	setMessage(defaultMessage);
-	return false;
+    if (visible && firstTime) {
+      firstTime = false;
+      if (!hasRepositoryConfiguration() && needsRefresh) {
+        // delay the execution so the dialog's progress bar is visible
+        // when the attributes are updated
+        Display.getDefault().asyncExec(new Runnable() {
+          public void run() {
+            if (getControl() != null && !getControl().isDisposed()) {
+              initializePage();
+            }
+          }
+        });
+      } else {
+        // no remote connection is needed to get attributes therefore do
+        // not use delayed execution to avoid flickering
+        initializePage();
+      }
+    }
+  }
+
+  private void createButtonGroup(Composite parent) {
+    Composite buttonComposite = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout(1, false);
+    layout.marginWidth = 0;
+    layout.marginHeight = 0;
+    buttonComposite.setLayout(layout);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).span(2, 1)
+        .applyTo(buttonComposite);
+    createButtons(buttonComposite);
+    if (buttonComposite.getChildren().length > 0) {
+      layout.numColumns = buttonComposite.getChildren().length;
+    } else {
+      // remove composite to avoid spacing
+      buttonComposite.dispose();
+    }
+  }
+
+  private void createTitleGroup(Composite control) {
+    if (inSearchContainer()) {
+      return;
     }
 
-    public boolean needsClear() {
-	return needsClear;
+    Label titleLabel = new Label(control, SWT.NONE);
+    titleLabel.setText(Messages.AbstractRepositoryQueryPage2__Title_);
+
+    titleText = new Text(control, SWT.BORDER);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleText);
+    titleText.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        getContainer().updateButtons();
+      }
+    });
+  }
+
+  private void initializePage() {
+    if (needsRefresh) {
+      boolean refreshed = refreshConfiguration(false);
+      if (!refreshed) {
+        // always do a refresh when page is initially shown
+        if (!innerComposite.isDisposed()) {
+          doRefreshControls();
+        }
+      }
     }
-
-    public boolean needsRefresh() {
-	return needsRefresh;
+    boolean restored = false;
+    if (getQuery() != null) {
+      titleText.setText(getQuery().getSummary());
+      restored |= restoreState(getQuery());
+    } else if (inSearchContainer()) {
+      restored |= restoreSavedState();
     }
-
-    @Override
-    public boolean performSearch() {
-	if (inSearchContainer()) {
-	    saveState();
-	}
-	return super.performSearch();
+    if (!restored) {
+      // initialize with default values
+      if (!innerComposite.isDisposed()) {
+        doClearControls();
+      }
     }
+  }
 
-    @Override
-    public void saveState() {
-	if (inSearchContainer()) {
-	    RepositoryQuery query = new RepositoryQuery(getTaskRepository()
-		    .getConnectorKind(), "handle"); //$NON-NLS-1$
-	    applyTo(query);
-
-	    IDialogSettings settings = getDialogSettings();
-	    if (settings != null) {
-		settings.put(getSavedStateSettingKey(), query.getUrl());
-	    }
-	}
+  protected boolean refreshConfiguration(final boolean force) {
+    if (force || !hasRepositoryConfiguration()) {
+      setErrorMessage(null);
+      try {
+        doRefreshConfiguration();
+        if (!innerComposite.isDisposed()) {
+          doRefreshControls();
+        }
+        return true;
+      } catch (InvocationTargetException e) {
+        if (e.getCause() instanceof CoreException) {
+          setErrorMessage(((CoreException) e.getCause()).getStatus().getMessage());
+        } else {
+          setErrorMessage(e.getCause().getMessage());
+        }
+      } catch (InterruptedException e) {
+        // canceled
+      }
     }
+    return false;
+  }
 
-    public void setExtraButtonState(Button button) {
-	Integer obj = (Integer) button.getData();
-	if (obj == QueryWizardDialog.REFRESH_BUTTON_ID) {
-	    if (needsRefresh) {
-		if (!button.isVisible()) {
-		    button.setVisible(true);
-		}
-		button.setEnabled(true);
-	    } else {
-		if (button != null && button.isVisible()) {
-		    button.setVisible(false);
-		}
-	    }
-	} else if (obj == QueryWizardDialog.CLEAR_BUTTON_ID) {
-	    if (!button.isVisible()) {
-		button.setVisible(true);
-	    }
-	    button.setEnabled(true);
-	}
-
+  private void doRefreshConfiguration() throws InvocationTargetException, InterruptedException {
+    IRunnableWithProgress runnable = new IRunnableWithProgress() {
+      public void run(IProgressMonitor monitor) throws InvocationTargetException,
+          InterruptedException {
+        monitor = SubMonitor.convert(monitor);
+        monitor.beginTask(Messages.AbstractRepositoryQueryPage2_Refresh_Configuration_Button_Label,
+            IProgressMonitor.UNKNOWN);
+        try {
+          connector.updateRepositoryConfiguration(getTaskRepository(), monitor);
+        } catch (CoreException e) {
+          throw new InvocationTargetException(e);
+        } catch (OperationCanceledException e) {
+          throw new InterruptedException();
+        } finally {
+          monitor.done();
+        }
+      }
+    };
+    if (getContainer() != null) {
+      getContainer().run(true, true, runnable);
+    } else if (progressContainer != null) {
+      progressContainer.run(true, true, runnable);
+    } else if (getSearchContainer() != null) {
+      getSearchContainer().getRunnableContext().run(true, true, runnable);
+    } else {
+      IProgressService service = PlatformUI.getWorkbench().getProgressService();
+      service.busyCursorWhile(runnable);
     }
+  }
 
-    public void setNeedsClear(boolean needsClearButton) {
-	this.needsClear = needsClearButton;
+  protected void createButtons(final Composite composite) {
+    if (getContainer() instanceof QueryWizardDialog) {
+      // refresh and clear buttons are provided by the dialog
+      return;
     }
-
-    public void setNeedsRefresh(boolean needsRefresh) {
-	this.needsRefresh = needsRefresh;
+    if (needsRefresh) {
+      refreshButton = new Button(composite, SWT.PUSH);
+      refreshButton.setText(Messages.AbstractRepositoryQueryPage2__Refresh_From_Repository);
+      refreshButton.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          if (getTaskRepository() != null) {
+            refreshConfiguration(true);
+          } else {
+            MessageDialog
+                .openInformation(
+                    Display.getCurrent().getActiveShell(),
+                    Messages.AbstractRepositoryQueryPage2_Update_Attributes_Failed,
+                    Messages.AbstractRepositoryQueryPage2_No_repository_available_please_add_one_using_the_Task_Repositories_view);
+          }
+        }
+      });
     }
-
-    public void setQueryTitle(String text) {
-	if (titleText != null) {
-	    titleText.setText(text);
-	}
+    if (needsClear) {
+      Button clearButton = new Button(composite, SWT.PUSH);
+      clearButton.setText(Messages.AbstractRepositoryQueryPage2_Clear_Fields);
+      clearButton.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          doClearControls();
+        }
+      });
     }
+    final ProgressMonitorPart progressMonitorPart = new ProgressMonitorPart(composite, null);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false)
+        .applyTo(progressMonitorPart);
+    progressMonitorPart.setVisible(false);
+    progressContainer = new ProgressContainer(composite.getShell(), progressMonitorPart) {
+      @Override
+      protected void restoreUiState(java.util.Map<Object, Object> state) {
+        cancelButton.setVisible(false);
+        CommonUiUtil.setEnabled(innerComposite, true);
+        for (Control control : composite.getChildren()) {
+          if (control instanceof ProgressMonitorPart) {
+            break;
+          }
+          control.setEnabled(true);
+        }
+      }
 
-    @Override
-    public void setVisible(boolean visible) {
-	super.setVisible(visible);
+      @Override
+      protected void saveUiState(java.util.Map<Object, Object> savedState) {
+        CommonUiUtil.setEnabled(innerComposite, false);
+        for (Control control : composite.getChildren()) {
+          if (control instanceof ProgressMonitorPart) {
+            break;
+          }
+          control.setEnabled(false);
+        }
+        cancelButton.setEnabled(true);
+        cancelButton.setVisible(true);
+      }
+    };
 
-	if (getSearchContainer() != null) {
-	    getSearchContainer().setPerformActionEnabled(true);
-	}
+    cancelButton = new Button(composite, SWT.PUSH);
+    cancelButton.setText(IDialogConstants.CANCEL_LABEL);
+    cancelButton.setVisible(false);
+    progressContainer.setCancelButton(cancelButton);
+  }
 
-	if (visible && firstTime) {
-	    firstTime = false;
-	    if (!hasRepositoryConfiguration() && needsRefresh) {
-		// delay the execution so the dialog's progress bar is visible
-		// when the attributes are updated
-		Display.getDefault().asyncExec(new Runnable() {
-		    public void run() {
-			if (getControl() != null && !getControl().isDisposed()) {
-			    initializePage();
-			}
-		    }
-		});
-	    } else {
-		// no remote connection is needed to get attributes therefore do
-		// not use delayed execution to avoid flickering
-		initializePage();
-	    }
-	}
+  protected void doClearControls() {}
+
+  protected AbstractRepositoryConnector getConnector() {
+    return connector;
+  }
+
+  protected String getSavedStateSettingKey() {
+    return getName() + "." + getTaskRepository().getRepositoryUrl(); //$NON-NLS-1$
+  }
+
+  protected boolean restoreSavedState() {
+    IDialogSettings settings = getDialogSettings();
+    if (settings != null) {
+      String queryUrl = settings.get(getSavedStateSettingKey());
+      if (queryUrl != null) {
+        RepositoryQuery query =
+            new RepositoryQuery(getTaskRepository().getConnectorKind(), "handle"); //$NON-NLS-1$
+        query.setUrl(queryUrl);
+        return restoreState(query);
+      }
     }
-
-    private void createButtonGroup(Composite parent) {
-	Composite buttonComposite = new Composite(parent, SWT.NONE);
-	GridLayout layout = new GridLayout(1, false);
-	layout.marginWidth = 0;
-	layout.marginHeight = 0;
-	buttonComposite.setLayout(layout);
-	GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP)
-		.grab(true, false).span(2, 1).applyTo(buttonComposite);
-	createButtons(buttonComposite);
-	if (buttonComposite.getChildren().length > 0) {
-	    layout.numColumns = buttonComposite.getChildren().length;
-	} else {
-	    // remove composite to avoid spacing
-	    buttonComposite.dispose();
-	}
-    }
-
-    private void createTitleGroup(Composite control) {
-	if (inSearchContainer()) {
-	    return;
-	}
-
-	Label titleLabel = new Label(control, SWT.NONE);
-	titleLabel.setText(Messages.AbstractRepositoryQueryPage2__Title_);
-
-	titleText = new Text(control, SWT.BORDER);
-	GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP)
-		.grab(true, false).applyTo(titleText);
-	titleText.addModifyListener(new ModifyListener() {
-	    public void modifyText(ModifyEvent e) {
-		getContainer().updateButtons();
-	    }
-	});
-    }
-
-    private void initializePage() {
-	if (needsRefresh) {
-	    boolean refreshed = refreshConfiguration(false);
-	    if (!refreshed) {
-		// always do a refresh when page is initially shown
-		if (!innerComposite.isDisposed()) {
-		    doRefreshControls();
-		}
-	    }
-	}
-	boolean restored = false;
-	if (getQuery() != null) {
-	    titleText.setText(getQuery().getSummary());
-	    restored |= restoreState(getQuery());
-	} else if (inSearchContainer()) {
-	    restored |= restoreSavedState();
-	}
-	if (!restored) {
-	    // initialize with default values
-	    if (!innerComposite.isDisposed()) {
-		doClearControls();
-	    }
-	}
-    }
-
-    protected boolean refreshConfiguration(final boolean force) {
-	if (force || !hasRepositoryConfiguration()) {
-	    setErrorMessage(null);
-	    try {
-		doRefreshConfiguration();
-		if (!innerComposite.isDisposed()) {
-		    doRefreshControls();
-		}
-		return true;
-	    } catch (InvocationTargetException e) {
-		if (e.getCause() instanceof CoreException) {
-		    setErrorMessage(((CoreException) e.getCause()).getStatus()
-			    .getMessage());
-		} else {
-		    setErrorMessage(e.getCause().getMessage());
-		}
-	    } catch (InterruptedException e) {
-		// canceled
-	    }
-	}
-	return false;
-    }
-
-    private void doRefreshConfiguration() throws InvocationTargetException,
-	    InterruptedException {
-	IRunnableWithProgress runnable = new IRunnableWithProgress() {
-	    public void run(IProgressMonitor monitor)
-		    throws InvocationTargetException, InterruptedException {
-		monitor = SubMonitor.convert(monitor);
-		monitor.beginTask(
-			Messages.AbstractRepositoryQueryPage2_Refresh_Configuration_Button_Label,
-			IProgressMonitor.UNKNOWN);
-		try {
-		    connector.updateRepositoryConfiguration(
-			    getTaskRepository(), monitor);
-		} catch (CoreException e) {
-		    throw new InvocationTargetException(e);
-		} catch (OperationCanceledException e) {
-		    throw new InterruptedException();
-		} finally {
-		    monitor.done();
-		}
-	    }
-	};
-	if (getContainer() != null) {
-	    getContainer().run(true, true, runnable);
-	} else if (progressContainer != null) {
-	    progressContainer.run(true, true, runnable);
-	} else if (getSearchContainer() != null) {
-	    getSearchContainer().getRunnableContext().run(true, true, runnable);
-	} else {
-	    IProgressService service = PlatformUI.getWorkbench()
-		    .getProgressService();
-	    service.busyCursorWhile(runnable);
-	}
-    }
-
-    protected void createButtons(final Composite composite) {
-	if (getContainer() instanceof QueryWizardDialog) {
-	    // refresh and clear buttons are provided by the dialog
-	    return;
-	}
-	if (needsRefresh) {
-	    refreshButton = new Button(composite, SWT.PUSH);
-	    refreshButton
-		    .setText(Messages.AbstractRepositoryQueryPage2__Refresh_From_Repository);
-	    refreshButton.addSelectionListener(new SelectionAdapter() {
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-		    if (getTaskRepository() != null) {
-			refreshConfiguration(true);
-		    } else {
-			MessageDialog
-				.openInformation(
-					Display.getCurrent().getActiveShell(),
-					Messages.AbstractRepositoryQueryPage2_Update_Attributes_Failed,
-					Messages.AbstractRepositoryQueryPage2_No_repository_available_please_add_one_using_the_Task_Repositories_view);
-		    }
-		}
-	    });
-	}
-	if (needsClear) {
-	    Button clearButton = new Button(composite, SWT.PUSH);
-	    clearButton
-		    .setText(Messages.AbstractRepositoryQueryPage2_Clear_Fields);
-	    clearButton.addSelectionListener(new SelectionAdapter() {
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-		    doClearControls();
-		}
-	    });
-	}
-	final ProgressMonitorPart progressMonitorPart = new ProgressMonitorPart(
-		composite, null);
-	GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING)
-		.grab(true, false).applyTo(progressMonitorPart);
-	progressMonitorPart.setVisible(false);
-	progressContainer = new ProgressContainer(composite.getShell(),
-		progressMonitorPart) {
-	    @Override
-	    protected void restoreUiState(java.util.Map<Object, Object> state) {
-		cancelButton.setVisible(false);
-		CommonUiUtil.setEnabled(innerComposite, true);
-		for (Control control : composite.getChildren()) {
-		    if (control instanceof ProgressMonitorPart) {
-			break;
-		    }
-		    control.setEnabled(true);
-		}
-	    }
-
-	    @Override
-	    protected void saveUiState(java.util.Map<Object, Object> savedState) {
-		CommonUiUtil.setEnabled(innerComposite, false);
-		for (Control control : composite.getChildren()) {
-		    if (control instanceof ProgressMonitorPart) {
-			break;
-		    }
-		    control.setEnabled(false);
-		}
-		cancelButton.setEnabled(true);
-		cancelButton.setVisible(true);
-	    }
-	};
-
-	cancelButton = new Button(composite, SWT.PUSH);
-	cancelButton.setText(IDialogConstants.CANCEL_LABEL);
-	cancelButton.setVisible(false);
-	progressContainer.setCancelButton(cancelButton);
-    }
-
-    protected void doClearControls() {
-    }
-
-    protected AbstractRepositoryConnector getConnector() {
-	return connector;
-    }
-
-    protected String getSavedStateSettingKey() {
-	return getName() + "." + getTaskRepository().getRepositoryUrl(); //$NON-NLS-1$
-    }
-
-    protected boolean restoreSavedState() {
-	IDialogSettings settings = getDialogSettings();
-	if (settings != null) {
-	    String queryUrl = settings.get(getSavedStateSettingKey());
-	    if (queryUrl != null) {
-		RepositoryQuery query = new RepositoryQuery(getTaskRepository()
-			.getConnectorKind(), "handle"); //$NON-NLS-1$
-		query.setUrl(queryUrl);
-		return restoreState(query);
-	    }
-	}
-	return false;
-    }
+    return false;
+  }
 }

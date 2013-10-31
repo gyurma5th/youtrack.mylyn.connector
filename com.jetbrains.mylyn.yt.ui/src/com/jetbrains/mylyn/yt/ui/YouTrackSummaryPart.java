@@ -8,9 +8,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorSummaryPart;
+import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.swt.SWT;
@@ -25,11 +25,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
@@ -44,6 +45,8 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
   private static final String ADD_TAG_TEXT = "Add tag";
 
   private CCombo addTagCombo;
+
+  private Composite secondLineComposite;
 
   private void addAttribute(Composite composite, FormToolkit toolkit, TaskAttribute attribute,
       boolean shouldInitializeGridData) {
@@ -174,7 +177,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
     if (layout instanceof GridLayout) {
       GridLayout gLayout = (GridLayout) layout;
 
-      Composite secondLineComposite = new Composite(composite, SWT.NONE);
+      secondLineComposite = new Composite(composite, SWT.NONE);
       final RowLayout rowLayout = new RowLayout();
       rowLayout.center = true;
       rowLayout.marginLeft = 0;
@@ -183,13 +186,31 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       GridDataFactory.fillDefaults().span(gLayout.numColumns, 1).applyTo(secondLineComposite);
       toolkit.adapt(secondLineComposite);
 
-      Button addLink = new Button(secondLineComposite, SWT.NONE);
-      addLink.setText("Add link");
+      CCombo addLinkCombo = new CCombo(secondLineComposite, SWT.DOWN | SWT.ARROW | SWT.BORDER);
+      addLinkCombo.setText("Add link");
+      addLinkCombo.setEditable(false);
 
       putAddTagCombo(secondLineComposite);
 
-      Button commandDialog = new Button(secondLineComposite, SWT.NONE);
-      commandDialog.setText("Command dialog");
+      ToolBar toolBar = new ToolBar(secondLineComposite, SWT.NONE);
+      ToolItem commandDialog = new ToolItem(toolBar, SWT.PUSH | SWT.BORDER);
+      commandDialog.setText("Command Dialog");
+      commandDialog.addSelectionListener(new SelectionListener() {
+
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          YouTrackCommandWizard dialogWizard =
+              new YouTrackCommandWizard(getTaskData(), getTaskEditorPage().getModel()
+                  .getTaskRepository(), getTaskEditorPage().getTaskEditor());
+          dialogWizard.setHelpAvailable(true);
+          YouTrackCommandDialogWizard dialog =
+              new YouTrackCommandDialogWizard(secondLineComposite.getShell(), dialogWizard);
+          dialog.open();
+        }
+
+        @Override
+        public void widgetDefaultSelected(SelectionEvent e) {}
+      });
 
     }
 
@@ -220,23 +241,9 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
         CCombo combo = (CCombo) e.widget;
         String selectedText = combo.getItem(combo.getSelectionIndex());
 
-        String taskId = getTaskData().getTaskId();
-        String realIssueId = "";
-        if (taskId.contains("-")) {
-          realIssueId = taskId;
-        } else {
-          if (TasksUiPlugin.getTaskList().getTask(
-              getTaskEditorPage().getModel().getTaskRepository().getRepositoryUrl(), taskId) != null) {
-            realIssueId =
-                TasksUiPlugin
-                    .getTaskList()
-                    .getTask(getTaskEditorPage().getModel().getTaskRepository().getRepositoryUrl(),
-                        taskId).getTaskKey();
-          }
-        }
-
-        YouTrackConnector.getClient(getTaskEditorPage().getModel().getTaskRepository()).addNewTag(
-            realIssueId, selectedText);
+        TaskRepository repository = getTaskEditorPage().getModel().getTaskRepository();
+        YouTrackConnector.getClient(repository).addNewTag(
+            YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), repository), selectedText);
         combo.setText(ADD_TAG_TEXT);
 
         TaskAttribute attribute =
