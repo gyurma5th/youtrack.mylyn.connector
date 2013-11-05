@@ -48,7 +48,14 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
   private static final String ADD_NEW_TAG_PROPOSAL = "Add tag with command...";
 
+  private static final String ADD_LINK_TEXT = "Add link";
+
+  private static final String[] linkTypeSentences = {"relates to", "is required for", "depends on",
+      "is duplicated by", "duplicates", "parent for", "subtask of"};
+
   private CCombo addTagCombo;
+
+  private CCombo addLinkCombo;
 
   private Composite secondLineComposite;
 
@@ -190,15 +197,34 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       GridDataFactory.fillDefaults().span(gLayout.numColumns, 1).applyTo(secondLineComposite);
       toolkit.adapt(secondLineComposite);
 
-      CCombo addLinkCombo = new CCombo(secondLineComposite, SWT.DOWN | SWT.ARROW | SWT.BORDER);
-      addLinkCombo.setText("Add link");
-      addLinkCombo.setEditable(false);
 
+      putAddLinkCombo(secondLineComposite);
       putAddTagCombo(secondLineComposite);
       putOpenCommandDialogItem(secondLineComposite);
     }
 
     return composite;
+  }
+
+  private void putAddLinkCombo(Composite composite) {
+
+    addLinkCombo = new CCombo(composite, SWT.DOWN | SWT.ARROW | SWT.BORDER);
+    addLinkCombo.setEditable(false);
+    addLinkCombo.setItems(linkTypeSentences);
+    addLinkCombo.setText(ADD_LINK_TEXT);
+    addLinkCombo.addSelectionListener(new SelectionListener() {
+
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        CCombo combo = (CCombo) e.widget;
+        String selectedText = combo.getItem(combo.getSelectionIndex());
+        openCommandWizard(secondLineComposite.getShell(), capitalize(selectedText) + ": ", true);
+        combo.setText(ADD_LINK_TEXT);
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {}
+    });
   }
 
   private void putOpenCommandDialogItem(final Composite composite) {
@@ -282,5 +308,9 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
     if (dialog.open() == Window.OK && needUISynchronization) {
       YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
     }
+  }
+
+  private String capitalize(String line) {
+    return Character.toUpperCase(line.charAt(0)) + line.substring(1);
   }
 }

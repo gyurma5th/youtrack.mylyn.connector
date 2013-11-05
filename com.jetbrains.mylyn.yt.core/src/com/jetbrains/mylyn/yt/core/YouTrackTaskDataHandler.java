@@ -47,9 +47,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
 
-  public static final String LINK_PREFIX = "TaskAttribute.LINK";
+  public static final String LINK_PREFIX = "TaskAttribute.LINK_";
 
-  public static final String TAG_PREFIX = "TaskAttribute.TAG";
+  public static final String TAG_PREFIX = "TaskAttribute.TAG_";
 
   public static final String CUSTOM_FIELD_KIND = "TaslAttributeKind.CUSTOM_FIELD_KIND";
 
@@ -336,21 +336,16 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     attribute.setValue("<a href=\"" + taskData.getRepositoryUrl() + "/issue/" + issue.getId()
         + "\">" + issue.getId() + "</a>");
 
-    attribute = taskData.getRoot().createAttribute(TaskAttribute.COMPONENT);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_TASK_DEPENDENCY)
-        .setLabel("Relates to:");
-    if (issue.getLinks() != null && issue.getLinks().size() > 0) {
-      int count = 0;
-      for (IssueLink link : issue.getLinks()) {
-        TaskAttribute attr = taskData.getRoot().createAttribute(LINK_PREFIX + count);
-        attr.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_TASK_DEPENDENCY);
-        attr.addValue(link.getValue());
-        if (count == 0) {
-          attribute.addValue(attr.getValue());
-        } else {
-          attribute.addValue("\n" + attr.getValue());
-        }
-        count++;
+    for (IssueLink link : issue.getLinks()) {
+      String role = link.getRole();
+      if (!taskData.getRoot().getAttributes().containsKey(attributeNameFromLinkRole(role))) {
+        attribute = taskData.getRoot().createAttribute(attributeNameFromLinkRole(role));
+        attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_TASK_DEPENDENCY)
+            .setLabel(capitalize(role) + ":");
+        attribute.addValue(link.getValue());
+      } else {
+        attribute = taskData.getRoot().getMappedAttribute(attributeNameFromLinkRole(role));
+        attribute.addValue("\n" + link.getValue());
       }
     }
 
@@ -621,4 +616,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     YouTrackTaskDataHandler.enableEditMode = enableEditMode;
   }
 
+  private String attributeNameFromLinkRole(String role) {
+    return LINK_PREFIX + role.replace(" ", "_").toUpperCase();
+  }
+
+  private String capitalize(String line) {
+    return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+  }
 }
