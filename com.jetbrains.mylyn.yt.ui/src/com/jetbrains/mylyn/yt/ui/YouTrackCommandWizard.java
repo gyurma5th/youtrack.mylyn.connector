@@ -35,7 +35,8 @@ import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
 
 public class YouTrackCommandWizard extends Wizard {
 
-  private YouTrackCommandDialogPage commandDialogPage;
+  public YouTrackCommandDialogPage commandDialogPage = new YouTrackCommandDialogPage(
+      "Apply Command");
 
   private TaskData taskData;
 
@@ -45,7 +46,9 @@ public class YouTrackCommandWizard extends Wizard {
 
   private static final String CANT_SUBMIT = "Can't submit incorrect command.";
 
-  private class YouTrackCommandDialogPage extends WizardPage {
+  private String importedCommand;
+
+  public class YouTrackCommandDialogPage extends WizardPage {
 
     private Text commandBoxText;
 
@@ -85,9 +88,13 @@ public class YouTrackCommandWizard extends Wizard {
           + getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY).getValue());
 
       commandBoxText = new Text(composite, SWT.SINGLE | SWT.FILL);
-      commandBoxText.setLayoutData(gd);
+      if (importedCommand != null) {
+        commandBoxText.setText(importedCommand);
+        commandBoxText.setSelection(commandBoxText.getCharCount());
+      }
+      getCommandBoxText().setLayoutData(gd);
 
-      commandBoxText.addModifyListener(new ModifyListener() {
+      getCommandBoxText().addModifyListener(new ModifyListener() {
 
         @Override
         public void modifyText(ModifyEvent e) {
@@ -96,11 +103,11 @@ public class YouTrackCommandWizard extends Wizard {
       });
 
       try {
-        intellisense = getClient().intellisenseSearchValues(commandBoxText.getText());
+        intellisense = getClient().intellisenseSearchValues(getCommandBoxText().getText());
         scp = new SimpleContentProposalProvider(intellisense.getFullOptions());
         KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
         ContentProposalAdapter adapter =
-            new ContentProposalAdapter(commandBoxText, new TextContentAdapter(), scp, ks, null);
+            new ContentProposalAdapter(getCommandBoxText(), new TextContentAdapter(), scp, ks, null);
         adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
         adapter.addContentProposalListener(new IContentProposalListener() {
 
@@ -113,11 +120,11 @@ public class YouTrackCommandWizard extends Wizard {
         throw new RuntimeException(e);
       }
 
-      commandBoxText.addKeyListener(new KeyAdapter() {
+      getCommandBoxText().addKeyListener(new KeyAdapter() {
         public void keyReleased(KeyEvent ke) {
           intellisense =
-              getClient().intellisenseSearchValues(commandBoxText.getText(),
-                  commandBoxText.getCaretPosition());
+              getClient().intellisenseSearchValues(getCommandBoxText().getText(),
+                  getCommandBoxText().getCaretPosition());
           items = intellisense.getIntellisenseItems();
           for (int ind = 0; ind < items.size(); ind++) {
             itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
@@ -131,19 +138,31 @@ public class YouTrackCommandWizard extends Wizard {
 
     private void insertAcceptedProposal(IContentProposal proposal) {
       IntellisenseItem item = itemByNameMap.get((proposal.getContent()));
-      String beforeInsertion = commandBoxText.getText();
+      String beforeInsertion = getCommandBoxText().getText();
       String afterInsertion =
           beforeInsertion.substring(0, item.getCompletionPositions().getStart())
               + proposal.getContent()
               + beforeInsertion.substring(item.getCompletionPositions().getEnd());
-      commandBoxText.setText(afterInsertion);
-      commandBoxText.setSelection(Integer.parseInt(item.getCaret()));
+      getCommandBoxText().setText(afterInsertion);
+      getCommandBoxText().setSelection(Integer.parseInt(item.getCaret()));
     }
 
 
     @Override
     public boolean isPageComplete() {
       return true;
+    }
+
+    public Text getCommandBoxText() {
+      return commandBoxText;
+    }
+
+    public void setCommandBoxText(String text) {
+      if (commandBoxText == null) {
+        importedCommand = text;
+      } else {
+        commandBoxText.setText(text);
+      }
     }
   }
 
@@ -161,17 +180,17 @@ public class YouTrackCommandWizard extends Wizard {
   }
 
   public boolean finishPressed() {
-    if (commandDialogPage.commandBoxText.getText().trim().length() == 0) {
-      commandDialogPage.setErrorMessage(CANT_SUBMIT);
+    if (getCommandDialogPage().getCommandBoxText().getText().trim().length() == 0) {
+      getCommandDialogPage().setErrorMessage(CANT_SUBMIT);
       return false;
     } else {
       try {
         getClient().applyCommand(
             YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), taskRepository),
-            commandDialogPage.commandBoxText.getText());
+            getCommandDialogPage().getCommandBoxText().getText());
         return true;
       } catch (RuntimeException e) {
-        commandDialogPage.setErrorMessage(CANT_SUBMIT);
+        getCommandDialogPage().setErrorMessage(CANT_SUBMIT);
         return false;
       }
     }
@@ -179,8 +198,7 @@ public class YouTrackCommandWizard extends Wizard {
 
   @Override
   public void addPages() {
-    commandDialogPage = new YouTrackCommandDialogPage("Apply Command");
-    addPage(commandDialogPage);
+    addPage(getCommandDialogPage());
   }
 
   public TaskData getTaskData() {
@@ -209,6 +227,14 @@ public class YouTrackCommandWizard extends Wizard {
 
   public void setEditor(TaskEditor editor) {
     this.editor = editor;
+  }
+
+  YouTrackCommandDialogPage getCommandDialogPage() {
+    return commandDialogPage;
+  }
+
+  public void setCommandDialogPage(YouTrackCommandDialogPage commandDialogPage) {
+    this.commandDialogPage = commandDialogPage;
   }
 
 }

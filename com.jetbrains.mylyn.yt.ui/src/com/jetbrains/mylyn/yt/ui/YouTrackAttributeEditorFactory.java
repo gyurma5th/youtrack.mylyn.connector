@@ -15,8 +15,6 @@ import org.eclipse.mylyn.tasks.ui.editors.LayoutHint.ColumnSpan;
 import org.eclipse.mylyn.tasks.ui.editors.LayoutHint.RowSpan;
 import org.eclipse.ui.services.IServiceLocator;
 
-import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
-
 public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
 
   private final TaskDataModel model;
@@ -31,17 +29,10 @@ public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
   public AbstractAttributeEditor createEditor(String type, TaskAttribute taskAttribute) {
 
     if (TaskAttribute.TYPE_MULTI_SELECT.equals(type)) {
-      if (taskAttribute.getId().equals(YouTrackTaskDataHandler.TAG_PREFIX)) {
-        CheckboxMultiWithAdditionAttributeEditor attributeEditor =
-            new CheckboxMultiWithAdditionAttributeEditor(model, taskAttribute);
-        attributeEditor.setLayoutHint(new LayoutHint(RowSpan.SINGLE, ColumnSpan.SINGLE));
-        return attributeEditor;
-      } else {
-        CheckboxMultiSelectAttributeEditor attributeEditor =
-            new CheckboxMultiSelectAttributeEditor(model, taskAttribute);
-        attributeEditor.setLayoutHint(new LayoutHint(RowSpan.SINGLE, ColumnSpan.SINGLE));
-        return attributeEditor;
-      }
+      CheckboxMultiSelectAttributeEditor attributeEditor =
+          new CheckboxMultiSelectAttributeEditor(model, taskAttribute);
+      attributeEditor.setLayoutHint(new LayoutHint(RowSpan.SINGLE, ColumnSpan.SINGLE));
+      return attributeEditor;
     }
 
     return super.createEditor(type, taskAttribute);

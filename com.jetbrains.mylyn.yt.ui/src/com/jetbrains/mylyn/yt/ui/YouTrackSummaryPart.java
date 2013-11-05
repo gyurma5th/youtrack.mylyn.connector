@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.window.Window;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorSummaryPart;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
@@ -43,6 +44,8 @@ import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
   private static final String ADD_TAG_TEXT = "Add tag";
+
+  private static final String ADD_NEW_TAG_PROPOSAL = "Add tag with command...";
 
   private CCombo addTagCombo;
 
@@ -229,6 +232,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
         CCombo combo = (CCombo) event.widget;
         combo.setItems(YouTrackConnector.getClient(
             getTaskEditorPage().getModel().getTaskRepository()).getAllSuitableTags());
+        combo.add(ADD_NEW_TAG_PROPOSAL, 0);
         combo.setText(ADD_TAG_TEXT);
       }
     });
@@ -241,16 +245,30 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
         CCombo combo = (CCombo) e.widget;
         String selectedText = combo.getItem(combo.getSelectionIndex());
 
-        TaskRepository repository = getTaskEditorPage().getModel().getTaskRepository();
-        YouTrackConnector.getClient(repository).addNewTag(
-            YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), repository), selectedText);
-        combo.setText(ADD_TAG_TEXT);
+        if (selectedText.equals(ADD_NEW_TAG_PROPOSAL)) {
+          YouTrackCommandWizard dialogWizard =
+              new YouTrackCommandWizard(getTaskData(), getTaskEditorPage().getModel()
+                  .getTaskRepository(), getTaskEditorPage().getTaskEditor());
+          dialogWizard.getCommandDialogPage().setCommandBoxText(ADD_TAG_TEXT.toLowerCase() + " ");
+          dialogWizard.setHelpAvailable(true);
+          YouTrackCommandDialogWizard dialog =
+              new YouTrackCommandDialogWizard(secondLineComposite.getShell(), dialogWizard);
+          if (dialog.open() == Window.OK) {
+            YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
+          }
+        } else {
+          TaskRepository repository = getTaskEditorPage().getModel().getTaskRepository();
+          YouTrackConnector.getClient(repository)
+              .addNewTag(YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), repository),
+                  selectedText);
 
-        TaskAttribute attribute =
-            getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX);
-        attribute.putOption(selectedText, selectedText);
-        attribute.addValue("\n" + selectedText);
-        YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
+          TaskAttribute attribute =
+              getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX);
+          attribute.putOption(selectedText, selectedText);
+          attribute.addValue("\n" + selectedText);
+          YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
+        }
+        combo.setText(ADD_TAG_TEXT);
       }
 
       @Override
@@ -259,5 +277,4 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       }
     });
   }
-
 }

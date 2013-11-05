@@ -325,6 +325,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     // because 'priority' icon needs priority level
     if (issue.getCustomFieldsValues().containsKey("Priority")) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
+      // TODO: NullPointer here!
       if (project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
         attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),
             project.getCustomFieldsMap().get("Priority").getBundle().getValues()).toString());
