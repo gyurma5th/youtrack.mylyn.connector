@@ -1,6 +1,6 @@
 /**
-@author: amarch
-*/
+ * @author: amarch
+ */
 
 package com.jetbrains.mylyn.yt.ui;
 
@@ -21,49 +21,49 @@ import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 
 public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
 
-	public YouTrackConnectorUi() {
-	}
+  public YouTrackConnectorUi() {}
 
-	@Override
-	public String getConnectorKind() {
-		return YouTrackCorePlugin.CONNECTOR_KIND;
-	}
+  @Override
+  public String getConnectorKind() {
+    return YouTrackCorePlugin.CONNECTOR_KIND;
+  }
 
-	@Override
-	public ITaskRepositoryPage getSettingsPage(TaskRepository taskRepository) {
-		return new YouTrackRepositoryPage(taskRepository);
-	}
+  @Override
+  public ITaskRepositoryPage getSettingsPage(TaskRepository taskRepository) {
+    return new YouTrackRepositoryPage(taskRepository);
+  }
 
-	@Override
-	public boolean hasSearchPage() {
-		return false;
-	}
+  @Override
+  public boolean hasSearchPage() {
+    return false;
+  }
 
-	@Override
-	public IWizard getNewTaskWizard(TaskRepository repository, ITaskMapping selection) {
-		return new NewYouTrackIssueWizard(repository, selection);
-	}
+  @Override
+  public IWizard getNewTaskWizard(TaskRepository repository, ITaskMapping selection) {
+    return new NewYouTrackIssueWizard(repository, selection);
+  }
 
-	@Override
-	public IWizard getQueryWizard(TaskRepository repository, IRepositoryQuery query) {
-		RepositoryQueryWizard wizard = new RepositoryQueryWizard(repository);
-		wizard.addPage(new YouTrackRepositoryQueryPage("youtrack.repository.query.page", repository, query));
-		return wizard;
-	}
-	
-	@Override
-	public String getTaskKindLabel(ITask repositoryTask) {
-		return "Issue";
-	}
-	
-	@Override
-	public String getReplyText(TaskRepository taskRepository, ITask task, ITaskComment taskComment, boolean includeTask) {
-		if (taskComment == null) {
-			return String.format("Reply to description:", task.getAttribute(TaskAttribute.DESCRIPTION));
-		} else {
-			return String.format("Reply to comment:", taskComment.getText());
-		}
-	}
+  @Override
+  public IWizard getQueryWizard(TaskRepository repository, IRepositoryQuery query) {
+    RepositoryQueryWizard wizard = new RepositoryQueryWizard(repository);
+    wizard.addPage(new YouTrackRepositoryQueryPage("youtrack.repository.query.page", repository,
+        query));
+    return wizard;
+  }
+
+  @Override
+  public String getTaskKindLabel(ITask repositoryTask) {
+    return "Issue";
+  }
+
+  @Override
+  public String getReplyText(TaskRepository taskRepository, ITask task, ITaskComment taskComment,
+      boolean includeTask) {
+    if (taskComment == null) {
+      return String.format("Reply to description:", task.getAttribute(TaskAttribute.DESCRIPTION));
+    } else {
+      return String.format("Reply to comment:", taskComment.getText());
+    }
+  }
 
 }
-

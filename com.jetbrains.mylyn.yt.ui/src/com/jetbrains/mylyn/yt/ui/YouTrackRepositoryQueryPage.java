@@ -49,6 +49,8 @@ import org.eclipse.mylyn.commons.ui.CommonUiUtil;
 import org.eclipse.mylyn.commons.ui.ProgressContainer;
 import org.eclipse.mylyn.commons.workbench.forms.SectionComposite;
 import org.eclipse.mylyn.internal.tasks.core.RepositoryQuery;
+import org.eclipse.mylyn.internal.tasks.core.TaskList;
+import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.internal.tasks.ui.wizards.Messages;
 import org.eclipse.mylyn.internal.tasks.ui.wizards.QueryWizardDialog;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
@@ -212,10 +214,12 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
           setMessage("Choose saved search.");
           recursiveSetEnabled(fastQueryComposite, true);
           recursiveSetEnabled(customQueryComposite, false);
+          numberOfIssues1.setText("");
           numberOfIssues1.setEnabled(false);
         } else {
           recursiveSetEnabled(fastQueryComposite, false);
           recursiveSetEnabled(customQueryComposite, true);
+          numberOfIssues2.setText("");
           numberOfIssues2.setEnabled(false);
           setQueryTitle("");
           setMessage("Enter query into search box (press Ctrl+Space for query completion).");
@@ -251,8 +255,17 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     savedSearchesCombo.addListener(SWT.Selection, new Listener() {
       @Override
       public void handleEvent(Event event) {
-
+        TaskList taskList = TasksUiPlugin.getTaskList();
         if (savedSearchesCombo.getItemCount() > 0 && savedSearchesCombo.getSelectionIndex() != -1) {
+          for (RepositoryQuery query : taskList.getQueries()) {
+            if (query.getSummary().equals(savedSearchesCombo.getText())
+                && query.getRepositoryUrl().equals(repository.getUrl())) {
+              setErrorMessage("Such query already exist.");
+              setQueryTitle("");
+              return;
+            }
+          }
+
           if (getQueryTitle() == null || getQueryTitle().length() == 0) {
             setQueryTitle(savedSearchesCombo.getText());
           }
@@ -263,6 +276,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     savedSearchesCombo.addListener(SWT.DROP_DOWN, new Listener() {
       @Override
       public void handleEvent(Event event) {
+        setErrorMessage(null);
+        setMessage(defaultMessage, INFORMATION);
         numberOfIssues1.setText("");
         fillSearches();
       }
