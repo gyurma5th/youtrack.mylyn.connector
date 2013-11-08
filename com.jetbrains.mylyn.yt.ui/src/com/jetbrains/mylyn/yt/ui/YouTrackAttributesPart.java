@@ -65,8 +65,15 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
       }
     }
 
-    addAttribute(attributesComposite, toolkit,
-        getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX));
+    if (getTaskData().getRoot().getAttributes().keySet()
+        .contains(YouTrackTaskDataHandler.TAG_PREFIX)
+        && getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX)
+            .getValues() != null
+        && getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX)
+            .getValues().size() > 0) {
+      addAttribute(attributesComposite, toolkit,
+          getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX));
+    }
 
     toolkit.paintBordersFor(attributesComposite);
     section.setClient(attributesComposite);

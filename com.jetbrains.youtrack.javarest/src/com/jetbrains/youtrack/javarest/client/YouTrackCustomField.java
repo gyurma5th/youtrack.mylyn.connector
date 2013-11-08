@@ -20,6 +20,14 @@ public class YouTrackCustomField {
 
   private String type;
 
+  private URL fullURL;
+
+  private String emptyText;
+
+  private boolean canBeEmpty;
+
+  private LinkedList<String> defaultValues;
+
   public static enum YouTrackCustomFieldType {
     BUILD_SINGLE("build[1]", false, true, String.class),
     BUILD_MULTI("build[*]", false, false, String.class),
@@ -90,10 +98,6 @@ public class YouTrackCustomField {
 
   }
 
-  private URL fullURL;
-
-  private String emptyText;
-
   @XmlAttribute(name = "name")
   public String getName() {
     return name;
@@ -156,6 +160,24 @@ public class YouTrackCustomField {
 
   public boolean isSingle() {
     return YouTrackCustomFieldType.getTypeByName(type).singleField();
+  }
+
+  @XmlAttribute(name = "canBeEmpty")
+  public boolean isCanBeEmpty() {
+    return canBeEmpty;
+  }
+
+  public void setCanBeEmpty(boolean canBeEmpty) {
+    this.canBeEmpty = canBeEmpty;
+  }
+
+  @XmlElement(name = "defaultValue")
+  public LinkedList<String> getDefaultValues() {
+    return defaultValues;
+  }
+
+  public void setDefaultValues(LinkedList<String> defaultValues) {
+    this.defaultValues = defaultValues;
   }
 
 }

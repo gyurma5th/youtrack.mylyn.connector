@@ -89,18 +89,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       YouTrackProject project = YouTrackConnector.getProject(repository, issue.getProjectName());
 
       if (taskData.isNew()) {
-        String uploadIssueId;
-        if (project.getModelIssue() != null) {
-          uploadIssueId = project.getModelIssue().getId();
-
-        } else {
-          uploadIssueId = client.putNewIssue(issue);
-          issue.setId(uploadIssueId);
-        }
-
+        String uploadIssueId = client.putNewIssue(issue);
+        issue.setId(uploadIssueId);
         client.updateIssue(uploadIssueId, issue);
         return new RepositoryResponse(ResponseKind.TASK_CREATED, uploadIssueId);
-
       } else {
         // upload new comments
         String newComment = getNewComment(taskData);
@@ -139,16 +131,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       attribute.setValue(initializationData.getProduct());
       attribute = data.getRoot().createAttribute(TaskAttribute.DESCRIPTION);
       attribute.setValue("");
-      YouTrackIssue issue;
-      try {
-        issue = buildIssue(repository, data);
-        YouTrackClient client = YouTrackConnector.getClient(repository);
-        String uploadedIssueId = client.putNewIssue(issue);
-        issue = client.getIssue(uploadedIssueId);
-        project.setModelIssue(issue);
-      } catch (CoreException e) {
-        throw new RuntimeException(e.getMessage());
-      }
     }
 
     TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
@@ -200,7 +182,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       attribute.getMetaData().setReadOnly(false).setType(TaskAttribute.TYPE_LONG_RICH_TEXT);
     }
 
-    if (data.isNew() || enableEditMode) {
+    if (data.isNew()) {
       if (initializationData == null) {
         return false;
       }
@@ -233,11 +215,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
           }
         }
-        if (project.getModelIssue() != null) {
-          if (project.getModelIssue().getCustomFieldsValues().containsKey(field.getName())) {
-            customFieldAttribute.setValues(project.getModelIssue().getCustomFieldValue(
-                field.getName()));
-          } else {
+
+        if (field.getDefaultValues() != null) {
+          customFieldAttribute.setValues(field.getDefaultValues());
+        } else {
+          if (field.isCanBeEmpty()) {
             customFieldAttribute.setValue(field.getEmptyText());
           }
         }
@@ -246,7 +228,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       attribute = data.getRoot().getMappedAttribute(TaskAttribute.PRODUCT);
       attribute.setValue(product);
       attribute.getMetaData().setReadOnly(true);
-
     }
 
     return true;
@@ -426,8 +407,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
         customFieldAttribute.setValues(issue.getCustomFieldValue(field.getName()));
       } else {
-        customFieldAttribute.setValue("");
-        if (project.getCustomFieldsMap().get(field.getName()).getEmptyText() != null) {
+        if (project.getCustomFieldsMap().get(field.getName()).isCanBeEmpty()) {
           customFieldAttribute.setValue(project.getCustomFieldsMap().get(field.getName())
               .getEmptyText());
         }
@@ -562,18 +542,18 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             attr.getMetaData().setReadOnly(false);
           } else if (TAG_PREFIX.equals(attr.getId())) {
             attr.getMetaData().setReadOnly(false);
-            for (String tag : tags) {
-              if (!tag.equals("tag")) {
-                attr.putOption(tag, tag);
+            if (tags != null) {
+              for (String tag : tags) {
+                if (!tag.equals("tag")) {
+                  attr.putOption(tag, tag);
+                }
+              }
+              for (int i = 0; i < attr.getValues().size(); i++) {
+                String value = attr.getValues().get(0);
+                attr.removeValue(value);
+                attr.addValue(value.replace("\n", ""));
               }
             }
-
-            for (int i = 0; i < attr.getValues().size(); i++) {
-              String value = attr.getValues().get(0);
-              attr.removeValue(value);
-              attr.addValue(value.replace("\n", ""));
-            }
-
           } else if (isCustomField(project, attr.getId())) {
             attr.getMetaData().setReadOnly(false);
             String customFieldName = getNameFromLabel(attr);
@@ -583,7 +563,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             YouTrackCustomField customField = project.getCustomFieldsMap().get(customFieldName);
             if (!YouTrackCustomFieldType.getTypeByName(customField.getType()).isSimple()) {
               LinkedList<String> values = customField.getBundle().getValues();
-              if (customField.getEmptyText() != null
+              if (customField.isCanBeEmpty()
                   && !attr.getOptions().containsKey(customField.getEmptyText())) {
                 attr.putOption(customField.getEmptyText(), customField.getEmptyText());
               }

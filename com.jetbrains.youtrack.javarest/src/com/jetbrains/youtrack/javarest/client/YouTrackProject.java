@@ -20,8 +20,6 @@ public class YouTrackProject {
 
   private String projectShortName;
 
-  private YouTrackIssue modelIssue;
-
   @XmlAttribute(name = "name")
   public String getProjectFullName() {
     return projectFullName;
@@ -131,23 +129,5 @@ public class YouTrackProject {
     } else {
       return both;
     }
-  }
-
-  public YouTrackIssue getModelIssue() {
-    return modelIssue;
-  }
-
-  public void setModelIssue(YouTrackIssue modelIssue) {
-    this.modelIssue = modelIssue;
-  }
-
-  public void updateModelIssue(YouTrackClient client) {
-    YouTrackIssue issue = new YouTrackIssue();
-    issue.addSingleField("projectShortName", getProjectShortName());
-    issue.addSingleField("summary", "TEST MODEL ISSUE");
-    String id = client.putNewIssue(issue);
-    modelIssue = client.getIssue(id);
-    modelIssue.mapFields();
-    client.deleteIssue(id);
   }
 }
