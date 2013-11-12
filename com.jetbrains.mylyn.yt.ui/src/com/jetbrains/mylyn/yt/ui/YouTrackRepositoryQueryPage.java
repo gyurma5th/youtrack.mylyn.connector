@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,6 +42,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalListener;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -59,8 +63,8 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositoryQueryPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -91,6 +95,25 @@ import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
 
 public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
+
+  public class ContentProposalAdapterOpenable extends ContentProposalAdapter {
+
+    public ContentProposalAdapterOpenable(Control control,
+        IControlContentAdapter controlContentAdapter, IContentProposalProvider proposalProvider,
+        KeyStroke keyStroke, char[] autoActivationCharacters) {
+      super(control, controlContentAdapter, proposalProvider, keyStroke, autoActivationCharacters);
+    }
+
+    public void openProposalPopup() {
+      super.openProposalPopup();
+    }
+
+    public void closeProposalPopup() {
+      super.closeProposalPopup();
+    }
+
+  }
+
   private TaskRepository repository;
 
   private List<SavedSearch> searches;
@@ -114,6 +137,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
   private IntellisenseSearchValues intellisense;
 
   private SimpleContentProposalProvider scp;
+
+  private ContentProposalAdapterOpenable adapter;
 
   private Group fastQueryComposite;
 
@@ -144,6 +169,15 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
   private Button refreshButton;
 
   private Text titleText;
+
+  // in milliseconds
+  private int updateTime = 200;
+
+  private int showDelay = 500;
+
+  private String searchSequence;
+
+  private long lastTryTime = 0;
 
   public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository,
       IRepositoryQuery query) {
@@ -371,8 +405,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       intellisense = getClient().intellisenseSearchValues(searchBoxText.getText());
       scp = new SimpleContentProposalProvider(intellisense.getFullOptions());
       KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
-      ContentProposalAdapter adapter =
-          new ContentProposalAdapter(searchBoxText, new TextContentAdapter(), scp, ks, null);
+      adapter =
+          new ContentProposalAdapterOpenable(searchBoxText, new TextContentAdapter(), scp, ks, null);
       adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
       adapter.addContentProposalListener(new IContentProposalListener() {
 
@@ -385,21 +419,98 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       throw new RuntimeException(e);
     }
 
-    searchBoxText.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent ke) {
-        try {
-          intellisense =
-              getClient().intellisenseSearchValues(searchBoxText.getText(),
-                  searchBoxText.getCaretPosition());
-          items = intellisense.getIntellisenseItems();
-          for (int ind = 0; ind < items.size(); ind++) {
-            itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
-          }
-          scp.setProposals(intellisense.getFullOptions());
-        } catch (CoreException e) {
-          throw new RuntimeException(e);
+    // searchBoxText.addKeyListener(new KeyAdapter() {
+    // public void keyReleased(KeyEvent ke) {
+    // try {
+    // intellisense =
+    // getClient().intellisenseSearchValues(searchBoxText.getText(),
+    // searchBoxText.getCaretPosition());
+    // items = intellisense.getIntellisenseItems();
+    // for (int ind = 0; ind < items.size(); ind++) {
+    // itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
+    // }
+    // scp.setProposals(intellisense.getFullOptions());
+    // } catch (CoreException e) {
+    // throw new RuntimeException(e);
+    // }
+    // }
+    // });
+
+    searchBoxText.addFocusListener(new FocusListener() {
+
+      private Job autocomletionJob;
+
+      private Timer timer;
+
+      private Text widgetText;
+
+      @Override
+      public void focusLost(FocusEvent e) {
+        if (autocomletionJob != null) {
+          autocomletionJob.cancel();
+          timer.cancel();
         }
       }
+
+      @Override
+      public void focusGained(FocusEvent e) {
+
+        if (e.getSource() instanceof Text) {
+          widgetText = (Text) e.getSource();
+        }
+
+        class CheckModification extends TimerTask {
+          public void run() {
+
+            if (widgetText.isDisposed()) {
+              autocomletionJob.cancel();
+              timer.cancel();
+              return;
+            } else {
+              Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+
+                  if (searchSequence == null || !searchSequence.equals(widgetText.getText())) {
+                    searchSequence = widgetText.getText();
+                    lastTryTime = System.currentTimeMillis();
+                    adapter.closeProposalPopup();
+                    try {
+                      intellisense =
+                          getClient().intellisenseSearchValues(searchBoxText.getText(),
+                              searchBoxText.getCaretPosition());
+                      items = intellisense.getIntellisenseItems();
+                      for (int ind = 0; ind < items.size(); ind++) {
+                        itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
+                      }
+                    } catch (CoreException e) {
+                      throw new RuntimeException(e);
+                    }
+
+                    return;
+                  } else {
+                    if (lastTryTime > 0 && lastTryTime + showDelay > System.currentTimeMillis()) {
+                      scp.setProposals(intellisense.getFullOptions());
+                      openPopupProposals();
+                    }
+                  }
+                }
+              });
+            }
+          }
+        }
+
+        autocomletionJob = new Job("Command Autocompletion Proposals Job") {
+          @Override
+          protected IStatus run(IProgressMonitor monitor) {
+            timer = new Timer();
+            timer.schedule(new CheckModification(), 0, updateTime);
+            return Status.OK_STATUS;
+          }
+        };
+        autocomletionJob.setUser(true);
+        autocomletionJob.schedule();
+      }
+
     });
 
     numberOfIssues2 = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
@@ -410,6 +521,10 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
     recursiveSetEnabled(customQueryComposite, false);
     searchBoxText.addModifyListener(new ModifyAdapter(numberOfIssues2, null));
+  }
+
+  private void openPopupProposals() {
+    adapter.openProposalPopup();
   }
 
   private YouTrackClient getClient() throws CoreException {
