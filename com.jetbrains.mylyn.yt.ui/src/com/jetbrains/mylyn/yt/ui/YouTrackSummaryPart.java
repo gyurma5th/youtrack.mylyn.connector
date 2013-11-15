@@ -296,15 +296,15 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
 
   private void openCommandWizard(Shell shell, String initialCommand, boolean needUISynchronization) {
-    YouTrackCommandWizard dialogWizard =
+    YouTrackCommandWizard commandWizard =
         new YouTrackCommandWizard(getTaskData(),
             getTaskEditorPage().getModel().getTaskRepository(), getTaskEditorPage().getTaskEditor());
 
     if (initialCommand != null) {
-      dialogWizard.getCommandDialogPage().setCommandBoxText(initialCommand);
+      commandWizard.getCommandDialogPage().setCommandBoxText(initialCommand);
     }
 
-    YouTrackCommandDialogWizard dialog = new YouTrackCommandDialogWizard(shell, dialogWizard);
+    YouTrackCommandDialogWizard dialog = new YouTrackCommandDialogWizard(shell, commandWizard);
     if (dialog.open() == Window.OK && needUISynchronization) {
       YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
     }

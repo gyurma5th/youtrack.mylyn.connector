@@ -1,15 +1,5 @@
 package com.jetbrains.mylyn.yt.ui;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
-import org.eclipse.jface.bindings.keys.KeyStroke;
-import org.eclipse.jface.fieldassist.ContentProposalAdapter;
-import org.eclipse.jface.fieldassist.IContentProposal;
-import org.eclipse.jface.fieldassist.IContentProposalListener;
-import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
-import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -18,10 +8,6 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -30,8 +16,6 @@ import org.eclipse.swt.widgets.Text;
 
 import com.jetbrains.mylyn.yt.core.YouTrackConnector;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
-import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
-import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
 
 public class YouTrackCommandWizard extends Wizard {
 
@@ -51,17 +35,6 @@ public class YouTrackCommandWizard extends Wizard {
   public class YouTrackCommandDialogPage extends WizardPage {
 
     private Text commandBoxText;
-
-    private final String KEY_PRESS = "Ctrl+Space";
-
-    private LinkedList<IntellisenseItem> items;
-
-    private Map<String, IntellisenseItem> itemByNameMap = new HashMap<String, IntellisenseItem>();
-
-    private IntellisenseSearchValues intellisense;
-
-    private SimpleContentProposalProvider scp;
-
 
     protected YouTrackCommandDialogPage(String pageName) {
       super(pageName);
@@ -94,59 +67,10 @@ public class YouTrackCommandWizard extends Wizard {
       }
       getCommandBoxText().setLayoutData(gd);
 
-      getCommandBoxText().addModifyListener(new ModifyListener() {
-
-        @Override
-        public void modifyText(ModifyEvent e) {
-          setErrorMessage(null);
-        }
-      });
-
-      try {
-        intellisense = getClient().intellisenseSearchValues(getCommandBoxText().getText());
-        scp = new SimpleContentProposalProvider(intellisense.getFullOptions());
-        KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
-        ContentProposalAdapter adapter =
-            new ContentProposalAdapter(getCommandBoxText(), new TextContentAdapter(), scp, ks, null);
-        adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
-        adapter.addContentProposalListener(new IContentProposalListener() {
-
-          @Override
-          public void proposalAccepted(IContentProposal proposal) {
-            insertAcceptedProposal(proposal);
-          }
-        });
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-
-      getCommandBoxText().addKeyListener(new KeyAdapter() {
-        public void keyReleased(KeyEvent ke) {
-          intellisense =
-              getClient().intellisenseSearchValues(getCommandBoxText().getText(),
-                  getCommandBoxText().getCaretPosition());
-          items = intellisense.getIntellisenseItems();
-          for (int ind = 0; ind < items.size(); ind++) {
-            itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
-          }
-          scp.setProposals(intellisense.getFullOptions());
-        }
-      });
+      getCommandBoxText().addFocusListener(new CommandDialogFocusAdapter(getClient(), false, null));
 
       setControl(composite);
     }
-
-    private void insertAcceptedProposal(IContentProposal proposal) {
-      IntellisenseItem item = itemByNameMap.get((proposal.getContent()));
-      String beforeInsertion = getCommandBoxText().getText();
-      String afterInsertion =
-          beforeInsertion.substring(0, item.getCompletionPositions().getStart())
-              + proposal.getContent()
-              + beforeInsertion.substring(item.getCompletionPositions().getEnd());
-      getCommandBoxText().setText(afterInsertion);
-      getCommandBoxText().setSelection(Integer.parseInt(item.getCaret()));
-    }
-
 
     @Override
     public boolean isPageComplete() {

@@ -182,6 +182,10 @@ public class YouTrackClient {
   }
 
   public YouTrackIssue getIssue(String id) {
+    return getIssue(id, false);
+  }
+
+  public YouTrackIssue getIssue(String id, boolean wikifyDescription) {
     if (id == null) {
       throw new RuntimeException("Null issue id");
     } else {
@@ -189,12 +193,13 @@ public class YouTrackClient {
         throw new RuntimeException("Issue with such id dont exist in tracker.");
       } else {
         YouTrackIssue issue =
-            service.path("/issue/").path(id).accept("application/xml").get(YouTrackIssue.class);
+            service.path("/issue/").path(id)
+                .queryParam("wikifyDescription", String.valueOf(wikifyDescription))
+                .accept("application/xml").get(YouTrackIssue.class);
         issue.mapFields();
         return issue;
       }
     }
-
   }
 
   public List<YouTrackIssue> getIssuesInProject(String projectname, String filter, int after,
@@ -712,8 +717,7 @@ public class YouTrackClient {
 
       StringBuilder modifyTagsCommand = new StringBuilder();
       for (String newTag : newTags) {
-        this.applyCommand(oldIssueId,
-            " add tag " + newTag.replace("\n", ""));
+        this.applyCommand(oldIssueId, " add tag " + newTag.replace("\n", ""));
       }
 
       for (String tagToRemove : removeTags) {

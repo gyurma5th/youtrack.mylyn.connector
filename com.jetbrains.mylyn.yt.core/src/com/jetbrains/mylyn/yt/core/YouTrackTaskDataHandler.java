@@ -134,7 +134,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_RICH_TEXT)
+    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_LONG_RICH_TEXT)
         .setLabel("Summary:");
 
     attribute = data.getRoot().createAttribute(TaskAttribute.DATE_CREATION);
