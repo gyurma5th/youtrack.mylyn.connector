@@ -317,10 +317,10 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       }
     });
 
-    savedSearchesCombo.addModifyListener(new ModifyAdapter(numberOfIssues1, searches));
+    savedSearchesCombo.addModifyListener(new CountIssuesModifyAdapter(numberOfIssues1, searches));
   }
 
-  public class ModifyAdapter implements ModifyListener {
+  public class CountIssuesModifyAdapter implements ModifyListener {
 
     public Text issuesCountText;
 
@@ -330,7 +330,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
     public List<SavedSearch> searches;
 
-    public ModifyAdapter(Text setText, List<SavedSearch> searches) {
+    public CountIssuesModifyAdapter(Text setText, List<SavedSearch> searches) {
       this.issuesCountText = setText;
       this.searches = searches;
       this.queryIssuesAmount = 0;
@@ -340,12 +340,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     public void modifyText(ModifyEvent e) {
 
       issuesCountText.setText("");
-      if (e.getSource() instanceof Text) {
-        queryFilter = ((Text) e.getSource()).getText();
-      } else {
-        if (e.getSource() instanceof Combo && ((Combo) e.getSource()).getSelectionIndex() > 0) {
-          queryFilter = searches.get(((Combo) e.getSource()).getSelectionIndex()).getSearchText();
-        }
+      if (e.getSource() instanceof Combo && ((Combo) e.getSource()).getSelectionIndex() > 0) {
+        queryFilter = searches.get(((Combo) e.getSource()).getSelectionIndex()).getSearchText();
       }
 
       Job job = new Job("Count Number of Issues") {
@@ -379,7 +375,133 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
         }
       });
     }
+  }
 
+  public class CommandDialogFocusAdapter implements FocusListener {
+
+    private Job autocomletionJob;
+
+    private Timer timer;
+
+    private Text widgetText;
+
+    public Text issuesCountText;
+
+    public int queryIssuesAmount;
+
+    public boolean isCountIssuses = false;
+
+    public CommandDialogFocusAdapter(boolean isCountIssues, Text issuesCountText) {
+      this.isCountIssuses = isCountIssues;
+      this.issuesCountText = issuesCountText;
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+      if (autocomletionJob != null) {
+        autocomletionJob.cancel();
+        timer.cancel();
+      }
+    }
+
+    private void syncWithUi(final boolean needOpen) {
+      Display.getDefault().asyncExec(new Runnable() {
+        @Override
+        public void run() {
+          if (needOpen) {
+            scp.setProposals(intellisense.getFullOptions());
+            openPopupProposals();
+          } else {
+            adapter.closeProposalPopup();
+          }
+
+          if (isCountIssuses && issuesCountText != null) {
+            if (queryIssuesAmount == -1) {
+              issuesCountText.setText("Can't get number of issues. Please try another query.");
+            } else if (queryIssuesAmount == 1) {
+              issuesCountText.setText("1 issue");
+            } else {
+              issuesCountText.setText(queryIssuesAmount + " issues");
+            }
+          }
+        }
+      });
+    }
+
+    class CheckModification extends TimerTask {
+
+      public Text widgetText;
+
+      public String searchSequence2;
+
+      public int caret;
+
+      public CheckModification(Text widgetText) {
+        this.widgetText = widgetText;
+        searchSequence2 = searchSequence;
+      }
+
+      public void run() {
+        if (widgetText.isDisposed()) {
+          autocomletionJob.cancel();
+          timer.cancel();
+          return;
+        } else {
+
+          Display.getDefault().syncExec(new Runnable() {
+            public void run() {
+              if (searchSequence == null || !searchSequence.equals(widgetText.getText())) {
+                searchSequence2 = widgetText.getText();
+                caret = widgetText.getCaretPosition();
+              }
+            }
+          });
+
+          if (searchSequence == null || !searchSequence.equals(searchSequence2)) {
+            searchSequence = searchSequence2;
+            lastTryTime = System.currentTimeMillis();
+            syncWithUi(false);
+            try {
+              intellisense = getClient().intellisenseSearchValues(searchSequence2, caret);
+              if (isCountIssuses && issuesCountText != null) {
+                queryIssuesAmount = getClient().getNumberOfIssues(searchSequence2);
+              }
+              items = intellisense.getIntellisenseItems();
+              for (int ind = 0; ind < items.size(); ind++) {
+                itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
+              }
+            } catch (CoreException e) {
+              throw new RuntimeException(e);
+            }
+            return;
+          } else {
+
+            if (lastTryTime > 0 && lastTryTime + showDelay > System.currentTimeMillis()) {
+              syncWithUi(true);
+            }
+          }
+        }
+      }
+    }
+
+    @Override
+    public void focusGained(FocusEvent e) {
+
+      if (e.getSource() instanceof Text) {
+        widgetText = (Text) e.getSource();
+      }
+
+      autocomletionJob = new Job("command.autocompletion.proposals.job") {
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+          timer = new Timer();
+          timer.schedule(new CheckModification(widgetText), 0, updateTime);
+          return Status.OK_STATUS;
+        }
+      };
+      autocomletionJob.setUser(true);
+      autocomletionJob.schedule();
+    }
   }
 
   protected void createCustomizeQueryContent(SectionComposite parent) {
@@ -419,108 +541,15 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       throw new RuntimeException(e);
     }
 
-    // searchBoxText.addKeyListener(new KeyAdapter() {
-    // public void keyReleased(KeyEvent ke) {
-    // try {
-    // intellisense =
-    // getClient().intellisenseSearchValues(searchBoxText.getText(),
-    // searchBoxText.getCaretPosition());
-    // items = intellisense.getIntellisenseItems();
-    // for (int ind = 0; ind < items.size(); ind++) {
-    // itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
-    // }
-    // scp.setProposals(intellisense.getFullOptions());
-    // } catch (CoreException e) {
-    // throw new RuntimeException(e);
-    // }
-    // }
-    // });
-
-    searchBoxText.addFocusListener(new FocusListener() {
-
-      private Job autocomletionJob;
-
-      private Timer timer;
-
-      private Text widgetText;
-
-      @Override
-      public void focusLost(FocusEvent e) {
-        if (autocomletionJob != null) {
-          autocomletionJob.cancel();
-          timer.cancel();
-        }
-      }
-
-      @Override
-      public void focusGained(FocusEvent e) {
-
-        if (e.getSource() instanceof Text) {
-          widgetText = (Text) e.getSource();
-        }
-
-        class CheckModification extends TimerTask {
-          public void run() {
-
-            if (widgetText.isDisposed()) {
-              autocomletionJob.cancel();
-              timer.cancel();
-              return;
-            } else {
-              Display.getDefault().asyncExec(new Runnable() {
-                public void run() {
-
-                  if (searchSequence == null || !searchSequence.equals(widgetText.getText())) {
-                    searchSequence = widgetText.getText();
-                    lastTryTime = System.currentTimeMillis();
-                    adapter.closeProposalPopup();
-                    try {
-                      intellisense =
-                          getClient().intellisenseSearchValues(searchBoxText.getText(),
-                              searchBoxText.getCaretPosition());
-                      items = intellisense.getIntellisenseItems();
-                      for (int ind = 0; ind < items.size(); ind++) {
-                        itemByNameMap.put(items.get(ind).getFullOption(), items.get(ind));
-                      }
-                    } catch (CoreException e) {
-                      throw new RuntimeException(e);
-                    }
-
-                    return;
-                  } else {
-                    if (lastTryTime > 0 && lastTryTime + showDelay > System.currentTimeMillis()) {
-                      scp.setProposals(intellisense.getFullOptions());
-                      openPopupProposals();
-                    }
-                  }
-                }
-              });
-            }
-          }
-        }
-
-        autocomletionJob = new Job("Command Autocompletion Proposals Job") {
-          @Override
-          protected IStatus run(IProgressMonitor monitor) {
-            timer = new Timer();
-            timer.schedule(new CheckModification(), 0, updateTime);
-            return Status.OK_STATUS;
-          }
-        };
-        autocomletionJob.setUser(true);
-        autocomletionJob.schedule();
-      }
-
-    });
-
     numberOfIssues2 = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
     numberOfIssues2.setLayoutData(gd);
     numberOfIssues2.setEnabled(false);
 
+    searchBoxText.addFocusListener(new CommandDialogFocusAdapter(true, numberOfIssues2));
+
     createTitleGroup(customQueryComposite);
 
     recursiveSetEnabled(customQueryComposite, false);
-    searchBoxText.addModifyListener(new ModifyAdapter(numberOfIssues2, null));
   }
 
   private void openPopupProposals() {
