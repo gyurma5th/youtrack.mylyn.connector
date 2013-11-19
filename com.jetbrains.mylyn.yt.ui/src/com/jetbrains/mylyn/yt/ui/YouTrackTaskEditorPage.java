@@ -12,7 +12,6 @@ import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorCommentPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.ToolBarButtonContribution;
-import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.AttributeEditorFactory;
@@ -107,8 +106,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
           protected Control createButton(Composite composite) {
             Button editButton = new Button(composite, SWT.FLAT);
             editButton.setText("Edit ");
-            editButton.setImage(CommonImages
-                .getImage(TasksUiImages.REPOSITORY_UPDATE_CONFIGURATION));
+            editButton.setImage(CommonImages.getImage(CommonImages.EDIT));
             editButton.setBackground(null);
             editButton.addListener(SWT.Selection, new Listener() {
               public void handleEvent(Event e) {

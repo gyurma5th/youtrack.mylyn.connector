@@ -75,6 +75,9 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
           getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX));
     }
 
+    // addAttribute(attributesComposite, toolkit,
+    // getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.WIKIFY_DESCRIPTION));
+
     toolkit.paintBordersFor(attributesComposite);
     section.setClient(attributesComposite);
     setSection(toolkit, section);

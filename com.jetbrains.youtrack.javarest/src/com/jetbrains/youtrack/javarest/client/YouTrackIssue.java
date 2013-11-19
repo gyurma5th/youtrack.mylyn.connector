@@ -25,8 +25,7 @@ public class YouTrackIssue {
 
   private String id;
 
-  @XmlElement(name = "field")
-  public LinkedList<IssueSchemaField> fields;
+  private LinkedList<IssueSchemaField> fields;
 
   private LinkedList<YouTrackComment> comments;
 
@@ -67,7 +66,7 @@ public class YouTrackIssue {
   }
 
   public void setField(LinkedList<IssueSchemaField> field) {
-    this.fields = field;
+    this.setFields(field);
   }
 
   public void setComment(LinkedList<YouTrackComment> comments) {
@@ -76,8 +75,8 @@ public class YouTrackIssue {
 
   public void mapFields() {
     if (!mapped) {
-      if (fields.size() > 0) {
-        for (IssueSchemaField field : fields) {
+      if (getFields().size() > 0) {
+        for (IssueSchemaField field : getFields()) {
           if (field.getType().equals(IssueSchemaField.TYPE_LINK_FIELD)) {
             for (IssueSchemaValue linkValue : field.getValues()) {
               IssueLink link = new IssueLink();
@@ -299,6 +298,15 @@ public class YouTrackIssue {
 
   public void setTags(LinkedList<IssueTag> tag) {
     this.tags = tag;
+  }
+
+  @XmlElement(name = "field")
+  public LinkedList<IssueSchemaField> getFields() {
+    return fields;
+  }
+
+  public void setFields(LinkedList<IssueSchemaField> fields) {
+    this.fields = fields;
   }
 
 }

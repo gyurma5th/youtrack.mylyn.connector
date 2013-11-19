@@ -47,6 +47,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
 
+  public static final String WIKIFY_DESCRIPTION = "TaskAttribute.WIKIFY_DESCRIPTION";
+
+  public static final String TYPE_HTML = "TaskAttribute.TYPE_HTML";
+
   public static final String LINK_PREFIX = "TaskAttribute.LINK_";
 
   public static final String TAG_PREFIX = "TaskAttribute.TAG_";
@@ -134,7 +138,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_LONG_RICH_TEXT)
+    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_RICH_TEXT)
         .setLabel("Summary:");
 
     attribute = data.getRoot().createAttribute(TaskAttribute.DATE_CREATION);
@@ -152,6 +156,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     attribute = data.getRoot().createAttribute(TaskAttribute.DESCRIPTION);
     attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_LONG_RICH_TEXT)
         .setLabel("Description:");
+
+    attribute = data.getRoot().createAttribute(WIKIFY_DESCRIPTION);
+    attribute.getMetaData().setReadOnly(true).setType(TYPE_HTML).setLabel("Wikify Description:");
 
     attribute = data.getRoot().createAttribute(TaskAttribute.USER_REPORTER);
     attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_RICH_TEXT)
@@ -269,6 +276,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     attribute = taskData.getRoot().getAttribute(TaskAttribute.DESCRIPTION);
     attribute.setValue(issue.getDescription());
+
+    attribute = taskData.getRoot().getAttribute(WIKIFY_DESCRIPTION);
+    attribute.setValue(connector.getClient(repository).getIssueWikifyDescription(issueId));
 
     attribute = taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY);
     attribute.setValue(issueId);

@@ -16,14 +16,9 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -74,47 +69,6 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
       editor.createControl(composite, toolkit);
       getTaskEditorPage().getAttributeEditorToolkit().adapt(editor);
-    }
-  }
-
-  private void addTag(Composite composite, TaskAttribute tag, int horizontalSpan, final int count) {
-    if (tag.getId().startsWith(YouTrackTaskDataHandler.TAG_PREFIX) && tag.getValue() != null
-        && tag.getValue().length() > 0) {
-
-      CLabel label = new CLabel(composite, SWT.BORDER);
-      Image image =
-          new Image(label.getDisplay(), getClass().getResourceAsStream("/resource/close_view.gif"));
-      label.setImage(image);
-      label.setText(tag.getValue());
-
-
-      label.addMouseListener(new MouseListener() {
-
-        @Override
-        public void mouseUp(MouseEvent arg0) {
-          CLabel label = (CLabel) arg0.widget;
-          Point eventLocation = new Point(label.getBounds().x + arg0.x, arg0.y);
-
-          Image image = label.getImage();
-
-          // check if click is on image
-          if (eventLocation.x >= label.getBounds().x + image.getBounds().x
-              && eventLocation.x <= label.getBounds().x + image.getBounds().x
-                  + image.getBounds().width
-              && eventLocation.y >= label.getBounds().y + image.getBounds().y
-              && eventLocation.y <= label.getBounds().y + image.getBounds().y
-                  + image.getBounds().height) {
-            System.err.println("Close tab " + count);
-            // label.dispose();
-          }
-        }
-
-        @Override
-        public void mouseDown(MouseEvent arg0) {}
-
-        @Override
-        public void mouseDoubleClick(MouseEvent arg0) {}
-      });
     }
   }
 

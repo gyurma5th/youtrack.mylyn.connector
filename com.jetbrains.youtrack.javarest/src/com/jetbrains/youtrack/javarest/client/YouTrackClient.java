@@ -202,6 +202,17 @@ public class YouTrackClient {
     }
   }
 
+  public String getIssueWikifyDescription(String id) {
+    YouTrackIssue wikifyIssue = getIssue(id, true);
+    wikifyIssue.mapFields();
+    for (IssueSchemaField field : wikifyIssue.getFields()) {
+      if (field.getName().equals("description")) {
+        return field.getValues().getFirst().getValue();
+      }
+    }
+    return "";
+  }
+
   public List<YouTrackIssue> getIssuesInProject(String projectname, String filter, int after,
       int max, long updatedAfter) {
     try {

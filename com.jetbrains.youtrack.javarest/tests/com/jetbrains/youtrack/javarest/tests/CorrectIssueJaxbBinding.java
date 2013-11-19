@@ -34,7 +34,7 @@ public class CorrectIssueJaxbBinding {
       assertEquals(1366278449653L, Long.parseLong(issue.getSingleField("created")));
       assertEquals("root", issue.getComments().get(0).getAuthorName());
       assertEquals(4, issue.getTags().size());
-      for (IssueSchemaField field : issue.fields) {
+      for (IssueSchemaField field : issue.getFields()) {
         if (field.getName().equals("summary")) {
           assertEquals("SingleField", field.getType());
         }
