@@ -1,6 +1,7 @@
 package com.jetbrains.mylyn.yt.ui;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
@@ -28,9 +29,9 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
         GridDataFactory.defaultsFor(editor.getLabelControl()).indent(COLUMN_MARGIN, 0)
             .applyTo(editor.getLabelControl());
         editor.createControl(composite, toolkit);
-        getTaskEditorPage().getAttributeEditorToolkit().adapt(editor);
+        // getTaskEditorPage().getAttributeEditorToolkit().adapt(editor);
         if (editor instanceof YouTrackAttributeEditor) {
-          GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).hint(130, 95)
+          GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL)
               .applyTo(editor.getControl());
         } else {
           GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP)
@@ -43,13 +44,14 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
   @Override
   public void createControl(Composite parent, FormToolkit toolkit) {
     Section section = createSection(parent, toolkit, true);
-    final Composite attributesComposite = toolkit.createComposite(section);
-    GridLayout layout = new GridLayout(2, false);
-    layout.marginWidth = 5;
+    Composite attributesComposite = toolkit.createComposite(section);
+    GridLayout layout = EditorUtil.createSectionClientLayout();
+    layout.numColumns = 2;
     attributesComposite.setLayout(layout);
 
     addAttribute(attributesComposite, toolkit,
         getTaskData().getRoot().getMappedAttribute(TaskAttribute.PRODUCT));
+
 
     for (String key : getTaskData().getRoot().getAttributes().keySet()) {
       if (getTaskData().getRoot().getMappedAttribute(key).getMetaData().getKind() != null
@@ -75,8 +77,6 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
           getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX));
     }
 
-    // addAttribute(attributesComposite, toolkit,
-    // getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.WIKIFY_DESCRIPTION));
 
     toolkit.paintBordersFor(attributesComposite);
     section.setClient(attributesComposite);

@@ -114,16 +114,21 @@ public class YouTrackTaskEditorRichTextPart extends AbstractTaskEditorPart {
 
       Browser browser = new Browser(composite, SWT.NONE);
       GridData gd = EditorUtil.getTextControlLayoutData(getTaskEditorPage(), browser, true);
+
       gd.heightHint =
-          getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ACTIONS).getControl()
+          getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl()
               .computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+      // TODO: check the margins width, not hardcode constants
+      gd.widthHint =
+          getTaskEditorPage().getEditorComposite().getSize().x
+              - getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl()
+                  .computeSize(SWT.DEFAULT, SWT.DEFAULT).x - 40;
 
       browser.setLayoutData(gd);
       String wikifyDescription =
           getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.WIKIFY_DESCRIPTION)
               .getValue();
       browser.setText(wikifyDescription);
-
     } else {
       editor = (RichTextAttributeEditor) attributeEditor;
       editor.createControl(composite, toolkit);
@@ -133,8 +138,6 @@ public class YouTrackTaskEditorRichTextPart extends AbstractTaskEditorPart {
               getExpandVertically()));
       editor.getControl().setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TREE_BORDER);
     }
-
-    // getTaskEditorPage().getAttributeEditorToolkit().adapt(editor);
 
     toolkit.paintBordersFor(composite);
     section.setClient(composite);
