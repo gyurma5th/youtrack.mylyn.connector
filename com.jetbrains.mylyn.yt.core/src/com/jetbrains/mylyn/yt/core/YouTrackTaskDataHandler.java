@@ -45,6 +45,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   private static boolean enableEditMode = false;
 
+  private static boolean postNewCommentMode = false;
+
   public static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
 
   public static final String WIKIFY_DESCRIPTION = "TaskAttribute.WIKIFY_DESCRIPTION";
@@ -87,6 +89,17 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     YouTrackClient client = YouTrackConnector.getClient(repository);
     YouTrackIssue issue = new YouTrackIssue();
+
+    if (postNewCommentMode) {
+      String newComment = getNewComment(taskData);
+      if (newComment != null && newComment.length() > 0) {
+        client.addComment(taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY).getValue(),
+            newComment);
+        taskData.getRoot().getMappedAttribute(COMMENT_NEW).clearValues();
+        setPostNewCommentMode(false);
+        return new RepositoryResponse(ResponseKind.TASK_UPDATED, taskData.getTaskId());
+      }
+    }
 
     try {
       issue = buildIssue(repository, taskData);
@@ -612,5 +625,13 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   private String capitalize(String line) {
     return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+  }
+
+  public static boolean isUploadNewCommentMode() {
+    return postNewCommentMode;
+  }
+
+  public static void setPostNewCommentMode(boolean postNewCommentMode) {
+    YouTrackTaskDataHandler.postNewCommentMode = postNewCommentMode;
   }
 }
