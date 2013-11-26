@@ -32,7 +32,7 @@ public class YouTrackDescriptionPart extends YouTrackTaskEditorRichTextPart {
           new AbstractReplyToCommentAction(getTaskEditorPage(), null) {
             @Override
             protected String getReplyText() {
-              return getEditor().getValue();
+              return getAttribute().getValue();
             }
           };
       replyAction.setImageDescriptor(TasksUiImages.COMMENT_REPLY_SMALL);
