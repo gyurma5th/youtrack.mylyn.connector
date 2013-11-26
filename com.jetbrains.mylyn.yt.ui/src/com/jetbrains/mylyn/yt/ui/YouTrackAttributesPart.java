@@ -17,6 +17,8 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
 
   private static final int COLUMN_MARGIN = 5;
 
+  private String partId;
+
   public YouTrackAttributesPart() {
     setPartName("Attributes");
   }
@@ -80,5 +82,13 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
     toolkit.paintBordersFor(attributesComposite);
     section.setClient(attributesComposite);
     setSection(toolkit, section);
+  }
+
+  public void setPartId(String partId) {
+    this.partId = partId;
+  }
+
+  public String getPartId() {
+    return partId;
   }
 }

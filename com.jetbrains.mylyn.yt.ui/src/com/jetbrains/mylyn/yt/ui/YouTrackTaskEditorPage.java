@@ -191,7 +191,11 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
           public void run() throws Exception {
             AbstractTaskEditorPart part = descriptor.createPart();
-            // part.setPartId(descriptor.getId());
+            if (part instanceof YouTrackDescriptionPart) {
+              ((YouTrackDescriptionPart) part).setPartId(descriptor.getId());
+            } else if (part instanceof YouTrackAttributesPart) {
+              ((YouTrackAttributesPart) part).setPartId(descriptor.getId());
+            }
             initializePart(parent, part, descriptors);
           }
         });

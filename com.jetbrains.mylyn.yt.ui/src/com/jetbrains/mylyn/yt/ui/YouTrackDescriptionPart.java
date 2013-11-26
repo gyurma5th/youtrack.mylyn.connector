@@ -13,6 +13,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  */
 public class YouTrackDescriptionPart extends YouTrackTaskEditorRichTextPart {
 
+  private String partId;
+
   public YouTrackDescriptionPart() {
     setPartName("Description");
   }
@@ -46,4 +48,11 @@ public class YouTrackDescriptionPart extends YouTrackTaskEditorRichTextPart {
     setAttribute(getModel().getTaskData().getRoot().getMappedAttribute(TaskAttribute.DESCRIPTION));
   }
 
+  public void setPartId(String partId) {
+    this.partId = partId;
+  }
+
+  public String getPartId() {
+    return partId;
+  }
 }
