@@ -4,11 +4,20 @@
 
 package com.jetbrains.mylyn.yt.ui;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.mylyn.commons.ui.CommonImages;
+import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
+import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorOutlineNode;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
 import org.eclipse.mylyn.internal.tasks.ui.editors.ToolBarButtonContribution;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
@@ -86,7 +95,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         AbstractTaskEditorPart part = new YouTrackTaskEditorCommentsPart();
         return part;
       }
-    }.setPath(PATH_HEADER));
+    }.setPath(PATH_COMMENTS));
 
     descriptors.add(new TaskEditorPartDescriptor(ID_NEW_COMMENTS_PART) {
       @Override
@@ -94,7 +103,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         AbstractTaskEditorPart part = new YouTrackTaskEditorNewCommentPart();
         return part;
       }
-    }.setPath(PATH_HEADER));
+    }.setPath(PATH_COMMENTS));
 
     return descriptors;
   }
@@ -154,6 +163,71 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         YouTrackTaskEditorPage.this.refresh();
       }
     });
-
   }
+
+  @Override
+  protected void createParts() {
+    List<TaskEditorPartDescriptor> descriptors =
+        new LinkedList<TaskEditorPartDescriptor>(createPartDescriptors());
+    // single column
+    createParts(PATH_HEADER, getEditorComposite(), descriptors);
+    // two column
+    Composite bottomComposite = getManagedForm().getToolkit().createComposite(getEditorComposite());
+    bottomComposite.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(bottomComposite);
+    createParts(PATH_ACTIONS, bottomComposite, descriptors);
+    createParts(PATH_PEOPLE, bottomComposite, descriptors);
+    bottomComposite.pack(true);
+    createParts(PATH_COMMENTS, getEditorComposite(), descriptors);
+  }
+
+  private void createParts(String path, final Composite parent,
+      final Collection<TaskEditorPartDescriptor> descriptors) {
+    for (Iterator<TaskEditorPartDescriptor> it = descriptors.iterator(); it.hasNext();) {
+      final TaskEditorPartDescriptor descriptor = it.next();
+      if (path == null || path.equals(descriptor.getPath())) {
+        SafeRunner.run(new ISafeRunnable() {
+          public void handleException(Throwable e) {}
+
+          public void run() throws Exception {
+            AbstractTaskEditorPart part = descriptor.createPart();
+            // part.setPartId(descriptor.getId());
+            initializePart(parent, part, descriptors);
+          }
+        });
+        it.remove();
+      }
+    }
+  }
+
+  private void initializePart(Composite parent, AbstractTaskEditorPart part,
+      Collection<TaskEditorPartDescriptor> descriptors) {
+    getManagedForm().addPart(part);
+    part.initialize(this);
+    if (parent != null) {
+      part.createControl(parent, getManagedForm().getToolkit());
+      if (part.getControl() != null) {
+        if (ID_PART_ACTIONS.equals(part.getPartId())) {
+          // do not expand horizontally
+          GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false)
+              .applyTo(part.getControl());
+        } else {
+          if (part.getExpandVertically()) {
+            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true)
+                .applyTo(part.getControl());
+          } else {
+            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false)
+                .applyTo(part.getControl());
+          }
+        }
+        // for outline
+        if (ID_PART_COMMENTS.equals(part.getPartId())) {
+          EditorUtil.setMarker(part.getControl(), TaskEditorOutlineNode.LABEL_COMMENTS);
+        } else if (ID_PART_ATTACHMENTS.equals(part.getPartId())) {
+          EditorUtil.setMarker(part.getControl(), TaskEditorOutlineNode.LABEL_ATTACHMENTS);
+        }
+      }
+    }
+  }
+
 }

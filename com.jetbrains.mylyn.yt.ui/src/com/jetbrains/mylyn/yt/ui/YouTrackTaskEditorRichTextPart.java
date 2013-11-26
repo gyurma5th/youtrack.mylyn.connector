@@ -115,14 +115,18 @@ public class YouTrackTaskEditorRichTextPart extends AbstractTaskEditorPart {
       Browser browser = new Browser(composite, SWT.NONE);
       GridData gd = EditorUtil.getTextControlLayoutData(getTaskEditorPage(), browser, true);
 
-      gd.heightHint =
-          getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl()
-              .computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-      // TODO: check the margins width, not hardcode constants
-      gd.widthHint =
-          getTaskEditorPage().getEditorComposite().getSize().x
-              - getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl()
-                  .computeSize(SWT.DEFAULT, SWT.DEFAULT).x - 40;
+      if (getTaskEditorPage() != null
+          && getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES) != null
+          && getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl() != null) {
+        gd.heightHint =
+            getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl()
+                .computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+        // TODO: check the margins width, not hardcode constants
+        gd.widthHint =
+            getTaskEditorPage().getEditorComposite().getSize().x
+                - getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES)
+                    .getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT).x - 40;
+      }
 
       browser.setLayoutData(gd);
       String wikifyDescription =
