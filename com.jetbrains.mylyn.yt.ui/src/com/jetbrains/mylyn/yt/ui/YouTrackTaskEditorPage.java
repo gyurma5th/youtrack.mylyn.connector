@@ -22,6 +22,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.IManagedForm;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
@@ -29,6 +31,8 @@ import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
   private final static String ID_NEW_COMMENTS_PART = "ID_NEW_COMMENTS_PART";
+
+  private boolean refreshed = false;
 
   public YouTrackTaskEditorPage(TaskEditor editor) {
     super(editor, YouTrackCorePlugin.CONNECTOR_KIND);
@@ -137,5 +141,19 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
       ((TaskEditorRichTextPart) newCommentPart).appendText(text);
       newCommentPart.setFocus();
     }
+  }
+
+  @Override
+  protected void createFormContent(final IManagedForm managedForm) {
+    super.createFormContent(managedForm);
+
+    // TODO: fix here, need refresh because Layout of Description and
+    // Attributes parts not resizes properly
+    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+      public void run() {
+        YouTrackTaskEditorPage.this.refresh();
+      }
+    });
+
   }
 }

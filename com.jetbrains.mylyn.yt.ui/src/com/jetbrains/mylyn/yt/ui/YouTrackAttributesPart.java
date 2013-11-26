@@ -77,7 +77,6 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
           getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX));
     }
 
-
     toolkit.paintBordersFor(attributesComposite);
     section.setClient(attributesComposite);
     setSection(toolkit, section);
