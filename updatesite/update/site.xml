@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.jetbrains.mylyn.yt.connector.feature_1.0.0.201311122105.jar" id="com.jetbrains.mylyn.yt.connector.feature" version="1.0.0.201311122105">
+   <feature url="features/com.jetbrains.mylyn.yt.connector.feature_1.0.0.201311271735.jar" id="com.jetbrains.mylyn.yt.connector.feature" version="1.0.0.201311271735">
       <category name="versions"/>
    </feature>
    <category-def name="versions" label="Versions"/>
