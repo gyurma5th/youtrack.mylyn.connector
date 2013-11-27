@@ -51,8 +51,10 @@ public class YouTrackTaskEditorNewCommentPart extends TaskEditorRichTextPart {
   }
 
   private void doSubmit() {
-    YouTrackTaskDataHandler.setPostNewCommentMode(true);
-    getTaskEditorPage().doSubmit();
+    if (getAttribute().getValue() != null && getAttribute().getValue().length() > 0) {
+      YouTrackTaskDataHandler.setPostNewCommentMode(true);
+      getTaskEditorPage().doSubmit();
+    }
   }
 
   @Override

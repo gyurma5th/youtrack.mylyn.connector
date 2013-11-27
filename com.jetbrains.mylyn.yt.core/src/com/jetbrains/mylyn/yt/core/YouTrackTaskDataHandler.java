@@ -631,7 +631,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static URL getIssueURL(TaskData data, TaskRepository repository) {
     try {
-      return new URL(data.getRepositoryUrl() + "/issue/"
+      return new URL(data.getRepositoryUrl() + YouTrackConnector.ISSUE_URL_PREFIX
           + YouTrackConnector.getRealIssueId(data.getTaskId(), repository));
     } catch (MalformedURLException e) {
       return null;

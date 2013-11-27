@@ -4,6 +4,7 @@
 
 package com.jetbrains.mylyn.yt.ui;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -118,8 +119,11 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
           browser =
               PlatformUI.getWorkbench().getBrowserSupport()
                   .createBrowser(getModel().getTaskData().getRoot().getId());
-          browser.openURL(YouTrackTaskDataHandler.getIssueURL(getModel().getTaskData(),
-              getTaskRepository()));
+          URL issueURL =
+              YouTrackTaskDataHandler.getIssueURL(getModel().getTaskData(), getTaskRepository());
+          if (issueURL != null) {
+            browser.openURL(issueURL);
+          }
         } catch (PartInitException e) {
           throw new RuntimeException(e);
         }
