@@ -59,33 +59,6 @@ public class YouTrackTaskEditorRichTextPart extends AbstractTaskEditorPart {
         | ExpandableComposite.EXPANDED);
   }
 
-  public void appendText(String text) {
-    if (editor == null) {
-      return;
-    }
-
-    editor.showEditor();
-    if (toggleEditAction != null) {
-      toggleEditAction.setChecked(false);
-    }
-
-    StringBuilder strBuilder = new StringBuilder();
-    String oldText = editor.getViewer().getDocument().get();
-    if (strBuilder.length() != 0) {
-      strBuilder.append("\n"); //$NON-NLS-1$
-    }
-    strBuilder.append(oldText);
-    strBuilder.append(text);
-    editor.getViewer().getDocument().set(strBuilder.toString());
-    TaskAttribute attribute = getTaskData().getRoot().getMappedAttribute(TaskAttribute.COMMENT_NEW);
-    if (attribute != null) {
-      attribute.setValue(strBuilder.toString());
-      getTaskEditorPage().getModel().attributeChanged(attribute);
-    }
-    editor.getViewer().getTextWidget().setCaretOffset(strBuilder.length());
-    editor.getViewer().getTextWidget().showSelection();
-  }
-
   public int getSectionStyle() {
     return sectionStyle;
   }

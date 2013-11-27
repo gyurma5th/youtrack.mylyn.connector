@@ -39,7 +39,7 @@ import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
 public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
-  private final static String ID_NEW_COMMENTS_PART = "ID_NEW_COMMENTS_PART";
+  public final static String ID_NEW_COMMENTS_PART = "ID_NEW_COMMENTS_PART";
 
   private boolean refreshed = false;
 
@@ -195,6 +195,8 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
               ((YouTrackDescriptionPart) part).setPartId(descriptor.getId());
             } else if (part instanceof YouTrackAttributesPart) {
               ((YouTrackAttributesPart) part).setPartId(descriptor.getId());
+            } else if (part instanceof YouTrackTaskEditorNewCommentPart) {
+              ((YouTrackTaskEditorNewCommentPart) part).setPartId(descriptor.getId());
             }
             initializePart(parent, part, descriptors);
           }

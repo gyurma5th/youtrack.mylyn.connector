@@ -26,6 +26,11 @@ import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
 import org.eclipse.mylyn.tasks.core.sync.ISynchronizationSession;
+import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
@@ -277,17 +282,28 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
   }
 
   public static String getRealIssueId(String pseudoIssueId, TaskRepository taskRepository) {
-    String realIssueId;
     if (pseudoIssueId.contains("-")) {
-      realIssueId = pseudoIssueId;
+      return pseudoIssueId;
     } else {
       if (TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId) == null) {
+        // Check if issue open from repository directly and not added into TaskList yet
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if (window == null) {
+          IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+          if (windows != null && windows.length > 0) {
+            window = windows[0];
+          }
+        }
+        IWorkbenchPage page = window.getActivePage();
+        IEditorPart part = page.getActiveEditor();
+        if (part instanceof TaskEditor) {
+          TaskEditor taskPage = (TaskEditor) part;
+          return taskPage.getTaskEditorInput().getTask().getTaskKey();
+        }
         return null;
       }
-      realIssueId =
-          TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId)
-              .getTaskKey();
+      return TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId)
+          .getTaskKey();
     }
-    return realIssueId;
   }
 }
