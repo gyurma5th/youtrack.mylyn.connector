@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -19,18 +20,14 @@ import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorOutlineNode;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
-import org.eclipse.mylyn.internal.tasks.ui.editors.ToolBarButtonContribution;
+import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.AttributeEditorFactory;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IManagedForm;
 
@@ -109,33 +106,52 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
   }
 
   @Override
-  public void fillToolBar(IToolBarManager toolBarManager) {
-    super.fillToolBar(toolBarManager);
+  public void fillToolBar(final IToolBarManager toolBarManager) {
 
-    ToolBarButtonContribution editButtonContribution =
-        new ToolBarButtonContribution("com.jetbrains.yt.mylyn.toolbars.update") {
-          @Override
-          protected Control createButton(Composite composite) {
-            Button editButton = new Button(composite, SWT.FLAT);
-            editButton.setText("Edit ");
-            editButton.setImage(CommonImages.getImage(CommonImages.EDIT));
-            editButton.setBackground(null);
-            editButton.addListener(SWT.Selection, new Listener() {
-              public void handleEvent(Event e) {
-                doEdit();
-              }
-            });
-            return editButton;
-          }
-        };
-    editButtonContribution.marginLeft = 10;
-    toolBarManager.add(editButtonContribution);
+    Action submitAction = new Action() {
+      @Override
+      public void run() {
+        doSubmit();
+      }
+    };
+    submitAction.setToolTipText("Submit");
+    submitAction.setImageDescriptor(TasksUiImages.REPOSITORY_SUBMIT);
+    toolBarManager.add(submitAction);
+
+
+    Action editAction = new Action() {
+      @Override
+      public void run() {
+        if (!YouTrackTaskDataHandler.isEnableEditMode()) {
+          doEdit();
+        }
+      }
+    };
+    editAction.setToolTipText("Edit");
+    editAction.setImageDescriptor(CommonImages.EDIT);
+    toolBarManager.add(editAction);
+
+    Action cancelAction = new Action() {
+      @Override
+      public void run() {
+        if (YouTrackTaskDataHandler.isEnableEditMode()) {
+          doCancel();
+        }
+      }
+    };
+    cancelAction.setToolTipText("Cancel");
+    cancelAction.setImageDescriptor(CommonImages.REMOVE);
+    toolBarManager.add(cancelAction);
   }
 
   public void doEdit() {
     YouTrackTaskDataHandler.setEnableEditMode(true);
     getEditor().refreshPages();
+  }
+
+  public void doCancel() {
     YouTrackTaskDataHandler.setEnableEditMode(false);
+    getEditor().refreshPages();
   }
 
   @Override
@@ -234,6 +250,12 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         }
       }
     }
+  }
+
+  @Override
+  public void doSubmit() {
+    super.doSubmit();
+    YouTrackTaskDataHandler.setEnableEditMode(false);
   }
 
 }
