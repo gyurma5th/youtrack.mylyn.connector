@@ -4,6 +4,8 @@
 
 package com.jetbrains.mylyn.yt.core;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -185,10 +187,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
         .setLabel("Priority level:");
 
-    attribute = data.getRoot().createAttribute("ISSUE_URL");
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_URL)
-        .setLabel("Issue url:");
-
     attribute = data.getRoot().createAttribute(TaskAttribute.STATUS);
     attribute.getMetaData().setReadOnly(false).setType(TaskAttribute.TYPE_BOOLEAN)
         .setLabel("Resolved:");
@@ -335,10 +333,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             project.getCustomFieldsMap().get("Priority").getBundle().getValues()).toString());
       }
     }
-
-    attribute = taskData.getRoot().getAttribute("ISSUE_URL");
-    attribute.setValue("<a href=\"" + taskData.getRepositoryUrl() + "/issue/" + issue.getId()
-        + "\">" + issue.getId() + "</a>");
 
     for (IssueLink link : issue.getLinks()) {
       String role = link.getRole();
@@ -633,5 +627,14 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static void setPostNewCommentMode(boolean postNewCommentMode) {
     YouTrackTaskDataHandler.postNewCommentMode = postNewCommentMode;
+  }
+
+  public static URL getIssueURL(TaskData data, TaskRepository repository) {
+    try {
+      return new URL(data.getRepositoryUrl() + "/issue/"
+          + YouTrackConnector.getRealIssueId(data.getTaskId(), repository));
+    } catch (MalformedURLException e) {
+      return null;
+    }
   }
 }

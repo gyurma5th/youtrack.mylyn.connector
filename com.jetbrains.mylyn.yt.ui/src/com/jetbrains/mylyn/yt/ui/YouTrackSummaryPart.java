@@ -4,9 +4,6 @@
 
 package com.jetbrains.mylyn.yt.ui;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.window.Window;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
@@ -16,21 +13,16 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import com.jetbrains.mylyn.yt.core.YouTrackConnector;
@@ -99,36 +91,6 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
     attribute = getTaskData().getRoot().getMappedAttribute(TaskAttribute.DATE_MODIFICATION);
     if (attribute != null) {
       addAttribute(composite, toolkit, attribute, true);
-    }
-
-    // Issue URL
-    attribute = getTaskData().getRoot().getMappedAttribute("ISSUE_URL");
-    if (attribute != null) {
-      // TODO: remove hack with attribute text write normal usage
-      String url = attribute.getValue();
-      attribute.setValue(" ");
-      addAttribute(composite, toolkit, attribute, true);
-      attribute.setValue(url);
-      Link link = new Link(composite, SWT.NONE);
-      link.setText(url);
-      link.setToolTipText("Open issue in internal Eclipse browser.");
-      link.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-          try {
-            final IWebBrowser browser =
-                PlatformUI.getWorkbench().getBrowserSupport()
-                    .createBrowser(getTaskData().getRoot().getId());
-            browser.openURL(new URL(e.text));
-          } catch (PartInitException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-          } catch (MalformedURLException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-          }
-        }
-      });
     }
 
     if (layout instanceof GridLayout) {

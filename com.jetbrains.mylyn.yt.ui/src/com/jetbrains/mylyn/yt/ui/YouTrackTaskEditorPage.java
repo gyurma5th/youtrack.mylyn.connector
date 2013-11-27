@@ -28,7 +28,9 @@ import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
@@ -108,6 +110,25 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
   @Override
   public void fillToolBar(final IToolBarManager toolBarManager) {
 
+    Action webViewAction = new Action() {
+      @Override
+      public void run() {
+        IWebBrowser browser;
+        try {
+          browser =
+              PlatformUI.getWorkbench().getBrowserSupport()
+                  .createBrowser(getModel().getTaskData().getRoot().getId());
+          browser.openURL(YouTrackTaskDataHandler.getIssueURL(getModel().getTaskData(),
+              getTaskRepository()));
+        } catch (PartInitException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
+    webViewAction.setToolTipText("Open issue in internal Eclipse browser.");
+    webViewAction.setImageDescriptor(CommonImages.WEB);
+    toolBarManager.add(webViewAction);
+
     Action submitAction = new Action() {
       @Override
       public void run() {
@@ -151,6 +172,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
   public void doCancel() {
     YouTrackTaskDataHandler.setEnableEditMode(false);
+    getModel().revert();
     getEditor().refreshPages();
   }
 
