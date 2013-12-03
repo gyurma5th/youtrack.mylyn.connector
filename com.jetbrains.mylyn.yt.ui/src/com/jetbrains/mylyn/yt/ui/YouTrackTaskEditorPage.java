@@ -159,12 +159,11 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
     Action cancelAction = new Action() {
       @Override
       public void run() {
-        if (YouTrackTaskDataHandler.isEnableEditMode()) {
-          doCancel();
-        }
+        // this action cancel all changes and restore previous state
+        doCancel();
       }
     };
-    cancelAction.setToolTipText("Cancel");
+    cancelAction.setToolTipText("Cancel all changes.");
     cancelAction.setImageDescriptor(CommonImages.REMOVE);
     toolBarManager.add(cancelAction);
   }

@@ -159,13 +159,9 @@ public class CommandDialogFocusAdapter implements FocusListener {
           lastTryTime = System.currentTimeMillis();
           intellisense = getClient().intellisenseSearchValues(searchSequence2, caret);
 
-          Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-              if (isCountIssuses && issuesCountText != null) {
-                queryIssuesAmount = getClient().getNumberOfIssues(searchSequence2);
-              }
-            }
-          });
+          if (isCountIssuses && issuesCountText != null) {
+            queryIssuesAmount = getClient().getNumberOfIssues(searchSequence2);
+          }
 
           items = intellisense.getIntellisenseItems();
           for (int ind = 0; ind < items.size(); ind++) {
