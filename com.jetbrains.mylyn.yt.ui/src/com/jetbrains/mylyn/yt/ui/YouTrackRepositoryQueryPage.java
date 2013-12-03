@@ -51,6 +51,7 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositoryQueryPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -85,7 +86,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
   private List<SavedSearch> searches;
 
-  private Combo savedSearchesCombo;
+  private CCombo savedSearchesCombo;
 
   private Text numberOfIssues1;
 
@@ -219,7 +220,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     gd.horizontalAlignment = SWT.FILL;
     fastQueryComposite.setLayoutData(gd);
 
-    savedSearchesCombo = new Combo(fastQueryComposite, SWT.FILL);
+    savedSearchesCombo = new CCombo(fastQueryComposite, SWT.FILL);
     savedSearchesCombo.setLayoutData(gd);
 
     fillSearches();
@@ -247,9 +248,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
             }
           }
 
-          if (getQueryTitle() == null || getQueryTitle().length() == 0) {
-            setQueryTitle(savedSearchesCombo.getText());
-          }
+          setQueryTitle(savedSearchesCombo.getText());
         }
       }
     });
@@ -264,7 +263,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       }
     });
 
-    savedSearchesCombo.addModifyListener(new CountIssuesModifyAdapter(numberOfIssues1, searches));
+    savedSearchesCombo.addSelectionListener(new CountIssuesSelectionAdapter(numberOfIssues1,
+        searches));
   }
 
   public class CountIssuesFocusAdapter implements FocusListener {
@@ -332,7 +332,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
   }
 
-  public class CountIssuesModifyAdapter implements ModifyListener {
+  public class CountIssuesSelectionAdapter implements SelectionListener {
 
     public Text issuesCountText;
 
@@ -342,20 +342,34 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
     public List<SavedSearch> searches;
 
-    public CountIssuesModifyAdapter(Text setText, List<SavedSearch> searches) {
+    public CountIssuesSelectionAdapter(Text setText, List<SavedSearch> searches) {
       this.issuesCountText = setText;
       this.searches = searches;
       this.queryIssuesAmount = 0;
     }
 
-    @Override
-    public void modifyText(ModifyEvent e) {
+    private void syncWithUi() {
+      Display.getDefault().asyncExec(new Runnable() {
+        @Override
+        public void run() {
+          if (queryIssuesAmount == -1) {
+            issuesCountText.setText("Can't get number of issues. Please try another query.");
+          } else if (queryIssuesAmount == 1) {
+            issuesCountText.setText("1 issue");
+          } else if (queryIssuesAmount >= 0) {
+            issuesCountText.setText(queryIssuesAmount + " issues");
+          }
+        }
+      });
+    }
 
+    @Override
+    public void widgetSelected(SelectionEvent e) {
       issuesCountText.setText("");
       queryFilter = "";
       queryIssuesAmount = Integer.MIN_VALUE;
-      if (e.getSource() instanceof Combo && ((Combo) e.getSource()).getSelectionIndex() > 0) {
-        queryFilter = searches.get(((Combo) e.getSource()).getSelectionIndex()).getSearchText();
+      if (e.getSource() instanceof CCombo && ((CCombo) e.getSource()).getSelectionIndex() > 0) {
+        queryFilter = searches.get(((CCombo) e.getSource()).getSelectionIndex()).getSearchText();
       }
 
       Job job = new Job("count.issues.job") {
@@ -373,21 +387,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       job.schedule();
     }
 
-    private void syncWithUi() {
-      Display.getDefault().asyncExec(new Runnable() {
-        @Override
-        public void run() {
-          if (queryIssuesAmount == -1) {
-            issuesCountText.setText("Can't get number of issues. Please try another query.");
-          } else if (queryIssuesAmount == 1) {
-            issuesCountText.setText("1 issue");
-          } else if (queryIssuesAmount >= 0) {
-            issuesCountText.setText(queryIssuesAmount + " issues");
-          }
-        }
-      });
-    }
+    @Override
+    public void widgetDefaultSelected(SelectionEvent e) {}
+
   }
+
 
 
   protected void createCustomizeQueryContent(SectionComposite parent) {
