@@ -79,12 +79,17 @@ public class NewYouTrackIssueWizard extends NewTaskWizard implements INewWizard 
 
       projectCombo.addFocusListener(new FocusListener() {
 
+        private boolean showed = false;
+
         @Override
         public void focusLost(FocusEvent e) {}
 
         @Override
         public void focusGained(FocusEvent e) {
-          projectCombo.setListVisible(true);
+          if (!showed) {
+            showed = true;
+            projectCombo.setListVisible(true);
+          }
         }
       });
     }

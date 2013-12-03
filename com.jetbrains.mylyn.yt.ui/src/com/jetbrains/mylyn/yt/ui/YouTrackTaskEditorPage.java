@@ -163,8 +163,8 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         doCancel();
       }
     };
-    cancelAction.setToolTipText("Cancel all changes.");
-    cancelAction.setImageDescriptor(CommonImages.REMOVE);
+    cancelAction.setToolTipText("Revert all changes.");
+    cancelAction.setImageDescriptor(CommonImages.UNDO);
     toolBarManager.add(cancelAction);
   }
 
