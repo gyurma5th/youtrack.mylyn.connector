@@ -76,9 +76,9 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
   public static void updateProjectCustomFields(TaskRepository repository, String projectname) {
 
-    YouTrackProject project = YouTrackConnector.getProject(repository, projectname);
+    final YouTrackProject project = YouTrackConnector.getProject(repository, projectname);
 
-    YouTrackClient client = clientByRepository.get(repository);
+    final YouTrackClient client = clientByRepository.get(repository);
 
     if (project != null) {
       if (!project.isCustomFieldsUpdated()) {
@@ -90,6 +90,17 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
           repoProject.updateCustomFields(client);
         }
       }
+    }
+  }
+
+  public static void forceUpdateProjectCustomFields(TaskRepository repository, String projectname) {
+
+    final YouTrackProject project = YouTrackConnector.getProject(repository, projectname);
+
+    final YouTrackClient client = clientByRepository.get(repository);
+
+    if (project != null) {
+      project.updateCustomFields(client);
     }
   }
 

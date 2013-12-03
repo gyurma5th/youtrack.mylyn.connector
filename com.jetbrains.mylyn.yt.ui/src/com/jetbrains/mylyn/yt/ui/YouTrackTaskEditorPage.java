@@ -6,21 +6,30 @@ package com.jetbrains.mylyn.yt.ui;
 
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.mylyn.commons.ui.CommonImages;
+import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorOutlineNode;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
+import org.eclipse.mylyn.tasks.core.ITask;
+import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.core.sync.SynchronizationJob;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
@@ -29,11 +38,13 @@ import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
 
+import com.jetbrains.mylyn.yt.core.YouTrackConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
@@ -111,6 +122,39 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
   @Override
   public void fillToolBar(final IToolBarManager toolBarManager) {
 
+    Action updateProjectSettings = new Action() {
+      @Override
+      public void run() {
+        final String projectname =
+            getModel().getTaskData().getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue();
+        Job job = new Job("Update settings of " + projectname) {
+          @Override
+          protected IStatus run(IProgressMonitor monitor) {
+            YouTrackConnector.forceUpdateProjectCustomFields(getTaskRepository(), projectname);
+            syncWithUi();
+            return Status.OK_STATUS;
+          }
+        };
+        job.setUser(true);
+        job.schedule();
+      }
+
+      private void syncWithUi() {
+        Display.getDefault().asyncExec(new Runnable() {
+          @Override
+          public void run() {
+            if (!getModel().getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY)
+                .getMetaData().isReadOnly()) {
+              doEdit();
+            }
+          }
+        });
+      }
+    };
+    updateProjectSettings.setToolTipText("Update project settings.");
+    updateProjectSettings.setImageDescriptor(TasksUiImages.REPOSITORY_UPDATE_CONFIGURATION);
+    toolBarManager.add(updateProjectSettings);
+
     Action webViewAction = new Action() {
       @Override
       public void run() {
@@ -171,11 +215,21 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
   public void doEdit() {
     YouTrackTaskDataHandler.setEnableEditMode(true);
     getEditor().refreshPages();
+    YouTrackTaskDataHandler.setEnableEditMode(false);
   }
 
   public void doCancel() {
-    YouTrackTaskDataHandler.setEnableEditMode(false);
     getModel().revert();
+    if (getModel().getChangedAttributes().size() != 0) {
+      Set<ITask> taskSet = new HashSet<ITask>();
+      taskSet.add(getTask());
+      SynchronizationJob job =
+          TasksUiPlugin.getTaskJobFactory().createSynchronizeTasksJob(getConnector(),
+              getTaskRepository(), taskSet);
+      job.setUser(true);
+      job.schedule();
+      // YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditor());
+    }
     getEditor().refreshPages();
   }
 
