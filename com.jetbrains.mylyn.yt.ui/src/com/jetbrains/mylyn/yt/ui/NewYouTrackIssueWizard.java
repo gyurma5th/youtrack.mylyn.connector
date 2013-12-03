@@ -14,8 +14,6 @@ import org.eclipse.mylyn.tasks.core.TaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.wizards.NewTaskWizard;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -77,16 +75,13 @@ public class NewYouTrackIssueWizard extends NewTaskWizard implements INewWizard 
         }
       });
 
-      projectCombo.addFocusListener(new FocusListener() {
+      projectCombo.addListener(SWT.Paint, new Listener() {
 
         private boolean showed = false;
 
         @Override
-        public void focusLost(FocusEvent e) {}
-
-        @Override
-        public void focusGained(FocusEvent e) {
-          if (!showed) {
+        public void handleEvent(Event event) {
+          if (!showed && isCurrentPage()) {
             showed = true;
             projectCombo.setListVisible(true);
           }
