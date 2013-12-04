@@ -22,6 +22,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
@@ -29,6 +30,7 @@ import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorOutlineNode;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
 import org.eclipse.mylyn.tasks.core.sync.SynchronizationJob;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
@@ -41,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
 
@@ -121,6 +124,11 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
   @Override
   public void fillToolBar(final IToolBarManager toolBarManager) {
+
+    Action synchronizeEditorAction = new SynchronizeEditorAction();
+    ((BaseSelectionListenerAction) synchronizeEditorAction)
+        .selectionChanged(new StructuredSelection(getTaskEditor()));
+    toolBarManager.add(synchronizeEditorAction);
 
     Action updateProjectSettings = new Action() {
       @Override
@@ -204,7 +212,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
       @Override
       public void run() {
         // this action cancel all changes and restore previous state
-        doCancel();
+        doRevert();
       }
     };
     cancelAction.setToolTipText("Revert all changes.");
@@ -218,7 +226,23 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
     YouTrackTaskDataHandler.setEnableEditMode(false);
   }
 
-  public void doCancel() {
+  public void doRevert() {
+    getModel().revert();
+    TaskDataModel m = getModel();
+    Set<TaskAttribute> old = getModel().getChangedOldAttributes();
+
+    // final String summary = connector.getTaskMapping(model.getTaskData()).getSummary();
+    // try {
+    // TasksUiPlugin.getTaskList().run(new ITaskListRunnable() {
+    // public void execute(IProgressMonitor monitor) throws CoreException {
+    // task.setSummary(summary);
+    // }
+    // });
+    // TasksUiPlugin.getTaskList().notifyElementChanged(task);
+
+    for (TaskAttribute attribute : getModel().getChangedAttributes()) {
+      getTask().setAttribute(attribute.getId(), attribute.getValue());
+    }
     getModel().revert();
     if (getModel().getChangedAttributes().size() != 0) {
       Set<ITask> taskSet = new HashSet<ITask>();

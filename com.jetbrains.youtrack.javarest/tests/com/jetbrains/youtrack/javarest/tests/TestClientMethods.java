@@ -340,7 +340,7 @@ public class TestClientMethods {
 
     LinkedList<String> bundleValues =
         ((BundleValues) client.getEnumerationBundleValues("Types")).getValues();
-    assertEquals(9, bundleValues.size());
+    assertEquals(10, bundleValues.size());
     assertEquals("Bug", bundleValues.get(0));
 
     try {
