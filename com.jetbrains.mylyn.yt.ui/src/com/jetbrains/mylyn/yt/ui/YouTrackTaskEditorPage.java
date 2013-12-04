@@ -38,6 +38,8 @@ import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.BaseSelectionListenerAction;
@@ -57,10 +59,31 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
   private boolean refreshed = false;
 
+
+  /**
+   * submit task by Ctrl+Enter
+   */
+  private class SubmitKeyPressedListener implements Listener {
+
+    @Override
+    public void handleEvent(Event e) {
+      if (((e.stateMask & SWT.CTRL) == SWT.CTRL) && (e.keyCode == 13)) {
+        doSubmit();
+      }
+    }
+  }
+
+  private static SubmitKeyPressedListener submitKeyPressedListener;
+
   public YouTrackTaskEditorPage(TaskEditor editor) {
     super(editor, YouTrackCorePlugin.CONNECTOR_KIND);
     setNeedsPrivateSection(false);
     setNeedsSubmitButton(true);
+
+    if (submitKeyPressedListener == null) {
+      submitKeyPressedListener = new SubmitKeyPressedListener();
+      PlatformUI.getWorkbench().getDisplay().addFilter(SWT.KeyDown, submitKeyPressedListener);
+    }
   }
 
   @Override
