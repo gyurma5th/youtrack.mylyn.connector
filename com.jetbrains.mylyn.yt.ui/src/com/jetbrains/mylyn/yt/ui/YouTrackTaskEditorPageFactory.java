@@ -4,14 +4,17 @@
 
 package com.jetbrains.mylyn.yt.ui;
 
+import java.net.URL;
+
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.internal.tasks.ui.util.TasksUiInternal;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
-import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.TasksUiUtil;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPageFactory;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
@@ -19,6 +22,8 @@ import org.eclipse.mylyn.tasks.ui.editors.TaskEditorInput;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.editor.IFormPage;
+import org.eclipse.ui.internal.util.BundleUtility;
+import org.osgi.framework.Bundle;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 
@@ -37,7 +42,9 @@ public class YouTrackTaskEditorPageFactory extends AbstractTaskEditorPageFactory
 
   @Override
   public Image getPageImage() {
-    return CommonImages.getImage(TasksUiImages.REPOSITORY_SMALL);
+    Bundle bundle = Platform.getBundle(getPluginId());
+    URL fullPathString = BundleUtility.find(bundle, "resource/icon16.png");
+    return CommonImages.getImage(ImageDescriptor.createFromURL(fullPathString));
   }
 
   @Override

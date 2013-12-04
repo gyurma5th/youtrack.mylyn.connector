@@ -200,7 +200,6 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
     submitAction.setImageDescriptor(TasksUiImages.REPOSITORY_SUBMIT);
     toolBarManager.add(submitAction);
 
-
     Action editAction = new Action() {
       @Override
       public void run() {

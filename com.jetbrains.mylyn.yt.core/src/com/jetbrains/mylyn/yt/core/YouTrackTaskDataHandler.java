@@ -329,6 +329,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
       // TODO: NullPointer here!
       if (project.isCustomFieldsUpdated()
+          && project.getCustomFieldsMap().get("Priority").getBundle() != null
           && project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
         attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),
             project.getCustomFieldsMap().get("Priority").getBundle().getValues()).toString());
