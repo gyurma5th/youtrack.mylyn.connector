@@ -6,7 +6,7 @@ package com.jetbrains.mylyn.yt.ui;
 
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,14 +24,11 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.mylyn.commons.ui.CommonImages;
-import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorOutlineNode;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
-import org.eclipse.mylyn.tasks.core.ITask;
+import org.eclipse.mylyn.tasks.core.IRepositoryElement;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
-import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
-import org.eclipse.mylyn.tasks.core.sync.SynchronizationJob;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
@@ -50,6 +47,8 @@ import org.eclipse.ui.forms.IManagedForm;
 import com.jetbrains.mylyn.yt.core.YouTrackConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
+import com.jetbrains.mylyn.yt.ui.utils.RevertAction;
+import com.jetbrains.mylyn.yt.ui.utils.SynchronizeEditorAction;
 
 public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
@@ -208,53 +207,16 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
     editAction.setImageDescriptor(CommonImages.EDIT);
     toolBarManager.add(editAction);
 
-    Action cancelAction = new Action() {
-      @Override
-      public void run() {
-        // this action cancel all changes and restore previous state
-        doRevert();
-      }
-    };
-    cancelAction.setToolTipText("Revert all changes.");
-    cancelAction.setImageDescriptor(CommonImages.UNDO);
-    toolBarManager.add(cancelAction);
+    Action revertAction =
+        new RevertAction(Collections.singletonList((IRepositoryElement) getTask()));
+    ((RevertAction) revertAction).setTaskEditorPage(this);
+    toolBarManager.add(revertAction);
   }
 
   public void doEdit() {
     YouTrackTaskDataHandler.setEnableEditMode(true);
     getEditor().refreshPages();
     YouTrackTaskDataHandler.setEnableEditMode(false);
-  }
-
-  public void doRevert() {
-    getModel().revert();
-    TaskDataModel m = getModel();
-    Set<TaskAttribute> old = getModel().getChangedOldAttributes();
-
-    // final String summary = connector.getTaskMapping(model.getTaskData()).getSummary();
-    // try {
-    // TasksUiPlugin.getTaskList().run(new ITaskListRunnable() {
-    // public void execute(IProgressMonitor monitor) throws CoreException {
-    // task.setSummary(summary);
-    // }
-    // });
-    // TasksUiPlugin.getTaskList().notifyElementChanged(task);
-
-    for (TaskAttribute attribute : getModel().getChangedAttributes()) {
-      getTask().setAttribute(attribute.getId(), attribute.getValue());
-    }
-    getModel().revert();
-    if (getModel().getChangedAttributes().size() != 0) {
-      Set<ITask> taskSet = new HashSet<ITask>();
-      taskSet.add(getTask());
-      SynchronizationJob job =
-          TasksUiPlugin.getTaskJobFactory().createSynchronizeTasksJob(getConnector(),
-              getTaskRepository(), taskSet);
-      job.setUser(true);
-      job.schedule();
-      // YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditor());
-    }
-    getEditor().refreshPages();
   }
 
   @Override

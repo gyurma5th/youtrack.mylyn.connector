@@ -50,7 +50,7 @@ public class YouTrackTaskEditorPageFactory extends AbstractTaskEditorPageFactory
     return PRIORITY_TASK;
   }
 
-  static void synchronizeTaskUi(final TaskEditor editor) {
+  public static void synchronizeTaskUi(final TaskEditor editor) {
 
     final ITask task = editor.getTaskEditorInput().getTask();
     if (task == null) {

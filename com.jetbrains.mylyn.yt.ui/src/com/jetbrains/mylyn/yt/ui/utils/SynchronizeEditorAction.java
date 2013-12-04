@@ -1,4 +1,4 @@
-package com.jetbrains.mylyn.yt.ui;
+package com.jetbrains.mylyn.yt.ui.utils;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.mylyn.commons.ui.CommonImages;
@@ -6,6 +6,8 @@ import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.ui.actions.BaseSelectionListenerAction;
+
+import com.jetbrains.mylyn.yt.ui.YouTrackTaskEditorPageFactory;
 
 public class SynchronizeEditorAction extends BaseSelectionListenerAction {
 
