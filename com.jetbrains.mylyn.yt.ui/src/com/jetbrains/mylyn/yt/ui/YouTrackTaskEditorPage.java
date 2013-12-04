@@ -47,6 +47,7 @@ import org.eclipse.ui.forms.IManagedForm;
 import com.jetbrains.mylyn.yt.core.YouTrackConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
+import com.jetbrains.mylyn.yt.ui.utils.DeleteTaskAction;
 import com.jetbrains.mylyn.yt.ui.utils.RevertAction;
 import com.jetbrains.mylyn.yt.ui.utils.SynchronizeEditorAction;
 
@@ -123,6 +124,11 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
   @Override
   public void fillToolBar(final IToolBarManager toolBarManager) {
+
+    if (getModel().getTaskData().isNew()) {
+      DeleteTaskAction deleteAction = new DeleteTaskAction(getTask());
+      toolBarManager.add(deleteAction);
+    }
 
     Action synchronizeEditorAction = new SynchronizeEditorAction();
     ((BaseSelectionListenerAction) synchronizeEditorAction)
