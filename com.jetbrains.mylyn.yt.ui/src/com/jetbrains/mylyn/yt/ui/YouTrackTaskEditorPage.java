@@ -148,10 +148,10 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
   @Override
   public void fillToolBar(final IToolBarManager toolBarManager) {
 
-    if (getModel().getTaskData().isNew()) {
-      DeleteTaskAction deleteAction = new DeleteTaskAction(getTask());
-      toolBarManager.add(deleteAction);
-    }
+    DeleteTaskAction deleteAction =
+        new DeleteTaskAction(getTask(), getModel().getTaskData().isNew(), getModel()
+            .getTaskRepository(), this);
+    toolBarManager.add(deleteAction);
 
     Action synchronizeEditorAction = new SynchronizeEditorAction();
     ((BaseSelectionListenerAction) synchronizeEditorAction)
@@ -209,7 +209,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         }
       }
     };
-    webViewAction.setToolTipText("Open issue in internal Eclipse browser.");
+    webViewAction.setToolTipText("Open issue in internal Eclipse browser");
     webViewAction.setImageDescriptor(CommonImages.WEB);
     toolBarManager.add(webViewAction);
 
