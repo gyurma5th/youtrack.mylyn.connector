@@ -56,6 +56,11 @@ public class YouTrackClient {
 
   private WebResource service;
 
+  public YouTrackClient(WebResource resource) {
+    baseServerURL = resource.getURI().toString();
+    this.service = resource;
+  }
+
   public YouTrackClient() {
     this.host = DEFAULT_HOST;
     this.port = DEFAULT_PORT;

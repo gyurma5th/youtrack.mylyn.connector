@@ -113,7 +113,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
           || !new URL(client.getBaseServerURL()).getHost().equals(
               new URL(repository.getUrl()).getHost())) {
 
-        client = YouTrackClient.createClient(repository.getUrl().toString());
+        client = YouTrackClient.createClient(repository.getUrl());
         boolean login = client.login(repository.getUserName(), repository.getPassword());
         if (!login) {
           throw new RuntimeException("Can't login into  : " + repository.getUrl().toString());
