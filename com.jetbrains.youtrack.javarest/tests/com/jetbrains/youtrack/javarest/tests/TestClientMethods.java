@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
+import com.jetbrains.youtrack.javarest.client.YouTrackClientFactory;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
@@ -35,32 +36,50 @@ public class TestClientMethods {
 
   static final String MYLYN_PROJECT_NAME = "mylyn";
 
+  static YouTrackClientFactory clientFactory;
+
   @BeforeClass
   public static void initialize() {
-    client = YouTrackClient.createClient("http://nylym.myjetbrains.com/youtrack/");
-    client.login("testuser", "12345");
+    clientFactory = new YouTrackClientFactory();
+    client = clientFactory.getClient("http://nylym.myjetbrains.com/youtrack/");
+    try {
+      client.login("testuser", "12345");
+    } catch (Exception e) {
+      fail("Can't login into YT\n" + e.getMessage());
+    }
+  }
+
+  @Test
+  public void testHandleCookies() {
+    int issues_count = 100;
+    // client.getNumberOfIssues("project: " + TEST_PROJECT_NAME);
+    List<YouTrackIssue> issues = client.getIssuesInProject(TEST_PROJECT_NAME, issues_count);
+    assertEquals(issues_count, issues.size());
+    try {
+      for (YouTrackIssue issue : issues) {
+        client.getIssue(issue.getId());
+      }
+    } catch (RuntimeException e) {
+      fail("Cant get issues.");
+    }
   }
 
   @Test
   public void testCreateClient() {
-
-    YouTrackClient defaultClient = new YouTrackClient();
-
-    YouTrackClient testClient =
-        YouTrackClient.createClient("http://nylym.myjetbrains.com/youtrack/");
-    testClient = YouTrackClient.createClient("nylym.myjetbrains.com/youtrack/");
-    testClient = YouTrackClient.createClient("nylym.myjetbrains.com:80/youtrack/");
-    testClient = YouTrackClient.createClient("http://youtrack.jetbrains.com/");
-    testClient = YouTrackClient.createClient("http://youtrack.jetbrains.com:80/");
-    testClient = YouTrackClient.createClient("youtrack.jetbrains.com");
-    testClient = YouTrackClient.createClient("youtrack.jetbrains.com:80");
+    String[] validServerUrls =
+        {"http://nylym.myjetbrains.com/youtrack/", "nylym.myjetbrains.com/youtrack/",
+            "nylym.myjetbrains.com:80/youtrack/", "http://youtrack.jetbrains.com/",
+            "http://youtrack.jetbrains.com:80/", "youtrack.jetbrains.com",
+            "youtrack.jetbrains.com:80"};
+    for (String serverUrl : validServerUrls) {
+      clientFactory.getClient(serverUrl);
+    }
   }
 
   @Test
   public void testLogin() {
 
-    YouTrackClient testClient =
-        YouTrackClient.createClient("http://nylym.myjetbrains.com/youtrack/");
+    YouTrackClient testClient = clientFactory.getClient("http://nylym.myjetbrains.com/youtrack/");
 
     try {
       assertTrue("Jersey test login method", testClient.login("testuser", "12345"));
@@ -389,7 +408,7 @@ public class TestClientMethods {
 
     bundleValues = ((BundleValues) client.getStateBundleValues("States")).getValues();
 
-    assertEquals(13, bundleValues.size());
+    assertEquals(14, bundleValues.size());
     assertTrue(bundleValues.contains("Submitted"));
     assertTrue(bundleValues.contains("Open"));
     assertTrue(bundleValues.contains("In Progress"));
@@ -629,12 +648,11 @@ public class TestClientMethods {
     List<YouTrackIssue> issues =
         client.getIssuesByFilter("created by: testuser project: mylyn", 100);
     try {
-      client.login("testuser", "12345");
       for (YouTrackIssue issue : issues) {
         client.deleteIssue(issue.getId());
       }
     } catch (Exception e) {
-      fail();
+      fail("Can't delete test issues in @AfterClass");
     }
   }
 

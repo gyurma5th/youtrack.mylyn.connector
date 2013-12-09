@@ -1,7 +1,5 @@
 package com.jetbrains.youtrack.javarest.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,11 +24,6 @@ import com.jetbrains.youtrack.javarest.utils.UserSavedSearches;
 import com.jetbrains.youtrack.javarest.utils.VersionBundleValues;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.filter.LoggingFilter;
-import com.sun.jersey.client.apache.ApacheHttpClient;
-import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
-import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 
 public class YouTrackClient {
 
@@ -38,115 +31,10 @@ public class YouTrackClient {
 
   private String password = null;
 
-  private String host;
-
-  private int port;
-
-  private final String baseServerURL;
-
-  private final static String DEFAULT_SCHEME = "http";
-
-  private final static String DEFAULT_HOST = "localhost";
-
-  private final static int DEFAULT_PORT = 80;
-
-  private ClientConfig config;
-
-  private ApacheHttpClient jerseyClient;
-
   private WebResource service;
 
   public YouTrackClient(WebResource resource) {
-    baseServerURL = resource.getURI().toString();
     this.service = resource;
-  }
-
-  public YouTrackClient() {
-    this.host = DEFAULT_HOST;
-    this.port = DEFAULT_PORT;
-    this.baseServerURL =
-        DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + Integer.toString(DEFAULT_PORT) + "/rest";
-    setClientConfigs();
-  }
-
-  public YouTrackClient(String hostname, int port, String scheme) {
-    try {
-      URI validator = new URI(buildBaseURL(hostname, port, scheme));
-
-      this.host = hostname;
-      this.port = port;
-      baseServerURL = validator.toString();
-
-    } catch (URISyntaxException e) {
-      throw new RuntimeException("Incorrect host or port, cant create new client");
-    }
-
-    setClientConfigs();
-  }
-
-  private String buildBaseURL(String hostname, int port, String scheme) throws URISyntaxException {
-
-    StringBuilder uri = new StringBuilder(scheme);
-    uri.append("://");
-
-    if (new URI(uri.toString() + hostname).getHost().toString().equals(hostname)) {
-      uri.append(hostname).append(":").append(port);
-    } else {
-      if (hostname.contains("/")) {
-        String realHost = hostname.substring(0, hostname.indexOf("/"));
-        String afterHostPart = hostname.substring(hostname.indexOf("/"));
-        uri.append(realHost).append(":").append(port).append(afterHostPart);
-      } else {
-        throw new RuntimeException("Incorrect host or port, cant create new client");
-      }
-    }
-
-    if (!uri.toString().endsWith("/")) {
-      uri.append("/");
-    }
-    uri.append("rest");
-    return uri.toString();
-  }
-
-  private void setClientConfigs() {
-    setConfig(new DefaultApacheHttpClientConfig());
-    getConfig().getProperties().put(ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
-    this.jerseyClient = ApacheHttpClient.create(getConfig());
-    jerseyClient.addFilter(new LoggingFilter(System.out));
-    service = jerseyClient.resource(this.getBaseServerURL());
-  }
-
-  public static YouTrackClient createClient(String url) {
-    URI uri;
-    try {
-      if (url.contains("://")) {
-        uri = new URI(url);
-      } else {
-        uri = new URI(DEFAULT_SCHEME + "://" + url);
-      }
-
-      String host = "";
-      if (uri.getHost() != null) {
-        host = uri.getHost();
-      }
-      if (uri.getPath() != null) {
-        host += uri.getPath();
-      }
-
-      String scheme = uri.getScheme();
-      if (scheme == null) {
-        scheme = DEFAULT_SCHEME;
-      }
-
-      int port = uri.getPort();
-      if (port == -1) {
-        port = DEFAULT_PORT;
-      }
-
-      return new YouTrackClient(host, port, scheme);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException("Incorrect host or port, can't create new client");
-    }
   }
 
   public static ClientResponse checkClientResponse(ClientResponse response, int code, String message) {
@@ -242,18 +130,6 @@ public class YouTrackClient {
     return getIssuesInProject(projectname, "", 0, 10, 0);
   }
 
-  public String getBaseServerURL() {
-    return baseServerURL;
-  }
-
-  public ClientConfig getConfig() {
-    return config;
-  }
-
-  public void setConfig(ClientConfig config) {
-    this.config = config;
-  }
-
   public String getPassword() {
     if (password == null) {
       throw new RuntimeException("Attempt to get null password.");
@@ -312,7 +188,7 @@ public class YouTrackClient {
         resource = resource.queryParam("description", issue.getDescription());
       }
       ClientResponse response =
-          checkClientResponse(resource.put(ClientResponse.class), 201, "Failed put new issue");
+          checkClientResponse(resource.put(ClientResponse.class, ""), 201, "Failed put new issue");
       return YouTrackIssue.getIdFromResponse(response);
     } else {
       throw new RuntimeException("Issue's project and summary can't be null.");

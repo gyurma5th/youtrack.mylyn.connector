@@ -20,6 +20,10 @@ public class YouTrackClientFactory {
 
   private DefaultClientConfig defaultConfig;
 
+  private static final String URL_PREFIX_HTTPS = "https://";
+
+  private static final String URL_PREFIX_HTTP = "http://";
+
   public YouTrackClientFactory(Client baseClient) {
     this.baseClient = baseClient;
   }
@@ -27,7 +31,7 @@ public class YouTrackClientFactory {
   public YouTrackClientFactory() {
     defaultConfig = new DefaultClientConfig();
     this.baseClient = Client.create(defaultConfig);
-    baseClient.addFilter(new LoggingFilter(System.out));
+    getClientFactory().addFilter(new LoggingFilter(System.out));
     handleCookies();
   }
 
@@ -35,8 +39,8 @@ public class YouTrackClientFactory {
 
     // getConfig().getProperties().put(ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
 
-    if (baseClient != null) {
-      baseClient.addFilter(new ClientFilter() {
+    if (getClientFactory() != null) {
+      getClientFactory().addFilter(new ClientFilter() {
         private ArrayList<Object> cookies;
 
         @Override
@@ -71,12 +75,26 @@ public class YouTrackClientFactory {
   }
 
   public YouTrackClient getClient(String baseUrlString) {
-    try {
-      URL baseUrl = new URL(baseUrlString);
-      return new YouTrackClient(baseClient.resource(baseUrl.toURI()).path("/rest"));
-    } catch (Exception e) {
-      throw new RuntimeException("Repository URL is not valid.", e);
+    URL baseUrl;
+    if (baseUrlString.startsWith(URL_PREFIX_HTTPS) || baseUrlString.startsWith(URL_PREFIX_HTTP)) {
+      try {
+        baseUrl = new URL(baseUrlString);
+        return new YouTrackClient(getClientFactory().resource(baseUrl.toURI()).path("/rest"));
+      } catch (Exception e) {
+        throw new RuntimeException("Repository URL is not valid.", e);
+      }
+    } else {
+      try {
+        baseUrl = new URL(URL_PREFIX_HTTPS + baseUrlString);
+        return new YouTrackClient(getClientFactory().resource(baseUrl.toURI()).path("/rest"));
+      } catch (Exception e) {
+        throw new RuntimeException("Repository URL is not valid.", e);
+      }
     }
-
   }
+
+  public Client getClientFactory() {
+    return baseClient;
+  }
+
 }

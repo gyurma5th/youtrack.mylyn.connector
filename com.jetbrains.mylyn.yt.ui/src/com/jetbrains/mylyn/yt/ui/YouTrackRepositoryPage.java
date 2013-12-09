@@ -6,6 +6,7 @@ package com.jetbrains.mylyn.yt.ui;
 
 import java.io.File;
 
+import org.apache.commons.httpclient.URI;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -17,6 +18,7 @@ import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositorySettingsPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 
+import com.jetbrains.mylyn.yt.core.YouTrackConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
@@ -63,7 +65,7 @@ public class YouTrackRepositoryPage extends AbstractRepositorySettingsPage {
         String user = repository.getUserName();
         String passwd = repository.getPassword();
         try {
-          YouTrackClient client = YouTrackClient.createClient(location);
+          YouTrackClient client = YouTrackConnector.getClient(repository);
           if (!client.login(user, passwd)) {
             throw new CoreException(new Status(IStatus.ERROR, YouTrackUiPlugin.ID_PLUGIN,
                 "Credentials are not valid"));
@@ -78,7 +80,21 @@ public class YouTrackRepositoryPage extends AbstractRepositorySettingsPage {
 
   @Override
   protected boolean isValidUrl(String url) {
-    return super.isValidUrl(url);
+    if (url.startsWith(URL_PREFIX_HTTPS) || url.startsWith(URL_PREFIX_HTTP)) {
+      try {
+        new URI(url, true, "UTF-8"); //$NON-NLS-1$
+        return true;
+      } catch (Exception e) {
+        return false;
+      }
+    } else {
+      try {
+        new URI(URL_PREFIX_HTTP + url, true, "UTF-8"); //$NON-NLS-1$
+        return true;
+      } catch (Exception e) {
+        return false;
+      }
+    }
   }
 
   @Override

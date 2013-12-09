@@ -4,8 +4,6 @@
 
 package com.jetbrains.mylyn.yt.core;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,6 +31,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
+import com.jetbrains.youtrack.javarest.client.YouTrackClientFactory;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
 import com.jetbrains.youtrack.javarest.utils.MyRunnable;
@@ -53,8 +52,11 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
   public final static String ISSUE_URL_PREFIX = "/issue/";
 
+  private static YouTrackClientFactory clientFactory;
+
   public YouTrackConnector() {
     taskDataHandler = new YouTrackTaskDataHandler(this);
+    clientFactory = new YouTrackClientFactory();
   }
 
   public static YouTrackProject getProject(TaskRepository repository, String projectname) {
@@ -105,23 +107,10 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
   }
 
   public static synchronized YouTrackClient getClient(TaskRepository repository) {
-
     YouTrackClient client = clientByRepository.get(repository);
-
-    try {
-      if (client == null
-          || !new URL(client.getBaseServerURL()).getHost().equals(
-              new URL(repository.getUrl()).getHost())) {
-
-        client = YouTrackClient.createClient(repository.getUrl());
-        boolean login = client.login(repository.getUserName(), repository.getPassword());
-        if (!login) {
-          throw new RuntimeException("Can't login into  : " + repository.getUrl().toString());
-        }
-        clientByRepository.put(repository, client);
-      }
-    } catch (MalformedURLException e) {
-      throw new RuntimeException("Malformed url " + e.getMessage(), e);
+    if (client == null) {
+      client = clientFactory.getClient(repository.getRepositoryUrl());
+      clientByRepository.put(repository, client);
     }
     return client;
   }
