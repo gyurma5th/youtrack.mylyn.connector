@@ -30,20 +30,24 @@ import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
 
 public class TestClientMethods {
 
-  static YouTrackClient client;
+  private static YouTrackClient client;
 
-  static final String TEST_PROJECT_NAME = "testproject";
+  private static final String TEST_PROJECT_NAME = "autotest";
 
-  static final String MYLYN_PROJECT_NAME = "mylyn";
+  private static final String TEST_PROJECT_USER = "tester";
 
-  static YouTrackClientFactory clientFactory;
+  private static final String TEST_PROJECT_USER_PASSWORD = "12345";
+
+  private static final String MYLYN_PROJECT_NAME = "mylyn";
+
+  private static YouTrackClientFactory clientFactory;
 
   @BeforeClass
   public static void initialize() {
     clientFactory = new YouTrackClientFactory();
     client = clientFactory.getClient("http://nylym.myjetbrains.com/youtrack/");
     try {
-      client.login("testuser", "12345");
+      client.login(TEST_PROJECT_USER, TEST_PROJECT_USER_PASSWORD);
     } catch (Exception e) {
       fail("Can't login into YT\n" + e.getMessage());
     }
@@ -51,7 +55,7 @@ public class TestClientMethods {
 
   @Test
   public void testHandleCookies() {
-    int issues_count = 100;
+    int issues_count = 17;
     // client.getNumberOfIssues("project: " + TEST_PROJECT_NAME);
     List<YouTrackIssue> issues = client.getIssuesInProject(TEST_PROJECT_NAME, issues_count);
     assertEquals(issues_count, issues.size());
@@ -82,7 +86,8 @@ public class TestClientMethods {
     YouTrackClient testClient = clientFactory.getClient("http://nylym.myjetbrains.com/youtrack/");
 
     try {
-      assertTrue("Jersey test login method", testClient.login("testuser", "12345"));
+      assertTrue("Jersey test login method",
+          testClient.login(TEST_PROJECT_USER, TEST_PROJECT_USER_PASSWORD));
       assertTrue("Jersey test login method with credentials", testClient.loginWithCredentials());
     } catch (Exception e) {
       fail("Exception while login test:" + e.getMessage());
@@ -109,26 +114,27 @@ public class TestClientMethods {
   @Test
   public void testGetIssueById() {
 
-    YouTrackIssue i1 = client.getIssue("mylyn-10");
-    i1.mapFields();
-    assertEquals("Mylyn Concepts and Usage", i1.getSummary());
-    assertEquals("root", i1.getSingleField("reporterName"));
-    assertEquals("mylyn-10", i1.getId());
-    assertEquals("Fixed", i1.getSingleCustomFieldValue("State"));
-    assertEquals("Task", i1.getSingleCustomFieldValue("Type"));
-    assertEquals(2, i1.getTags().size());
+    YouTrackIssue issue = client.getIssue(TEST_PROJECT_NAME + "-3");
+    issue.mapFields();
+    assertEquals("testGetIssueById$1", issue.getSummary());
+    assertEquals("Issue for testGetIssueById", issue.getDescription());
+    assertEquals("root", issue.getSingleField("reporterName"));
+    assertEquals(TEST_PROJECT_NAME + "-3", issue.getId());
+    assertEquals("Fixed", issue.getSingleCustomFieldValue("State"));
+    assertEquals("Task", issue.getSingleCustomFieldValue("Type"));
+    assertEquals(2, issue.getTags().size());
     try {
-      i1 = client.getIssue(null);
+      issue = client.getIssue(null);
       fail("Exception expected when issue id null.");
     } catch (Exception e) {}
 
     try {
-      i1 = client.getIssue("");
+      issue = client.getIssue("");
       fail("Exception expected when get issue with incorrect id. ");
     } catch (Exception e) {}
 
     try {
-      i1 = client.getIssue("-1");
+      issue = client.getIssue("-1");
       fail("Exception expected when get issue with incorrect id. ");
     } catch (Exception e) {}
   }
@@ -136,25 +142,26 @@ public class TestClientMethods {
   @Test
   public void testGetIssuesInProject() {
 
-    List<YouTrackIssue> issues = client.getIssuesInProject("mylyn", 10);
+    List<YouTrackIssue> issues = client.getIssuesInProject(TEST_PROJECT_NAME, 10);
     assertEquals(10, issues.size());
-    issues = client.getIssuesInProject("mylyn");
+    issues = client.getIssuesInProject(TEST_PROJECT_NAME);
     assertEquals(10, issues.size());
-    issues = client.getIssuesInProject("mylyn", "project: mylyn", 0, 10, 0);
+    issues =
+        client.getIssuesInProject(TEST_PROJECT_NAME, "project: " + TEST_PROJECT_NAME, 0, 10, 0);
     assertEquals(10, issues.size());
-    issues = client.getIssuesInProject("mylyn", "!@#$%^&*", 0, 10, 0);
+    issues = client.getIssuesInProject(TEST_PROJECT_NAME, "!@#$%^&*", 0, 10, 0);
     assertEquals(0, issues.size());
 
-    issues = client.getIssuesInProject("mylyn", 10);
+    issues = client.getIssuesInProject(TEST_PROJECT_NAME, 10);
     YouTrackIssue i = new YouTrackIssue();
     for (YouTrackIssue issue : issues) {
-      if (issue.getId().equals("mylyn-10")) {
+      if (issue.getId().equals(TEST_PROJECT_NAME + "-3")) {
         i = issue;
         break;
       }
     }
     i.mapFields();
-    assertEquals("Mylyn Concepts and Usage", i.getSummary());
+    assertEquals("testGetIssueById$1", i.getSummary());
 
     try {
       issues = client.getIssuesInProject(null);
@@ -194,7 +201,7 @@ public class TestClientMethods {
   public void testPutNewIssue() {
     YouTrackIssue issue = new YouTrackIssue();
     issue.addSingleField("projectShortName", TEST_PROJECT_NAME);
-    issue.addSingleField("summary", "test issue ? , + - # {");
+    issue.addSingleField("summary", "testPutNewIssue$: test issue ? , + - # {");
     issue.addSingleField("description", "test description");
     client.putNewIssue(issue);
 
@@ -220,7 +227,7 @@ public class TestClientMethods {
   public void testDeleteIssue() {
     YouTrackIssue issue = new YouTrackIssue();
     issue.addSingleField("projectShortName", TEST_PROJECT_NAME);
-    issue.addSingleField("summary", "test issue ? , + - # {");
+    issue.addSingleField("summary", "testDeleteIssue$: test issue ? , + - # {");
     issue.addSingleField("description", "test description");
     String id = client.putNewIssue(issue);
     client.deleteIssue(id);
@@ -242,10 +249,8 @@ public class TestClientMethods {
 
   @Test
   public void testApplyCommand() {
-    YouTrackIssue issue = new YouTrackIssue();
-    issue.addSingleField("projectShortName", TEST_PROJECT_NAME);
-    issue.addSingleField("summary", "test summary");
-    String id = client.putNewIssue(issue);
+    YouTrackIssue issue = client.getIssue(TEST_PROJECT_NAME + "-13");
+    String id = issue.getId();
 
     client.applyCommand(id, "Feature");
     issue = client.getIssue(id);
@@ -259,7 +264,7 @@ public class TestClientMethods {
     issue = client.getIssue(id);
     assertEquals("Won't fix", issue.getSingleCustomFieldValue("State"));
 
-    client.applyCommand(id, "");
+    client.applyCommand(id, "Bug Submitted");
 
     try {
       client.applyCommand(id, null);
@@ -270,8 +275,8 @@ public class TestClientMethods {
 
   @Test
   public void testIssueExist() {
-    assertTrue(client.issueExist(MYLYN_PROJECT_NAME + "-1"));
-    assertFalse(client.issueExist(MYLYN_PROJECT_NAME + "-0"));
+    assertTrue(client.issueExist(TEST_PROJECT_NAME + "-3"));
+    assertFalse(client.issueExist(TEST_PROJECT_NAME + "-0"));
 
     try {
       client.issueExist(null);
@@ -282,8 +287,7 @@ public class TestClientMethods {
 
   @Test
   public void testGetNumberOfIssues() {
-    int count = client.getNumberOfIssues(null);
-    count = client.getNumberOfIssues("project: " + TEST_PROJECT_NAME);
+    int count = client.getNumberOfIssues("project: " + TEST_PROJECT_NAME);
     assertTrue(client.getNumberOfIssues("project: " + TEST_PROJECT_NAME) <= client
         .getNumberOfIssues(null));
     assertEquals(1, client.getNumberOfIssues("#{Meta Issue} " + "project: " + TEST_PROJECT_NAME));
@@ -305,8 +309,8 @@ public class TestClientMethods {
 
   @Test
   public void testGetProjectCustomFields() {
-    LinkedList<YouTrackCustomField> cfs = client.getProjectCustomFields(MYLYN_PROJECT_NAME);
-    Set<String> cfNames = client.getProjectCustomFieldNames(MYLYN_PROJECT_NAME);
+    LinkedList<YouTrackCustomField> cfs = client.getProjectCustomFields(TEST_PROJECT_NAME);
+    Set<String> cfNames = client.getProjectCustomFieldNames(TEST_PROJECT_NAME);
     assertTrue(cfNames.contains("Priority"));
     assertTrue(cfNames.contains("Type"));
     assertTrue(cfNames.contains("State"));
@@ -315,8 +319,8 @@ public class TestClientMethods {
     assertTrue(cfNames.contains("Fix versions"));
     assertTrue(cfNames.contains("Affected versions"));
     assertTrue(cfNames.contains("Fixed in build"));
-    assertTrue(cfNames.contains("Difficulty rate"));
-    assertTrue(cfNames.contains("Phase"));
+    assertTrue(cfNames.contains("Simple string"));
+    assertTrue(cfNames.contains("Integer field"));
 
     try {
       cfs = client.getProjectCustomFields(null);
@@ -332,7 +336,7 @@ public class TestClientMethods {
 
   @Test
   public void testGetProjectCustomField() {
-    YouTrackCustomField cf = client.getProjectCustomField(MYLYN_PROJECT_NAME, "Type");
+    YouTrackCustomField cf = client.getProjectCustomField(TEST_PROJECT_NAME, "Type");
     assertEquals("Type", cf.getName());
     cf.findBundle();
     assertEquals("Types", cf.getBundle().getName());
@@ -479,14 +483,14 @@ public class TestClientMethods {
 
   @Test
   public void testAddComment() {
-    YouTrackIssue issue = client.getIssue(TEST_PROJECT_NAME + "-1");
+    YouTrackIssue issue = client.getIssue(TEST_PROJECT_NAME + "-18");
     int commentsLength = issue.getComments().size();
-    client.addComment(TEST_PROJECT_NAME + "-1", "New test comment");
-    issue = client.getIssue(TEST_PROJECT_NAME + "-1");
+    client.addComment(TEST_PROJECT_NAME + "-18", "New test comment");
+    issue = client.getIssue(TEST_PROJECT_NAME + "-18");
     assertTrue(issue.getComments().size() == commentsLength + 1);
 
     try {
-      client.addComment(TEST_PROJECT_NAME + "-1", null);
+      client.addComment(TEST_PROJECT_NAME + "-18", null);
       fail("Exception expected while add new comment with null body.");
     } catch (Exception e) {}
 
@@ -545,15 +549,13 @@ public class TestClientMethods {
   @Test
   public void testGetSavedSearches() {
     LinkedList<String> searches = client.getSavedSearchesNames();
-    assertTrue(new HashSet<String>(searches).contains("Unassigned in testproject"));
 
     SavedSearch search = client.getSavedSearch("Usability Problem");
     assertEquals("#{Usability Problem}", search.getSearchText());
 
-    LinkedList<UserSavedSearch> userSearches = client.getSavedSearchesForUser("testuser");
+    LinkedList<UserSavedSearch> userSearches = client.getSavedSearchesForUser(TEST_PROJECT_USER);
 
-    searches = client.getSavedSearchesNamesForUser("testuser");
-    assertTrue(searches.contains("Unassigned in testproject"));
+    searches = client.getSavedSearchesNamesForUser(TEST_PROJECT_USER);
     assertTrue(searches.contains("Assigned to me"));
     assertTrue(searches.contains("Commented by me"));
     assertTrue(searches.contains("Reported by me"));
@@ -574,16 +576,21 @@ public class TestClientMethods {
   @Test
   public void testGetUserTags() {
     String[] tags = client.getAllSuitableTags();
-    assertTrue(tags.length > 0);
-    assertEquals("Star", tags[0]);
+    assertTrue(tags.length == 2);
+    LinkedList<String> tagList = new LinkedList<String>();
+    for (String tag : tags) {
+      tagList.add(tag);
+    }
+    assertTrue(tagList.contains("New tag"));
+    assertTrue(tagList.contains("Yarrr"));
   }
 
   @Test
   public void testUpdateIssueSummaryAndDescription() {
-    String testIssueId = TEST_PROJECT_NAME + "-100";
+    String testIssueId = TEST_PROJECT_NAME + "-19";
     YouTrackIssue issue = client.getIssue(testIssueId);
-    assertEquals("OLD SUMMARY", issue.getSummary());
-    assertEquals("OLD DESCRIPTION", issue.getDescription());
+    assertEquals("testUpdateIssueSummaryAndDescription$1", issue.getSummary());
+    assertEquals("testUpdateIssueSummaryAndDescription$1", issue.getDescription());
     client.updateIssueSummaryAndDescription(testIssueId, "NEW SUMMARY", "NEW DESCRIPTION");
     issue = client.getIssue(testIssueId);
     assertEquals("NEW SUMMARY", issue.getSummary());
@@ -608,18 +615,19 @@ public class TestClientMethods {
     issue = client.getIssue(testIssueId);
     assertEquals("NEW DESCRIPTION", issue.getDescription());
 
-    client.updateIssueSummaryAndDescription(testIssueId, "OLD SUMMARY", "OLD DESCRIPTION");
+    client.updateIssueSummaryAndDescription(testIssueId, "testUpdateIssueSummaryAndDescription$1",
+        "testUpdateIssueSummaryAndDescription$1");
   }
 
   @Test
   public void testUpdateIssue() {
-    YouTrackIssue issue = client.getIssue(TEST_PROJECT_NAME + "-1");
+    YouTrackIssue issue = client.getIssue(TEST_PROJECT_NAME + "-20");
     YouTrackProject project = client.getProject(issue.getProjectName());
     project.updateCustomFields(client);
     issue.fillCustomFieldsFromProject(project, client);
     issue.addCustomFieldValue("Type", "Bug");
     client.updateIssue(issue.getId(), issue);
-    issue = client.getIssue(TEST_PROJECT_NAME + "-1");
+    issue = client.getIssue(TEST_PROJECT_NAME + "-20");
     issue.fillCustomFieldsFromProject(project, client);
     assertEquals("Bug", issue.getSingleCustomFieldValue("Type"));
 
@@ -638,22 +646,8 @@ public class TestClientMethods {
     } catch (Exception e) {}
   }
 
+
   @AfterClass
-  public static void removeTestIssues() {
-
-    /*
-     * delete all 'testuser' issues from project mylyn
-     */
-
-    List<YouTrackIssue> issues =
-        client.getIssuesByFilter("created by: testuser project: mylyn", 100);
-    try {
-      for (YouTrackIssue issue : issues) {
-        client.deleteIssue(issue.getId());
-      }
-    } catch (Exception e) {
-      fail("Can't delete test issues in @AfterClass");
-    }
-  }
+  public static void removeTestIssues() {}
 
 }
