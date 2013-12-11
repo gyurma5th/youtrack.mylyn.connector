@@ -63,6 +63,10 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
     if (!projectsByRepository.keySet().contains(repository)) {
       YouTrackClient client = getClient(repository);
       List<YouTrackProject> projects = client.getProjects();
+      if (projects.size() == 0) {
+        boolean loged = client.login(repository.getUserName(), repository.getPassword());
+        return loged ? getProject(repository, projectname) : null;
+      }
       projectsByRepository.put(repository, new HashSet<YouTrackProject>(projects));
     }
 

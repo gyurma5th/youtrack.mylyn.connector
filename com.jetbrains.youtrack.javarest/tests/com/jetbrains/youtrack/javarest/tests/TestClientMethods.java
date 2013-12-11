@@ -71,10 +71,8 @@ public class TestClientMethods {
   @Test
   public void testCreateClient() {
     String[] validServerUrls =
-        {"http://nylym.myjetbrains.com/youtrack/", "nylym.myjetbrains.com/youtrack/",
-            "nylym.myjetbrains.com:80/youtrack/", "http://youtrack.jetbrains.com/",
-            "http://youtrack.jetbrains.com:80/", "youtrack.jetbrains.com",
-            "youtrack.jetbrains.com:80"};
+        {"http://nylym.myjetbrains.com/youtrack/", "http://youtrack.jetbrains.com/",
+            "http://youtrack.jetbrains.com:80/", "http://nylym.myjetbrains.com:80/youtrack/"};
     for (String serverUrl : validServerUrls) {
       clientFactory.getClient(serverUrl);
     }

@@ -6,7 +6,6 @@ package com.jetbrains.mylyn.yt.ui;
 
 import java.io.File;
 
-import org.apache.commons.httpclient.URI;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -79,30 +78,10 @@ public class YouTrackRepositoryPage extends AbstractRepositorySettingsPage {
   }
 
   @Override
-  protected boolean isValidUrl(String url) {
-    if (url.startsWith(URL_PREFIX_HTTPS) || url.startsWith(URL_PREFIX_HTTP)) {
-      try {
-        new URI(url, true, "UTF-8"); //$NON-NLS-1$
-        return true;
-      } catch (Exception e) {
-        return false;
-      }
-    } else {
-      try {
-        new URI(URL_PREFIX_HTTP + url, true, "UTF-8"); //$NON-NLS-1$
-        return true;
-      } catch (Exception e) {
-        return false;
-      }
-    }
-  }
-
-  @Override
   protected void repositoryTemplateSelected(RepositoryTemplate template) {
     repositoryLabelEditor.setStringValue(template.label);
     setUrl(template.repositoryUrl);
     setAnonymous(template.anonymous);
     getContainer().updateButtons();
   }
-
 }
