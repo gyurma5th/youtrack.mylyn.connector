@@ -62,27 +62,33 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
   /**
    * submit task by Ctrl+Enter
+   * 
+   * open command dialog by CTRL+ALT+J
    */
-  private class SubmitKeyPressedListener implements Listener {
+  private class UserKeyPressedListener implements Listener {
 
     @Override
     public void handleEvent(Event e) {
       if (((e.stateMask & SWT.CTRL) == SWT.CTRL) && (e.keyCode == 13)) {
         doSubmit();
+      } else if (e.stateMask == 327680 && e.keyCode == 106) {
+        // press CTRL+ALT+J
+        YouTrackSummaryPart.openCommandWizard(getEditorComposite().getShell(), null, true,
+            (AbstractTaskEditorPage) getEditor().getActivePageInstance());
       }
     }
   }
 
-  private static SubmitKeyPressedListener submitKeyPressedListener;
+  private static UserKeyPressedListener userKeyPressedListener;
 
   public YouTrackTaskEditorPage(TaskEditor editor) {
     super(editor, YouTrackCorePlugin.CONNECTOR_KIND);
     setNeedsPrivateSection(false);
     setNeedsSubmitButton(true);
 
-    if (submitKeyPressedListener == null) {
-      submitKeyPressedListener = new SubmitKeyPressedListener();
-      PlatformUI.getWorkbench().getDisplay().addFilter(SWT.KeyDown, submitKeyPressedListener);
+    if (userKeyPressedListener == null) {
+      userKeyPressedListener = new UserKeyPressedListener();
+      PlatformUI.getWorkbench().getDisplay().addFilter(SWT.KeyDown, userKeyPressedListener);
     }
   }
 
@@ -203,6 +209,8 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
               YouTrackTaskDataHandler.getIssueURL(getModel().getTaskData(), getTaskRepository());
           if (issueURL != null) {
             browser.openURL(issueURL);
+          } else {
+            getEditor().setMessage("Problem with browser.", SWT.ERROR);
           }
         } catch (PartInitException e) {
           throw new RuntimeException(e);
@@ -306,6 +314,8 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
               ((YouTrackAttributesPart) part).setPartId(descriptor.getId());
             } else if (part instanceof YouTrackTaskEditorNewCommentPart) {
               ((YouTrackTaskEditorNewCommentPart) part).setPartId(descriptor.getId());
+            } else if (part instanceof YouTrackSummaryPart) {
+              ((YouTrackSummaryPart) part).setPartId(descriptor.getId());
             }
             initializePart(parent, part, descriptors);
           }
