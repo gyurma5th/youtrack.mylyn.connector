@@ -31,6 +31,7 @@ public class YouTrackRepositoryPage extends AbstractRepositorySettingsPage {
     setNeedsEncoding(false);
     setNeedsHttpAuth(false);
     setNeedsProxy(false);
+    setNeedsValidateOnFinish(true);
   }
 
   @Override

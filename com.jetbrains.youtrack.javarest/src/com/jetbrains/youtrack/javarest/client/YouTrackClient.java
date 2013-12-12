@@ -40,13 +40,9 @@ public class YouTrackClient {
   public static ClientResponse checkClientResponse(ClientResponse response, int code, String message) {
     if (response.getStatus() != code) {
       String responseBody = response.getEntity(String.class);
-      if (responseBody != null && responseBody.length() > 0 && responseBody.contains("<error>"))
-        throw new RuntimeException(message
-            + "\nRESPONSE CODE: "
-            + response.getStatus()
-            + "\nRESPONSE DATA:"
-            + responseBody.substring(responseBody.indexOf("<error>") + "<error>".length(),
-                responseBody.indexOf("</error>")));
+      if (responseBody != null && responseBody.length() > 0)
+        throw new RuntimeException(message + "\nRESPONSE CODE: " + response.getStatus()
+            + "\nRESPONSE DATA:" + responseBody);
     }
     return response;
   }
