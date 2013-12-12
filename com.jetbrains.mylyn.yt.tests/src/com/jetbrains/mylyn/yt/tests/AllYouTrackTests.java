@@ -32,5 +32,8 @@ public class AllYouTrackTests {
 
   public static void addTests(TestSuite suite, TestConfiguration configuration) {
     suite.addTestSuite(YouTrackRepositoryPageTest.class);
+    suite.addTestSuite(YouTrackTaskEditorTest.class);
+    suite.addTestSuite(CorrectJaxbBindingTest.class);
+    suite.addTestSuite(YouTrackClientTest.class);
   }
 }

@@ -40,19 +40,16 @@ public class YouTrackRepositoryPageTest extends TestCase {
 
   private TaskRepository repository;
 
-  private static final String REPOSITORY_URL = "http://nylym.myjetbrains.com/youtrack/";
-
-  private static final String REAL_USER_ID = "tester";
-
-  private static final String REAL_USER_PASSWORD = "12345";
-
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     manager = TasksUiPlugin.getRepositoryManager();
     manager.clearRepositories(TasksUiPlugin.getDefault().getRepositoriesFilePath());
-    repository = new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, REPOSITORY_URL);
-    UserCredentials credentials = new UserCredentials(REAL_USER_ID, REAL_USER_PASSWORD);
+    repository =
+        new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, YouTrackTestConstants.REPOSITORY_URL);
+    UserCredentials credentials =
+        new UserCredentials(YouTrackTestConstants.REAL_USER_ID,
+            YouTrackTestConstants.REAL_USER_PASSWORD);
     repository.setCredentials(AuthenticationType.REPOSITORY, new AuthenticationCredentials(
         credentials.getUserName(), credentials.getPassword()), false);
     TasksUiPlugin.getRepositoryManager().addRepository(repository);
@@ -189,11 +186,12 @@ public class YouTrackRepositoryPageTest extends TestCase {
         createClient(page.getRepositoryUrl(), page.getUserName(), page.getPassword(),
             page.getHttpAuthUserId(), page.getHttpAuthPassword(), page.getCharacterEncoding());
     client.login(page.getUserName(), page.getPassword());
-    page.setUrl(REPOSITORY_URL);
+    page.setUrl(YouTrackTestConstants.REPOSITORY_URL);
     wizard.performFinish();
     assertEquals(1, manager.getAllRepositories().size());
     TaskRepository repositoryTest =
-        manager.getRepository(YouTrackCorePlugin.CONNECTOR_KIND, REPOSITORY_URL);
+        manager.getRepository(YouTrackCorePlugin.CONNECTOR_KIND,
+            YouTrackTestConstants.REPOSITORY_URL);
     assertNotNull(repositoryTest);
     assertEquals(tempUid, repositoryTest.getUserName());
     assertEquals(tempPass, repositoryTest.getPassword());
@@ -216,7 +214,8 @@ public class YouTrackRepositoryPageTest extends TestCase {
     assertFalse(finished);
     assertEquals(1, manager.getAllRepositories().size());
     TaskRepository repositoryTest =
-        manager.getRepository(YouTrackCorePlugin.CONNECTOR_KIND, REPOSITORY_URL);
+        manager.getRepository(YouTrackCorePlugin.CONNECTOR_KIND,
+            YouTrackTestConstants.REPOSITORY_URL);
     assertEquals(oldUserId, repositoryTest.getCredentials(AuthenticationType.REPOSITORY)
         .getUserName());
   }

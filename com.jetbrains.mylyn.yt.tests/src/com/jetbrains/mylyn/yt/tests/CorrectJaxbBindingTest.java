@@ -1,11 +1,4 @@
-/**
- * @author: amarch
- */
-
-package com.jetbrains.youtrack.javarest.tests;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+package com.jetbrains.mylyn.yt.tests;
 
 import java.io.File;
 
@@ -13,18 +6,16 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.jetbrains.youtrack.javarest.client.IssueSchemaField;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 
-public class CorrectIssueJaxbBinding {
+public class CorrectJaxbBindingTest extends TestCase {
 
-  @Test
-  public void JaxbIssueUnmarshalling() {
+  public void testJaxbIssueUnmarshallingTest() throws Exception {
     try {
-
-      File file = new File("tests/com/jetbrains/youtrack/javarest/tests/test_issue.xml");
+      File file = new File("src/com/jetbrains/mylyn/yt/tests/test_issue.xml");
       JAXBContext jaxbContext = JAXBContext.newInstance(YouTrackIssue.class);
       Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
       YouTrackIssue issue = (YouTrackIssue) jaxbUnmarshaller.unmarshal(file);
@@ -47,6 +38,4 @@ public class CorrectIssueJaxbBinding {
       fail("JAXB issue not created");
     }
   }
-
-
 }
