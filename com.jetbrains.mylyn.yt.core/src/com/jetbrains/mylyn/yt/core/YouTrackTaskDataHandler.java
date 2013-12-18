@@ -62,8 +62,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String CUSTOM_FIELD_KIND = "TaslAttributeKind.CUSTOM_FIELD_KIND";
 
-  public static final String SUMMARY_CREATED_FROM_ECLIPSE =
-      "<Issue created from Eclipse Connector. Please specify issue summary.>";
+  public static final String SINGLE_FIELD_KIND = "TaslAttributeKind.ORDINARY_FIELD_KIND";
 
   public YouTrackTaskDataHandler(YouTrackConnector connector) {
     this.connector = connector;
@@ -132,66 +131,56 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
   }
 
+  public TaskAttribute createAttribute(TaskData data, YouTrackAttribute attribute) {
+    TaskAttribute taskAttribute = data.getRoot().createAttribute(attribute.getName());
+    taskAttribute.getMetaData().setReadOnly(attribute.isReadOnly()).setType(attribute.getType())
+        .setLabel(attribute.getLabel()).setKind(attribute.getKind());
+    return taskAttribute;
+  }
+
+  public TaskAttribute createAttribute(TaskData data, YouTrackCustomField field) {
+    TaskAttribute attribute = data.getRoot().createAttribute(field.getName());
+    attribute.getMetaData().setReadOnly(true).setLabel(labelFromName(field.getName()))
+        .setKind(CUSTOM_FIELD_KIND);
+
+    if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
+      attribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
+    } else {
+      if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
+        attribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
+      } else {
+        attribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
+      }
+    }
+
+    if (field.getDefaultValues() != null) {
+      attribute.setValues(field.getDefaultValues());
+    } else {
+      if (field.isCanBeEmpty()) {
+        attribute.setValue(field.getEmptyText());
+      }
+    }
+    return attribute;
+  }
+
   @Override
   public boolean initializeTaskData(TaskRepository repository, TaskData data,
       ITaskMapping initializationData, IProgressMonitor monitor) throws CoreException {
 
-    if (data.isNew() && initializationData.getProduct() != null
-        && initializationData.getProduct().length() > 0) {
-      TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
-      attribute.setValue(SUMMARY_CREATED_FROM_ECLIPSE);
-      attribute = data.getRoot().createAttribute(TaskAttribute.PRODUCT);
-      attribute.setValue(initializationData.getProduct());
-      attribute = data.getRoot().createAttribute(TaskAttribute.DESCRIPTION);
-      attribute.setValue("");
-    }
-
-    TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_RICH_TEXT)
-        .setLabel("Summary:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.DATE_CREATION);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME)
-        .setLabel("Created:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.TASK_KEY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
-        .setLabel("Issue key:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.DATE_MODIFICATION);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME)
-        .setLabel("Updated:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.DESCRIPTION);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_LONG_RICH_TEXT)
-        .setLabel("Description:");
-
-    attribute = data.getRoot().createAttribute(WIKIFY_DESCRIPTION);
-    attribute.getMetaData().setReadOnly(true).setType(TYPE_HTML).setLabel("Wikify Description:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.USER_REPORTER);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_RICH_TEXT)
-        .setLabel("Reporter:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.USER_ASSIGNED);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
-        .setLabel("Assignee:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.PRIORITY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
-        .setLabel("Priority level:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.STATUS);
-    attribute.getMetaData().setReadOnly(false).setType(TaskAttribute.TYPE_BOOLEAN)
-        .setLabel("Resolved:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.PRODUCT);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SINGLE_SELECT)
-        .setLabel("Project:");
+    createAttribute(data, YouTrackAttribute.SUMMARY);
+    createAttribute(data, YouTrackAttribute.DATE_CREATION);
+    createAttribute(data, YouTrackAttribute.TASK_KEY);
+    createAttribute(data, YouTrackAttribute.UPDATED_DATE);
+    createAttribute(data, YouTrackAttribute.DESCRIPTION);
+    createAttribute(data, YouTrackAttribute.WIKIFY_DESCRIPTION);
+    createAttribute(data, YouTrackAttribute.USER_REPORTER);
+    createAttribute(data, YouTrackAttribute.USER_ASSIGNED);
+    createAttribute(data, YouTrackAttribute.PRIORITY_LEVEL);
+    createAttribute(data, YouTrackAttribute.RESOLVED);
+    createAttribute(data, YouTrackAttribute.PROJECT);
 
     if (!data.isNew()) {
-      attribute = data.getRoot().createAttribute(COMMENT_NEW);
-      attribute.getMetaData().setReadOnly(false).setType(TaskAttribute.TYPE_LONG_RICH_TEXT);
+      createAttribute(data, YouTrackAttribute.COMMENT_NEW);
     }
 
     if (data.isNew()) {
@@ -205,7 +194,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
 
       YouTrackProject project = YouTrackConnector.getProject(repository, product);
-
       if (project == null) {
         return false;
       }
@@ -215,29 +203,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
 
       for (YouTrackCustomField field : project.getCustomFields()) {
-        TaskAttribute customFieldAttribute = data.getRoot().createAttribute(field.getName());
-        customFieldAttribute.getMetaData().setReadOnly(true)
-            .setLabel(labelFromName(field.getName())).setKind(CUSTOM_FIELD_KIND);
-        if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
-          customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
-        } else {
-          if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
-            customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
-          } else {
-            customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
-          }
-        }
-
-        if (field.getDefaultValues() != null) {
-          customFieldAttribute.setValues(field.getDefaultValues());
-        } else {
-          if (field.isCanBeEmpty()) {
-            customFieldAttribute.setValue(field.getEmptyText());
-          }
-        }
+        createAttribute(data, field);
       }
 
-      attribute = data.getRoot().getMappedAttribute(TaskAttribute.PRODUCT);
+      TaskAttribute attribute = data.getRoot().getMappedAttribute(TaskAttribute.PRODUCT);
       attribute.setValue(product);
       attribute.getMetaData().setReadOnly(true);
     }
