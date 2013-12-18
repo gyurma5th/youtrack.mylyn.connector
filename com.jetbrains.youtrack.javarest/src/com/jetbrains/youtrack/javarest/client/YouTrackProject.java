@@ -122,6 +122,10 @@ public class YouTrackProject {
     }
   }
 
+  public boolean isCustomField(String field) {
+    return getCustomFieldsMap().keySet().contains(field);
+  }
+
   public static String getShortNameFromBoth(String both) {
     if (both.contains("[") && both.contains("]")) {
       return both.substring(both.indexOf("[") + 1, both.indexOf("]"));

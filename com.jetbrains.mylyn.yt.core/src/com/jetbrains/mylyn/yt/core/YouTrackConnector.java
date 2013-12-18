@@ -48,7 +48,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
   private final YouTrackTaskDataHandler taskDataHandler;
 
-  private static final int ISSUES_PER_ONE_QUERY = 20;
+  private static final int MAX_ISSUES_PER_ONE_QUERY = 500;
 
   public final static String ISSUE_URL_PREFIX = "/issue/";
 
@@ -185,10 +185,10 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
         String projectname = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_PROJECT);
         String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
 
-        int issuesCount = queryIssuesAmount(projectname, filter, repository);
+        // int issuesCount = queryIssuesAmount(projectname, filter, repository);
         issues =
             getClient(repository).getIssuesByFilter(getFilter(projectname, filter, repository),
-                issuesCount);
+                MAX_ISSUES_PER_ONE_QUERY);
 
         for (YouTrackIssue issue : issues) {
           TaskData taskData = taskDataHandler.readTaskData(repository, issue, monitor);
@@ -200,7 +200,6 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
   }
 
   public String getFilter(String projectname, String filter, TaskRepository repository) {
-
     String returnFilter = new String(filter);
     if (filter != null) {
       if (projectname != null && !projectname.equals("")) {
@@ -209,12 +208,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
     } else {
       returnFilter = "project: " + projectname;
     }
-
-    // TODO: fix
-    returnFilter += " sort by: {issue id}";
-
     return returnFilter;
-
   }
 
   public int queryIssuesAmount(String projectname, String filter, TaskRepository repository)

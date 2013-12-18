@@ -12,4 +12,6 @@ public final class YouTrackTestConstants {
 
   public static final String MYLYN_PROJECT_NAME = "mylyn";
 
+  public static final String MINOR_PRIORUTY = "Minor";
+
 }

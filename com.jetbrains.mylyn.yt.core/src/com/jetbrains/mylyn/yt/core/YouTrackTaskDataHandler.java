@@ -4,10 +4,15 @@
 
 package com.jetbrains.mylyn.yt.core;
 
-import com.jetbrains.youtrack.javarest.client.*;
-import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
-import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
-import com.jetbrains.youtrack.javarest.utils.StateValue;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -16,18 +21,31 @@ import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse.ResponseKind;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
-import org.eclipse.mylyn.tasks.core.data.*;
+import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
+import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
+import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
+import org.eclipse.mylyn.tasks.core.data.TaskData;
+import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.osgi.util.NLS;
+
 import util.CastCheck;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
+import com.jetbrains.youtrack.javarest.client.IssueLink;
+import com.jetbrains.youtrack.javarest.client.IssueTag;
+import com.jetbrains.youtrack.javarest.client.YouTrackClient;
+import com.jetbrains.youtrack.javarest.client.YouTrackComment;
+import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
+import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
+import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
+import com.jetbrains.youtrack.javarest.client.YouTrackProject;
+import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
+import com.jetbrains.youtrack.javarest.utils.StateValue;
 
 public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   private final YouTrackConnector connector;
-  //TODO: Rename
+  // TODO: Rename?
   private static boolean enableEditMode = false;
 
   private static boolean postNewCommentMode = false;
@@ -64,11 +82,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     return name + ":";
   }
 
-    //TODO: move to YouTrackProject
-  private boolean isCustomField(YouTrackProject project, String field) {
-    return project.getCustomFieldsMap().keySet().contains(field);
-  }
-
   @Override
   public RepositoryResponse postTaskData(TaskRepository repository, TaskData taskData,
       Set<TaskAttribute> oldAttributes, IProgressMonitor monitor) throws CoreException {
@@ -89,8 +102,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     try {
       issue = buildIssue(repository, taskData);
-        //TODO: Remove unused variable
-      YouTrackProject project = YouTrackConnector.getProject(repository, issue.getProjectName());
 
       if (taskData.isNew()) {
         String uploadIssueId = client.putNewIssue(issue);
@@ -127,8 +138,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     if (data.isNew() && initializationData.getProduct() != null
         && initializationData.getProduct().length() > 0) {
-      YouTrackProject project =
-          YouTrackConnector.getProject(repository, initializationData.getProduct());
       TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
       attribute.setValue(SUMMARY_CREATED_FROM_ECLIPSE);
       attribute = data.getRoot().createAttribute(TaskAttribute.PRODUCT);
@@ -252,7 +261,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
   }
 
-  private TaskData parseIssue(TaskRepository repository, YouTrackIssue issue,
+  public TaskData parseIssue(TaskRepository repository, YouTrackIssue issue,
       IProgressMonitor monitor) throws CoreException {
 
     issue.mapFields();
@@ -456,7 +465,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     for (TaskAttribute attribute : taskData.getRoot().getAttributes().values()) {
-      if (isCustomField(project, attribute.getId()) && attribute.getValue() != null
+      if (project.isCustomField(attribute.getId()) && attribute.getValue() != null
           && !attribute.getValue().equals("")) {
 
         // TODO: fix this mess
@@ -558,7 +567,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                 attr.addValue(value.replace("\n", ""));
               }
             }
-          } else if (isCustomField(project, attr.getId())) {
+          } else if (project.isCustomField(attr.getId())) {
             attr.getMetaData().setReadOnly(false);
             String customFieldName = getNameFromLabel(attr);
             if (project.getCustomFieldsMap().get(customFieldName) == null) {
@@ -624,4 +633,20 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       return null;
     }
   }
+
+  @Override
+  public void getMultiTaskData(final TaskRepository repository, Set<String> taskIds,
+      final TaskDataCollector collector, IProgressMonitor monitor) throws CoreException {
+    try {
+      monitor.beginTask("Receiving_tasks", taskIds.size());
+      final YouTrackClient client = connector.getClient(repository);
+
+      for (String id : taskIds) {
+        collector.accept(parseIssue(repository, client.getIssue(id), monitor));
+      }
+    } finally {
+      monitor.done();
+    }
+  }
+
 }
