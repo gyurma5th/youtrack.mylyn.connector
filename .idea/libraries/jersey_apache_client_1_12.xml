@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jersey-apache-client-1.12">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.mylyn.yt.ui/jersey-apache-client-1.12.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

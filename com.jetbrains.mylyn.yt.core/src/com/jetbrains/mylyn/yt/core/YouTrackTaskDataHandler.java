@@ -4,15 +4,10 @@
 
 package com.jetbrains.mylyn.yt.core;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import com.jetbrains.youtrack.javarest.client.*;
+import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
+import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
+import com.jetbrains.youtrack.javarest.utils.StateValue;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -21,30 +16,18 @@ import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse.ResponseKind;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
-import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
-import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
-import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
-import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
-import org.eclipse.mylyn.tasks.core.data.TaskData;
+import org.eclipse.mylyn.tasks.core.data.*;
 import org.eclipse.osgi.util.NLS;
-
 import util.CastCheck;
 
-import com.jetbrains.youtrack.javarest.client.IssueLink;
-import com.jetbrains.youtrack.javarest.client.IssueTag;
-import com.jetbrains.youtrack.javarest.client.YouTrackClient;
-import com.jetbrains.youtrack.javarest.client.YouTrackComment;
-import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
-import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
-import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
-import com.jetbrains.youtrack.javarest.client.YouTrackProject;
-import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
-import com.jetbrains.youtrack.javarest.utils.StateValue;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   private final YouTrackConnector connector;
-
+  //TODO: Rename
   private static boolean enableEditMode = false;
 
   private static boolean postNewCommentMode = false;
@@ -81,6 +64,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     return name + ":";
   }
 
+    //TODO: move to YouTrackProject
   private boolean isCustomField(YouTrackProject project, String field) {
     return project.getCustomFieldsMap().keySet().contains(field);
   }
@@ -105,6 +89,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     try {
       issue = buildIssue(repository, taskData);
+        //TODO: Remove unused variable
       YouTrackProject project = YouTrackConnector.getProject(repository, issue.getProjectName());
 
       if (taskData.isNew()) {
