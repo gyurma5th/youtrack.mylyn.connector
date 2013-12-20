@@ -56,9 +56,6 @@ public class YouTrackTaskEditorTest extends TestCase {
     TestFixture.resetTaskListAndRepositories();
   }
 
-  /**
-   * Tests that a task editor opens when creating new Bugzilla tasks.
-   */
   public void testOpenNewEditor() throws Exception {
     final TaskMapping taskMappingInit = new TaskMapping() {
       @Override
@@ -89,5 +86,17 @@ public class YouTrackTaskEditorTest extends TestCase {
     IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
     TaskEditor taskEditor = (TaskEditor) page.getActiveEditor();
     assertEquals("New Task", taskEditor.getTitle());
+  }
+
+  public void testCheckEditorsParts() throws Exception {
+    // TODO: add
+  }
+
+  public void testDisplayCustomFields() throws Exception {
+    // TODO: add
+  }
+
+  public void testToolbarActions() throws Exception {
+    // TODO: add
   }
 }
