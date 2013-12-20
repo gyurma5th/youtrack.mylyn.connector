@@ -36,15 +36,15 @@ import com.jetbrains.youtrack.javarest.client.YouTrackClient;
  */
 public class YouTrackRepositoryPageTest extends TestCase {
 
-  private TaskRepositoryManager manager;
-
   private TaskRepository repository;
+
+  private TaskRepositoryManager manager;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    manager = TasksUiPlugin.getRepositoryManager();
-    manager.clearRepositories(TasksUiPlugin.getDefault().getRepositoriesFilePath());
+    TasksUiPlugin.getRepositoryManager().clearRepositories(
+        TasksUiPlugin.getDefault().getRepositoriesFilePath());
     repository =
         new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, YouTrackTestConstants.REPOSITORY_URL);
     UserCredentials credentials =
@@ -148,7 +148,7 @@ public class YouTrackRepositoryPageTest extends TestCase {
   }
 
   public void testPersistChangeOfUrl() throws Exception {
-    assertEquals(1, manager.getAllRepositories().size());
+    assertEquals(1, TasksUiPlugin.getRepositoryManager().getAllRepositories().size());
     String tempUid = repository.getUserName();
     String tempPass = repository.getPassword();
     EditRepositoryWizard wizard = createEditRepositoryWizard();
@@ -158,9 +158,9 @@ public class YouTrackRepositoryPageTest extends TestCase {
             page.getHttpAuthUserId(), page.getHttpAuthPassword(), page.getCharacterEncoding());
     client.login(page.getUserName(), page.getPassword());
     wizard.performFinish();
-    assertEquals(1, manager.getAllRepositories().size());
+    assertEquals(1, TasksUiPlugin.getRepositoryManager().getAllRepositories().size());
     TaskRepository repositoryTest =
-        manager.getRepository(YouTrackCorePlugin.CONNECTOR_KIND,
+        TasksUiPlugin.getRepositoryManager().getRepository(YouTrackCorePlugin.CONNECTOR_KIND,
             YouTrackTestConstants.REPOSITORY_URL);
     assertNotNull(repositoryTest);
     assertEquals(tempUid, repositoryTest.getUserName());
@@ -168,7 +168,7 @@ public class YouTrackRepositoryPageTest extends TestCase {
   }
 
   public void testValidateOnFinishInvalidUserId() throws Exception {
-    assertEquals(1, manager.getAllRepositories().size());
+    assertEquals(1, TasksUiPlugin.getRepositoryManager().getAllRepositories().size());
     EditRepositoryWizard wizard = createEditRepositoryWizard();
     YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
     YouTrackClient client =
@@ -179,9 +179,9 @@ public class YouTrackRepositoryPageTest extends TestCase {
     page.setUserId("bogus");
     boolean finished = wizard.performFinish();
     assertFalse(finished);
-    assertEquals(1, manager.getAllRepositories().size());
+    assertEquals(1, TasksUiPlugin.getRepositoryManager().getAllRepositories().size());
     TaskRepository repositoryTest =
-        manager.getRepository(YouTrackCorePlugin.CONNECTOR_KIND,
+        TasksUiPlugin.getRepositoryManager().getRepository(YouTrackCorePlugin.CONNECTOR_KIND,
             YouTrackTestConstants.REPOSITORY_URL);
     assertEquals(oldUserId, repositoryTest.getCredentials(AuthenticationType.REPOSITORY)
         .getUserName());

@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.mylyn.commons.net.AuthenticationCredentials;
 import org.eclipse.mylyn.commons.net.AuthenticationType;
 import org.eclipse.mylyn.commons.repositories.core.auth.UserCredentials;
-import org.eclipse.mylyn.commons.sdk.util.TestConfiguration;
 import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskMapping;
@@ -60,15 +59,7 @@ public class YouTrackFixture extends TestFixture {
     this.version = version;
     setInfo("YouTrack", version, info);
 
-    repository =
-        new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, YouTrackTestConstants.REPOSITORY_URL);
-    UserCredentials credentials =
-        new UserCredentials(YouTrackTestConstants.REAL_USER_ID,
-            YouTrackTestConstants.REAL_USER_PASSWORD);
-    repository.setCredentials(AuthenticationType.REPOSITORY, new AuthenticationCredentials(
-        credentials.getUserName(), credentials.getPassword()), false);
-    TasksUiPlugin.getRepositoryManager().addRepository(repository);
-    TasksUiTestUtil.ensureTasksUiInitialization();
+    createTaskRepository();
     connector =
         (YouTrackRepositoryConnector) TasksUi.getRepositoryConnector(repository.getConnectorKind());
     client = YouTrackRepositoryConnector.getClient(repository);
@@ -77,6 +68,20 @@ public class YouTrackFixture extends TestFixture {
 
   public static YouTrackFixture current() {
     return current(DEFAULT);
+  }
+
+  private TaskRepository createTaskRepository() {
+    TaskRepository repository =
+        new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, YouTrackTestConstants.REPOSITORY_URL);
+    UserCredentials credentials =
+        new UserCredentials(YouTrackTestConstants.REAL_USER_ID,
+            YouTrackTestConstants.REAL_USER_PASSWORD);
+    repository.setCredentials(AuthenticationType.REPOSITORY, new AuthenticationCredentials(
+        credentials.getUserName(), credentials.getPassword()), false);
+    TasksUiPlugin.getRepositoryManager().addRepository(repository);
+    TasksUiTestUtil.ensureTasksUiInitialization();
+    this.repository = repository;
+    return repository;
   }
 
   public static YouTrackFixture current(YouTrackFixture fixture) {
@@ -95,7 +100,7 @@ public class YouTrackFixture extends TestFixture {
 
   @Override
   protected TestFixture getDefault() {
-    return TestConfiguration.getDefault().discoverDefault(YouTrackFixture.class, "youtrack");
+    return DEFAULT;
   }
 
   public String getVersion() {
@@ -151,7 +156,7 @@ public class YouTrackFixture extends TestFixture {
 
   @Override
   public TaskRepository repository() {
-    return repository;
+    return repository != null ? repository : createTaskRepository();
   }
 
   public YouTrackClient client() {
