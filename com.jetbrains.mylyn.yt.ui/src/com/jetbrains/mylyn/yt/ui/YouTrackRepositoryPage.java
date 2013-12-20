@@ -17,7 +17,7 @@ import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositorySettingsPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
@@ -65,7 +65,7 @@ public class YouTrackRepositoryPage extends AbstractRepositorySettingsPage {
         String user = repository.getUserName();
         String passwd = repository.getPassword();
         try {
-          YouTrackClient client = YouTrackConnector.getClient(repository);
+          YouTrackClient client = YouTrackRepositoryConnector.getClient(repository);
           if (!client.login(user, passwd)) {
             throw new CoreException(new Status(IStatus.ERROR, YouTrackUiPlugin.ID_PLUGIN,
                 "Credentials are not valid"));

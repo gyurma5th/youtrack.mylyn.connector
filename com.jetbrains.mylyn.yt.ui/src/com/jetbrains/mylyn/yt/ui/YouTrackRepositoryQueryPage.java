@@ -74,7 +74,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.utils.SavedSearch;
@@ -426,7 +426,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
   }
 
   private YouTrackClient getClient() {
-    return YouTrackConnector.getClient(getTaskRepository());
+    return YouTrackRepositoryConnector.getClient(getTaskRepository());
   }
 
   protected void doPartialRefresh() {

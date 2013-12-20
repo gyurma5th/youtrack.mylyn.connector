@@ -44,7 +44,7 @@ import com.jetbrains.youtrack.javarest.utils.StateValue;
 
 public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
-  private final YouTrackConnector connector;
+  private final YouTrackRepositoryConnector connector;
   // TODO: Rename?
   private static boolean enableEditMode = false;
 
@@ -64,7 +64,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String SINGLE_FIELD_KIND = "TaslAttributeKind.ORDINARY_FIELD_KIND";
 
-  public YouTrackTaskDataHandler(YouTrackConnector connector) {
+  public YouTrackTaskDataHandler(YouTrackRepositoryConnector connector) {
     this.connector = connector;
   }
 
@@ -85,7 +85,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
   public RepositoryResponse postTaskData(TaskRepository repository, TaskData taskData,
       Set<TaskAttribute> oldAttributes, IProgressMonitor monitor) throws CoreException {
 
-    YouTrackClient client = YouTrackConnector.getClient(repository);
+    YouTrackClient client = YouTrackRepositoryConnector.getClient(repository);
     YouTrackIssue issue = new YouTrackIssue();
 
     if (postNewCommentMode) {
@@ -193,13 +193,13 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         return false;
       }
 
-      YouTrackProject project = YouTrackConnector.getProject(repository, product);
+      YouTrackProject project = YouTrackRepositoryConnector.getProject(repository, product);
       if (project == null) {
         return false;
       }
 
       if (!project.isCustomFieldsUpdated()) {
-        project.updateCustomFields(YouTrackConnector.getClient(repository));
+        project.updateCustomFields(YouTrackRepositoryConnector.getClient(repository));
       }
 
       for (YouTrackCustomField field : project.getCustomFields()) {
@@ -426,11 +426,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     YouTrackProject project =
-        YouTrackConnector.getProject(repository,
+        YouTrackRepositoryConnector.getProject(repository,
             taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue());
 
     if (!project.isCustomFieldsUpdated()) {
-      project.updateCustomFields(YouTrackConnector.getClient(repository));
+      project.updateCustomFields(YouTrackRepositoryConnector.getClient(repository));
     }
 
     for (TaskAttribute attribute : taskData.getRoot().getAttributes().values()) {
@@ -440,7 +440,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         // TODO: fix this mess
 
         String emptyText =
-            YouTrackConnector
+            YouTrackRepositoryConnector
                 .getProject(repository,
                     taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
                 .getCustomFieldsMap().get(getNameFromLabel(attribute)).getEmptyText();
@@ -450,7 +450,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         } else {
           Class fieldClass =
               YouTrackCustomFieldType.getTypeByName(
-                  YouTrackConnector
+                  YouTrackRepositoryConnector
                       .getProject(repository,
                           taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
                       .getCustomFieldsMap().get(getNameFromLabel(attribute)).getType())
@@ -473,7 +473,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
     }
 
-    issue.fillCustomFieldsFromProject(project, YouTrackConnector.getClient(repository));
+    issue.fillCustomFieldsFromProject(project, YouTrackRepositoryConnector.getClient(repository));
     if (taskData.getRoot().getMappedAttribute(TAG_PREFIX) != null
         && taskData.getRoot().getMappedAttribute(TAG_PREFIX).getValues() != null) {
       LinkedList<IssueTag> tags = new LinkedList<IssueTag>();
@@ -508,14 +508,14 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       if (taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT) != null) {
 
         YouTrackProject project =
-            YouTrackConnector.getProject(taskRepository,
+            YouTrackRepositoryConnector.getProject(taskRepository,
                 taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
 
         if (isEnableEditMode() && !project.isCustomFieldsUpdated()) {
-          project.updateCustomFields(YouTrackConnector.getClient(taskRepository));
+          project.updateCustomFields(YouTrackRepositoryConnector.getClient(taskRepository));
         }
 
-        String[] tags = YouTrackConnector.getClient(taskRepository).getAllSuitableTags();
+        String[] tags = YouTrackRepositoryConnector.getClient(taskRepository).getAllSuitableTags();
 
         for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
           if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
@@ -540,7 +540,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             attr.getMetaData().setReadOnly(false);
             String customFieldName = getNameFromLabel(attr);
             if (project.getCustomFieldsMap().get(customFieldName) == null) {
-              project.updateCustomFields(YouTrackConnector.getClient(taskRepository));
+              project.updateCustomFields(YouTrackRepositoryConnector.getClient(taskRepository));
             }
             YouTrackCustomField customField = project.getCustomFieldsMap().get(customFieldName);
             if (!YouTrackCustomFieldType.getTypeByName(customField.getType()).isSimple()) {
@@ -596,8 +596,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static URL getIssueURL(TaskData data, TaskRepository repository) {
     try {
-      return new URL(data.getRepositoryUrl() + YouTrackConnector.ISSUE_URL_PREFIX
-          + YouTrackConnector.getRealIssueId(data.getTaskId(), repository));
+      return new URL(data.getRepositoryUrl() + YouTrackRepositoryConnector.ISSUE_URL_PREFIX
+          + YouTrackRepositoryConnector.getRealIssueId(data.getTaskId(), repository));
     } catch (MalformedURLException e) {
       return null;
     }

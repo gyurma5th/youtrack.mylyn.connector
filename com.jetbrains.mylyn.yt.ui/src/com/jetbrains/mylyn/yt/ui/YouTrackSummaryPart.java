@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
 
@@ -175,7 +175,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       @Override
       public void handleEvent(Event event) {
         CCombo combo = (CCombo) event.widget;
-        combo.setItems(YouTrackConnector.getClient(
+        combo.setItems(YouTrackRepositoryConnector.getClient(
             getTaskEditorPage().getModel().getTaskRepository()).getAllSuitableTags());
         combo.add(ADD_NEW_TAG_PROPOSAL, 0);
         combo.setText(ADD_TAG_TEXT);
@@ -195,8 +195,8 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
               true, getTaskEditorPage());
         } else {
           TaskRepository repository = getTaskEditorPage().getModel().getTaskRepository();
-          YouTrackConnector.getClient(repository)
-              .addNewTag(YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), repository),
+          YouTrackRepositoryConnector.getClient(repository)
+              .addNewTag(YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(), repository),
                   selectedText);
 
           TaskAttribute attribute =

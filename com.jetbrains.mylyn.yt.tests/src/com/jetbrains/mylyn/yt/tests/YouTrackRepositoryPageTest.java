@@ -25,7 +25,7 @@ import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tests.util.TasksUiTestUtil;
 import org.eclipse.ui.PlatformUI;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.ui.YouTrackRepositoryPage;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
@@ -68,12 +68,12 @@ public class YouTrackRepositoryPageTest extends TestCase {
     taskRepository.setCredentials(AuthenticationType.HTTP, webCredentials, false);
     taskRepository.setCharacterEncoding(encoding);
 
-    YouTrackConnector connector =
-        (YouTrackConnector) TasksUi.getRepositoryConnector(repository.getConnectorKind());
+    YouTrackRepositoryConnector connector =
+        (YouTrackRepositoryConnector) TasksUi.getRepositoryConnector(repository.getConnectorKind());
     if (repository.getRepositoryUrl().equals(hostUrl)) {
-      return YouTrackConnector.getClient(repository);
+      return YouTrackRepositoryConnector.getClient(repository);
     } else {
-      return YouTrackConnector
+      return YouTrackRepositoryConnector
           .getClient(new TaskRepository(repository.getConnectorKind(), hostUrl));
     }
 

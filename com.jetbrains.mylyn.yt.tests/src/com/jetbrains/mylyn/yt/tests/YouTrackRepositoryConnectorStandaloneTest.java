@@ -17,24 +17,14 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.mylyn.commons.net.AuthenticationCredentials;
-import org.eclipse.mylyn.commons.net.AuthenticationType;
-import org.eclipse.mylyn.commons.repositories.core.auth.UserCredentials;
 import org.eclipse.mylyn.internal.tasks.core.RepositoryQuery;
-import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
-import org.eclipse.mylyn.tasks.core.ITaskMapping;
-import org.eclipse.mylyn.tasks.core.TaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
-import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
-import org.eclipse.mylyn.tasks.ui.TasksUi;
-import org.eclipse.mylyn.tests.util.TasksUiTestUtil;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
@@ -53,68 +43,19 @@ public class YouTrackRepositoryConnectorStandaloneTest extends TestCase {
 
   private TaskRepository repository;
 
-  private YouTrackConnector connector;
+  private YouTrackRepositoryConnector connector;
 
   private YouTrackClient client;
 
   @Override
   public void setUp() throws Exception {
-    repository =
-        new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, YouTrackTestConstants.REPOSITORY_URL);
-    UserCredentials credentials =
-        new UserCredentials(YouTrackTestConstants.REAL_USER_ID,
-            YouTrackTestConstants.REAL_USER_PASSWORD);
-    repository.setCredentials(AuthenticationType.REPOSITORY, new AuthenticationCredentials(
-        credentials.getUserName(), credentials.getPassword()), false);
-    TasksUiPlugin.getRepositoryManager().addRepository(repository);
-    TasksUiTestUtil.ensureTasksUiInitialization();
-
-    connector = (YouTrackConnector) TasksUi.getRepositoryConnector(repository.getConnectorKind());
-    client = YouTrackConnector.getClient(repository);
-  }
-
-  public TaskData createTask(String summary, String description) throws Exception {
-    final String summaryNotNull = summary != null ? summary : "summary";
-    final String descriptionNotNull = description != null ? description : "description";
-    return createTask(new HashMap<String, String>() {
-      private static final long serialVersionUID = 1L;
-      {
-        put(TaskAttribute.SUMMARY, summaryNotNull);
-        put(TaskAttribute.DESCRIPTION, descriptionNotNull);
-      }
-    });
-  }
-
-  public TaskData createTask(Map<String, String> additionalAttributeValues) throws Exception {
-    Assert.isLegal(additionalAttributeValues.containsKey(TaskAttribute.SUMMARY),
-        "need value for Summary");
-    Assert.isLegal(additionalAttributeValues.containsKey(TaskAttribute.DESCRIPTION),
-        "need value for Description");
-    ITaskMapping initializationData = new TaskMapping() {
-
-      @Override
-      public String getProduct() {
-        return YouTrackTestConstants.TEST_PROJECT_NAME;
-      }
-    };
-
-    YouTrackTaskDataHandler taskDataHandler =
-        (YouTrackTaskDataHandler) connector.getTaskDataHandler();
-    TaskAttributeMapper mapper = taskDataHandler.getAttributeMapper(repository);
-    TaskData taskData =
-        new TaskData(mapper, repository.getConnectorKind(), repository.getRepositoryUrl(), "");
-    taskDataHandler.initializeTaskData(repository, taskData, initializationData, null);
-    for (String attributeKey : additionalAttributeValues.keySet()) {
-      taskData.getRoot().createMappedAttribute(attributeKey)
-          .setValue(additionalAttributeValues.get(attributeKey));
-    }
-    YouTrackIssue issue = taskDataHandler.buildIssue(repository, taskData);
-    String id = client.putNewIssue(issue);
-    return taskDataHandler.parseIssue(repository, client.getIssue(id), null);
+    repository = YouTrackFixture.current().repository();
+    connector = YouTrackFixture.current().connector();
+    client = YouTrackFixture.current().client();
   }
 
   public void testGetTaskData() throws Exception {
-    TaskData taskData = createTask(null, null);
+    TaskData taskData = YouTrackFixture.current().createTask(null, null);
     Set<String> taskIds = new HashSet<String>();
     taskIds.add(taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue() + "-"
         + taskData.getTaskId());
@@ -142,9 +83,9 @@ public class YouTrackRepositoryConnectorStandaloneTest extends TestCase {
   }
 
   public void testGetMultiTaskData() throws Exception {
-    TaskData taskData = createTask(null, null);
-    TaskData taskData2 = createTask(null, null);
-    TaskData taskData3 = createTask(null, null);
+    TaskData taskData = YouTrackFixture.current().createTask(null, null);
+    TaskData taskData2 = YouTrackFixture.current().createTask(null, null);
+    TaskData taskData3 = YouTrackFixture.current().createTask(null, null);
     Set<String> taskIds = new HashSet<String>();
     taskIds.add(taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue() + "-"
         + taskData.getTaskId());
@@ -198,7 +139,7 @@ public class YouTrackRepositoryConnectorStandaloneTest extends TestCase {
   public void testPerformQuery() throws Exception {
     final String summaryNotNull = "Summary for testPerformQuery " + new Date();
     final String descriptionNotNull = "Description for testPerformQuery " + new Date();
-    TaskData taskData = createTask(new HashMap<String, String>() {
+    TaskData taskData = YouTrackFixture.current().createTask(new HashMap<String, String>() {
       {
         put(TaskAttribute.SUMMARY, summaryNotNull);
         put(TaskAttribute.DESCRIPTION, descriptionNotNull);

@@ -36,7 +36,7 @@ import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
 import com.jetbrains.youtrack.javarest.utils.MyRunnable;
 
-public class YouTrackConnector extends AbstractRepositoryConnector {
+public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
   private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
@@ -54,7 +54,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
   private static YouTrackClientFactory clientFactory;
 
-  public YouTrackConnector() {
+  public YouTrackRepositoryConnector() {
     taskDataHandler = new YouTrackTaskDataHandler(this);
     clientFactory = new YouTrackClientFactory();
   }
@@ -82,7 +82,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
   public static void updateProjectCustomFields(TaskRepository repository, String projectname) {
 
-    final YouTrackProject project = YouTrackConnector.getProject(repository, projectname);
+    final YouTrackProject project = YouTrackRepositoryConnector.getProject(repository, projectname);
 
     final YouTrackClient client = clientByRepository.get(repository);
 
@@ -101,7 +101,7 @@ public class YouTrackConnector extends AbstractRepositoryConnector {
 
   public static void forceUpdateProjectCustomFields(TaskRepository repository, String projectname) {
 
-    final YouTrackProject project = YouTrackConnector.getProject(repository, projectname);
+    final YouTrackProject project = YouTrackRepositoryConnector.getProject(repository, projectname);
 
     final YouTrackClient client = clientByRepository.get(repository);
 

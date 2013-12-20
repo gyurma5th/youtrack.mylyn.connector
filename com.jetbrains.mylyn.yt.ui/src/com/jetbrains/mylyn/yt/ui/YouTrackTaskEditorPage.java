@@ -46,7 +46,7 @@ import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 import com.jetbrains.mylyn.yt.ui.utils.DeleteTaskAction;
@@ -172,7 +172,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         Job job = new Job("Update settings of " + projectname) {
           @Override
           protected IStatus run(IProgressMonitor monitor) {
-            YouTrackConnector.forceUpdateProjectCustomFields(getTaskRepository(), projectname);
+            YouTrackRepositoryConnector.forceUpdateProjectCustomFields(getTaskRepository(), projectname);
             syncWithUi();
             return Status.OK_STATUS;
           }

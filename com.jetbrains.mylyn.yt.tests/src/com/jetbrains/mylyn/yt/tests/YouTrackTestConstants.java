@@ -14,4 +14,6 @@ public final class YouTrackTestConstants {
 
   public static final String MINOR_PRIORUTY = "Minor";
 
+  public static final String LAST_MAJOR_VERSION = "1.0";
+
 }

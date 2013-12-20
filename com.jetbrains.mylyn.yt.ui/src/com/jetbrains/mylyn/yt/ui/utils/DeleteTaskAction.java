@@ -12,7 +12,7 @@ import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 
 public class DeleteTaskAction extends DeleteAction {
 
@@ -61,8 +61,8 @@ public class DeleteTaskAction extends DeleteAction {
           MessageDialog.openConfirm(null, "Confirm delete", "Delete task from tracker?" + "\n\n" //$NON-NLS-1$
               + task.getSummary());
       if (confirm) {
-        YouTrackConnector.getClient(repository).deleteIssue(
-            YouTrackConnector.getRealIssueId(task.getTaskId(), repository));
+        YouTrackRepositoryConnector.getClient(repository).deleteIssue(
+            YouTrackRepositoryConnector.getRealIssueId(task.getTaskId(), repository));
         super.performDeletion(Arrays.asList(task));
         page.close();
       }

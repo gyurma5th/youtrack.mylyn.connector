@@ -36,5 +36,21 @@ public class AllYouTrackTests {
     suite.addTestSuite(YouTrackTaskEditorTest.class);
     suite.addTestSuite(CorrectJaxbBindingTest.class);
     suite.addTestSuite(YouTrackClientTest.class);
+
+    for (YouTrackFixture fixture : new YouTrackFixture[] {YouTrackFixture.DEFAULT}) {
+      addTests(suite, fixture);
+    }
   }
+
+  private static void addTests(TestSuite suite, YouTrackFixture fixture) {
+    if (fixture.isExcluded()) {
+      return;
+    }
+
+    fixture.createSuite(suite);
+    fixture.add(YouTrackRepositoryConnectorStandaloneTest.class);
+
+    fixture.done();
+  }
+
 }

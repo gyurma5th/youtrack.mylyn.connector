@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
 public class YouTrackCommandWizard extends Wizard {
@@ -57,7 +57,7 @@ public class YouTrackCommandWizard extends Wizard {
 
       Label commandBoxLabel = new Label(composite, SWT.FILL);
       commandBoxLabel.setText("Command for "
-          + YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), getTaskRepository()) + ": "
+          + YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(), getTaskRepository()) + ": "
           + getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY).getValue());
 
       commandBoxText = new Text(composite, SWT.SINGLE | SWT.FILL);
@@ -110,7 +110,7 @@ public class YouTrackCommandWizard extends Wizard {
     } else {
       try {
         getClient().applyCommand(
-            YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), taskRepository),
+            YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(), taskRepository),
             getCommandDialogPage().getCommandBoxText().getText());
         return true;
       } catch (RuntimeException e) {
@@ -142,7 +142,7 @@ public class YouTrackCommandWizard extends Wizard {
   }
 
   private YouTrackClient getClient() {
-    return YouTrackConnector.getClient(getTaskRepository());
+    return YouTrackRepositoryConnector.getClient(getTaskRepository());
   }
 
   public TaskEditor getEditor() {
