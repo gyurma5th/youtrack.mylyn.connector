@@ -25,8 +25,8 @@ import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tests.util.TasksUiTestUtil;
 import org.eclipse.ui.PlatformUI;
 
-import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.ui.YouTrackRepositoryPage;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
@@ -56,6 +56,14 @@ public class YouTrackRepositoryPageTest extends TestCase {
     TasksUiTestUtil.ensureTasksUiInitialization();
   }
 
+  private EditRepositoryWizard createEditRepositoryWizard() {
+    EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
+    WizardDialog dialog =
+        new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
+    dialog.create();
+    return wizard;
+  }
+
   private YouTrackClient createClient(String hostUrl, String username, String password,
       String htAuthUser, String htAuthPass, String encoding) throws MalformedURLException {
     TaskRepository taskRepository = new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, hostUrl);
@@ -73,19 +81,15 @@ public class YouTrackRepositoryPageTest extends TestCase {
     if (repository.getRepositoryUrl().equals(hostUrl)) {
       return YouTrackRepositoryConnector.getClient(repository);
     } else {
-      return YouTrackRepositoryConnector
-          .getClient(new TaskRepository(repository.getConnectorKind(), hostUrl));
+      return YouTrackRepositoryConnector.getClient(new TaskRepository(
+          repository.getConnectorKind(), hostUrl));
     }
-
   }
 
-  public void testLoginInvalidPassword() throws Exception {
 
-    EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
-    WizardDialog dialog =
-        new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
-    dialog.create();
-    YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
+  public void testLoginInvalidPassword() throws Exception {
+    YouTrackRepositoryPage page =
+        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
     page.setPassword("bogus");
     try {
       YouTrackClient client =
@@ -99,11 +103,8 @@ public class YouTrackRepositoryPageTest extends TestCase {
   }
 
   public void testValidationInvalidUserid() throws Exception {
-    EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
-    WizardDialog dialog =
-        new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
-    dialog.create();
-    YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
+    YouTrackRepositoryPage page =
+        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
     page.setUserId("bogus");
     try {
       YouTrackClient client =
@@ -117,11 +118,8 @@ public class YouTrackRepositoryPageTest extends TestCase {
   }
 
   public void testLoginWithValidCredentials() throws Exception {
-    EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
-    WizardDialog dialog =
-        new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
-    dialog.create();
-    YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
+    YouTrackRepositoryPage page =
+        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
     try {
       YouTrackClient client =
           createClient(page.getRepositoryUrl(), page.getUserName(), page.getPassword(),
@@ -129,21 +127,16 @@ public class YouTrackRepositoryPageTest extends TestCase {
       if (client.login(page.getUserName(), page.getPassword())) {
         return;
       } else {
-        fail("Can't login with correct credentials (exception didn't occur!)");
+        fail("Can't login with correct credentials (and exception didn't occur!)");
       }
     } catch (RuntimeException e) {
       fail("Exception while login with correct credentials!");
     }
   }
 
-
   public void testValidationInvalidUrl() throws Exception {
-
-    EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
-    WizardDialog dialog =
-        new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
-    dialog.create();
-    YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
+    YouTrackRepositoryPage page =
+        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
     page.setUrl("http://nylym.myjetbrains.com");
     try {
       YouTrackClient client =
@@ -154,39 +147,16 @@ public class YouTrackRepositoryPageTest extends TestCase {
     } catch (RuntimeException e) {}
   }
 
-
-  //
-  // // TODO: Test locking up?
-  // // public void testAutoVersion() throws Exception {
-  // // repository.setVersion(BugzillaRepositorySettingsPage.LABEL_AUTOMATIC_VERSION);
-  // // EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
-  // // WizardDialog dialog = new
-  // // WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-  // // wizard);
-  // // dialog.create();
-  // // BugzillaRepositorySettingsPage page = (BugzillaRepositorySettingsPage)
-  // // wizard.getSettingsPage();
-  // // page.setTesting(true);
-  // // assertEquals(BugzillaRepositorySettingsPage.LABEL_AUTOMATIC_VERSION,
-  // // page.getVersion());
-  // // page.validateSettings();
-  // // assertEquals("2.22", page.getVersion());
-  // // }
-  //
   public void testPersistChangeOfUrl() throws Exception {
     assertEquals(1, manager.getAllRepositories().size());
     String tempUid = repository.getUserName();
     String tempPass = repository.getPassword();
-    EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
-    WizardDialog dialog =
-        new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
-    dialog.create();
+    EditRepositoryWizard wizard = createEditRepositoryWizard();
     YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
     YouTrackClient client =
         createClient(page.getRepositoryUrl(), page.getUserName(), page.getPassword(),
             page.getHttpAuthUserId(), page.getHttpAuthPassword(), page.getCharacterEncoding());
     client.login(page.getUserName(), page.getPassword());
-    page.setUrl(YouTrackTestConstants.REPOSITORY_URL);
     wizard.performFinish();
     assertEquals(1, manager.getAllRepositories().size());
     TaskRepository repositoryTest =
@@ -199,10 +169,7 @@ public class YouTrackRepositoryPageTest extends TestCase {
 
   public void testValidateOnFinishInvalidUserId() throws Exception {
     assertEquals(1, manager.getAllRepositories().size());
-    EditRepositoryWizard wizard = new EditRepositoryWizard(repository);
-    WizardDialog dialog =
-        new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
-    dialog.create();
+    EditRepositoryWizard wizard = createEditRepositoryWizard();
     YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
     YouTrackClient client =
         createClient(page.getRepositoryUrl(), page.getUserName(), page.getPassword(),

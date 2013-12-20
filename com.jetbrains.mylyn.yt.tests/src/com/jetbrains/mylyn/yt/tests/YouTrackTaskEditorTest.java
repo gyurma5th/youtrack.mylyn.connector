@@ -11,21 +11,15 @@ package com.jetbrains.mylyn.yt.tests;
 
 import junit.framework.TestCase;
 
-import org.eclipse.mylyn.commons.net.AuthenticationCredentials;
-import org.eclipse.mylyn.commons.net.AuthenticationType;
-import org.eclipse.mylyn.commons.repositories.core.auth.UserCredentials;
 import org.eclipse.mylyn.commons.sdk.util.UiTestUtil;
 import org.eclipse.mylyn.internal.tasks.ui.util.TasksUiInternal;
 import org.eclipse.mylyn.tasks.core.TaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
-import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tests.util.TestFixture;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-
-import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 
 /**
  * @author Jeff Pound
@@ -40,14 +34,7 @@ public class YouTrackTaskEditorTest extends TestCase {
   protected void setUp() throws Exception {
     // ensure that the local repository is present
     TestFixture.resetTaskListAndRepositories();
-    repository =
-        new TaskRepository(YouTrackCorePlugin.CONNECTOR_KIND, YouTrackTestConstants.REPOSITORY_URL);
-    UserCredentials credentials =
-        new UserCredentials(YouTrackTestConstants.REAL_USER_ID,
-            YouTrackTestConstants.REAL_USER_PASSWORD);
-    repository.setCredentials(AuthenticationType.REPOSITORY, new AuthenticationCredentials(
-        credentials.getUserName(), credentials.getPassword()), false);
-    TasksUi.getRepositoryManager().addRepository(repository);
+    repository = YouTrackFixture.current().repository();
   }
 
   @Override

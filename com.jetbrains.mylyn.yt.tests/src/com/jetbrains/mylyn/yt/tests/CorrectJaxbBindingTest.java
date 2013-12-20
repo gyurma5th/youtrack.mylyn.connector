@@ -13,7 +13,7 @@ import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 
 public class CorrectJaxbBindingTest extends TestCase {
 
-  public void testJaxbIssueUnmarshallingTest() throws Exception {
+  public void testJaxbBindIssueTest() throws Exception {
     try {
       File file = new File("src/com/jetbrains/mylyn/yt/tests/test_issue.xml");
       JAXBContext jaxbContext = JAXBContext.newInstance(YouTrackIssue.class);

@@ -149,6 +149,11 @@ public class YouTrackFixture extends TestFixture {
     return connector;
   }
 
+  @Override
+  public TaskRepository repository() {
+    return repository;
+  }
+
   public YouTrackClient client() {
     return client;
   }

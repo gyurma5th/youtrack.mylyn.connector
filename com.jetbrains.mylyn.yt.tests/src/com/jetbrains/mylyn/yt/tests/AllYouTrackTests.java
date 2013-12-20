@@ -31,12 +31,6 @@ public class AllYouTrackTests {
   }
 
   public static void addTests(TestSuite suite, TestConfiguration configuration) {
-    suite.addTestSuite(YouTrackRepositoryConnectorStandaloneTest.class);
-    suite.addTestSuite(YouTrackRepositoryPageTest.class);
-    suite.addTestSuite(YouTrackTaskEditorTest.class);
-    suite.addTestSuite(CorrectJaxbBindingTest.class);
-    suite.addTestSuite(YouTrackClientTest.class);
-
     for (YouTrackFixture fixture : new YouTrackFixture[] {YouTrackFixture.DEFAULT}) {
       addTests(suite, fixture);
     }
@@ -49,6 +43,10 @@ public class AllYouTrackTests {
 
     fixture.createSuite(suite);
     fixture.add(YouTrackRepositoryConnectorStandaloneTest.class);
+    fixture.add(YouTrackRepositoryPageTest.class);
+    fixture.add(YouTrackTaskEditorTest.class);
+    fixture.add(CorrectJaxbBindingTest.class);
+    fixture.add(YouTrackClientTest.class);
 
     fixture.done();
   }

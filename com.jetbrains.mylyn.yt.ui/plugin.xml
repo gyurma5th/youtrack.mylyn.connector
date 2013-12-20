@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.mylyn.tasks.ui.repositories">
       <connectorCore
-            class="com.jetbrains.mylyn.yt.core.YouTrackConnector">
+            class="com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector">
       </connectorCore>
       <connectorUi
             brandingIcon="resource/icon.png"
