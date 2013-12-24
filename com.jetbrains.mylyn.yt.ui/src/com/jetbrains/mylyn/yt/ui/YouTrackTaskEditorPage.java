@@ -4,7 +4,6 @@
 
 package com.jetbrains.mylyn.yt.ui;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -12,24 +11,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.mylyn.commons.ui.CommonImages;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorOutlineNode;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
 import org.eclipse.mylyn.tasks.core.IRepositoryElement;
-import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
-import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.AttributeEditorFactory;
@@ -37,21 +29,21 @@ import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.BaseSelectionListenerAction;
-import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
-import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 import com.jetbrains.mylyn.yt.ui.utils.DeleteTaskAction;
+import com.jetbrains.mylyn.yt.ui.utils.EditAction;
 import com.jetbrains.mylyn.yt.ui.utils.RevertAction;
+import com.jetbrains.mylyn.yt.ui.utils.SubmitAction;
 import com.jetbrains.mylyn.yt.ui.utils.SynchronizeEditorAction;
+import com.jetbrains.mylyn.yt.ui.utils.UpdateProjectAction;
+import com.jetbrains.mylyn.yt.ui.utils.WebViewAction;
 
 public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
@@ -154,100 +146,32 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
   @Override
   public void fillToolBar(final IToolBarManager toolBarManager) {
 
-    DeleteTaskAction deleteAction =
-        new DeleteTaskAction(getTask(), getModel().getTaskData().isNew(), getModel()
-            .getTaskRepository(), this);
-    toolBarManager.add(deleteAction);
+    Action submitAction = new SubmitAction(this);
+    toolBarManager.add(submitAction);
 
     Action synchronizeEditorAction = new SynchronizeEditorAction();
     ((BaseSelectionListenerAction) synchronizeEditorAction)
         .selectionChanged(new StructuredSelection(getTaskEditor()));
     toolBarManager.add(synchronizeEditorAction);
 
-    Action updateProjectSettings = new Action() {
-      @Override
-      public void run() {
-        final String projectname =
-            getModel().getTaskData().getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue();
-        Job job = new Job("Update settings of " + projectname) {
-          @Override
-          protected IStatus run(IProgressMonitor monitor) {
-            YouTrackRepositoryConnector.forceUpdateProjectCustomFields(getTaskRepository(),
-                projectname);
-            syncWithUi();
-            return Status.OK_STATUS;
-          }
-        };
-        job.setUser(true);
-        job.schedule();
-      }
-
-      private void syncWithUi() {
-        Display.getDefault().asyncExec(new Runnable() {
-          @Override
-          public void run() {
-            if (!getModel().getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY)
-                .getMetaData().isReadOnly()) {
-              doEdit();
-            }
-          }
-        });
-      }
-    };
-    updateProjectSettings.setToolTipText("Update project settings");
-    updateProjectSettings.setImageDescriptor(TasksUiImages.REPOSITORY_UPDATE_CONFIGURATION);
-    toolBarManager.add(updateProjectSettings);
-
-    Action webViewAction = new Action() {
-      @Override
-      public void run() {
-        IWebBrowser browser;
-        try {
-          browser =
-              PlatformUI.getWorkbench().getBrowserSupport()
-                  .createBrowser(getModel().getTaskData().getRoot().getId());
-          URL issueURL =
-              YouTrackTaskDataHandler.getIssueURL(getModel().getTaskData(), getTaskRepository());
-          if (issueURL != null) {
-            browser.openURL(issueURL);
-          } else {
-            getEditor().setMessage("Problem with browser.", SWT.ERROR);
-          }
-        } catch (PartInitException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
-    webViewAction.setToolTipText("Open issue in internal Eclipse browser");
-    webViewAction.setImageDescriptor(CommonImages.WEB);
-    toolBarManager.add(webViewAction);
-
-    Action submitAction = new Action() {
-      @Override
-      public void run() {
-        doSubmit();
-      }
-    };
-    submitAction.setToolTipText("Submit");
-    submitAction.setImageDescriptor(TasksUiImages.REPOSITORY_SUBMIT);
-    toolBarManager.add(submitAction);
-
-    Action editAction = new Action() {
-      @Override
-      public void run() {
-        if (!YouTrackTaskDataHandler.isEnableEditMode()) {
-          doEdit();
-        }
-      }
-    };
-    editAction.setToolTipText("Edit");
-    editAction.setImageDescriptor(CommonImages.EDIT);
+    Action editAction = new EditAction(this);
     toolBarManager.add(editAction);
 
     Action revertAction =
         new RevertAction(Collections.singletonList((IRepositoryElement) getTask()));
     ((RevertAction) revertAction).setTaskEditorPage(this);
     toolBarManager.add(revertAction);
+
+    Action webViewAction = new WebViewAction(this);
+    toolBarManager.add(webViewAction);
+
+    Action updateProjectSettings = new UpdateProjectAction(this);
+    toolBarManager.add(updateProjectSettings);
+
+    DeleteTaskAction deleteAction =
+        new DeleteTaskAction(getTask(), getModel().getTaskData().isNew(), getModel()
+            .getTaskRepository(), this);
+    toolBarManager.add(deleteAction);
   }
 
   public void doEdit() {

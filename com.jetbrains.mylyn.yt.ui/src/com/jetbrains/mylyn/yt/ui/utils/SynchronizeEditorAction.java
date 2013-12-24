@@ -15,7 +15,7 @@ public class SynchronizeEditorAction extends BaseSelectionListenerAction {
 
   public SynchronizeEditorAction() {
     super("Synchronize");
-    setToolTipText("Synchronize Incoming changes");
+    setToolTipText("Synchronize Incoming changes (F5)");
     setId(ID);
     setImageDescriptor(CommonImages.REFRESH);
   }

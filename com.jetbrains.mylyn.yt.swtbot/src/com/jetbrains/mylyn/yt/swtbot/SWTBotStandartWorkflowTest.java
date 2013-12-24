@@ -1,12 +1,11 @@
 package com.jetbrains.mylyn.yt.swtbot;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
@@ -20,7 +19,7 @@ import org.junit.runner.RunWith;
 
 
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class SWTBotStandartWorkflowTest {
+public class SWTBotStandartWorkflowTest extends TestCase {
 
   private static final String TEST_REPO_NAME = "SWTBot Test REPO";
 
