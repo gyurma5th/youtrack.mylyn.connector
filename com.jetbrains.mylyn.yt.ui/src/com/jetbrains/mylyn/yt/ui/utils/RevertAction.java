@@ -25,7 +25,7 @@ public class RevertAction extends Action {
 
   public RevertAction(List<IRepositoryElement> selectedElements) {
     this.selectedElements = selectedElements;
-    setToolTipText("Revert all changes.");
+    setToolTipText("Revert all changes");
     setImageDescriptor(CommonImages.UNDO);
     setId(ID);
     if (selectedElements.size() == 1 && (selectedElements.get(0) instanceof ITask)) {

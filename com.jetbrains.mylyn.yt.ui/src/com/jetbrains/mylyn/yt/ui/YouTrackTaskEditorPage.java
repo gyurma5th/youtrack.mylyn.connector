@@ -46,8 +46,8 @@ import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.forms.IManagedForm;
 
-import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 import com.jetbrains.mylyn.yt.ui.utils.DeleteTaskAction;
 import com.jetbrains.mylyn.yt.ui.utils.RevertAction;
@@ -172,7 +172,8 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         Job job = new Job("Update settings of " + projectname) {
           @Override
           protected IStatus run(IProgressMonitor monitor) {
-            YouTrackRepositoryConnector.forceUpdateProjectCustomFields(getTaskRepository(), projectname);
+            YouTrackRepositoryConnector.forceUpdateProjectCustomFields(getTaskRepository(),
+                projectname);
             syncWithUi();
             return Status.OK_STATUS;
           }
@@ -193,7 +194,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         });
       }
     };
-    updateProjectSettings.setToolTipText("Update project settings.");
+    updateProjectSettings.setToolTipText("Update project settings");
     updateProjectSettings.setImageDescriptor(TasksUiImages.REPOSITORY_UPDATE_CONFIGURATION);
     toolBarManager.add(updateProjectSettings);
 
