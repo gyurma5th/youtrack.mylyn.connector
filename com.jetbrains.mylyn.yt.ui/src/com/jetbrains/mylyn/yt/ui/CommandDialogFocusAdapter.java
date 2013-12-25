@@ -18,7 +18,6 @@ import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Control;
@@ -47,7 +46,7 @@ public class CommandDialogFocusAdapter implements FocusListener {
 
   private Timer timer;
 
-  private StyledText widgetText;
+  private Text widgetText;
 
   public Text issuesCountText;
 
@@ -128,13 +127,13 @@ public class CommandDialogFocusAdapter implements FocusListener {
 
   class CheckModification extends TimerTask {
 
-    public StyledText widgetText;
+    public Text widgetText;
 
     public String searchSequence2;
 
     public int caret;
 
-    public CheckModification(StyledText widgetText2) {
+    public CheckModification(Text widgetText2) {
       this.widgetText = widgetText2;
       searchSequence2 = searchSequence;
     }
@@ -150,7 +149,7 @@ public class CommandDialogFocusAdapter implements FocusListener {
           public void run() {
             if (searchSequence == null || !searchSequence.equals(widgetText.getText())) {
               searchSequence2 = widgetText.getText();
-              caret = widgetText.getCaretOffset();
+              caret = widgetText.getCaretPosition();
             }
           }
         });
@@ -183,7 +182,7 @@ public class CommandDialogFocusAdapter implements FocusListener {
   public void focusGained(FocusEvent e) {
 
     if (e.getSource() instanceof Text) {
-      widgetText = (StyledText) e.getSource();
+      widgetText = (Text) e.getSource();
     }
 
     try {

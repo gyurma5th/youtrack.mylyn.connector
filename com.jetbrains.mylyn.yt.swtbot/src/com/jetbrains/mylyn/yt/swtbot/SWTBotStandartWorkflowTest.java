@@ -89,10 +89,9 @@ public class SWTBotStandartWorkflowTest extends TestCase {
     bot.button("Next >").click();
     bot.comboBox().setText(REPOSITORY_URL);
     bot.text().setText(TEST_REPO_NAME);
-    bot.checkBox().setFocus();
-    bot.checkBox().setFocus();
     bot.textWithLabel("User ID: ").setText(REAL_USER_ID);
     bot.textWithLabel("Password: ").setText(REAL_USER_PASSWORD);
+    bot.button("Validate Settings").click();
     bot.captureScreenshot("screenshots/fillYTRepositoryData.jpg");
     bot.button("Finish").click();
     bot.button("Yes").click();
@@ -125,7 +124,7 @@ public class SWTBotStandartWorkflowTest extends TestCase {
     bot.captureScreenshot("screenshots/openIssueLinkInBrowser.jpg");
     bot.activeEditor().close();
     bot.toolbarButtonWithTooltip("Update project settings").click();
-    bot.toolbarButtonWithTooltip("Synchronize Incoming changes").click();
+    bot.toolbarButtonWithTooltip("Synchronize Incoming changes (F5)").click();
 
     // create new task, submit and delete from tracker
     SWTBotMenu fileMenu = bot.menu("File");
@@ -144,7 +143,7 @@ public class SWTBotStandartWorkflowTest extends TestCase {
     bot.button("Finish").click();
     bot.captureScreenshot("screenshots/openNewIssueEditor.jpg");
     bot.styledText(1).setText("Issue created by SWTBOT " + new Date());
-    bot.toolbarButtonWithTooltip("Submit").click();
+    bot.toolbarButtonWithTooltip("Submit (Ctrl + Enter)").click();
     bot.toolbarButtonWithTooltip("Delete task from tracker").click();
     bot.button("OK").click();
     assertTrue(suitableTitlesForIssues.contains(bot.activeEditor().getTitle()));
@@ -168,10 +167,10 @@ public class SWTBotStandartWorkflowTest extends TestCase {
     // edit and submit issue
     bot.toolbarButtonWithTooltip("Edit").click();
     bot.styledText(1).setText(issueSummary + "(edited)");
-    bot.toolbarButtonWithTooltip("Submit").click();
+    bot.toolbarButtonWithTooltip("Submit (Ctrl + Enter)").click();
     bot.toolbarButtonWithTooltip("Edit").click();
     bot.styledText(1).setText(issueSummary);
-    bot.toolbarButtonWithTooltip("Submit").click();
+    bot.toolbarButtonWithTooltip("Submit (Ctrl + Enter)").click();
 
     // create new task, edit, save and delete without submit
     fileMenu.menu("New").menu("Task").click();

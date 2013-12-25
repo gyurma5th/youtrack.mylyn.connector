@@ -115,6 +115,7 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
     if (client == null) {
       client = clientFactory.getClient(repository.getRepositoryUrl());
       clientByRepository.put(repository, client);
+      client.login(repository.getUserName(), repository.getPassword());
     }
     return client;
   }
@@ -185,10 +186,12 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
         String projectname = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_PROJECT);
         String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
 
-        // int issuesCount = queryIssuesAmount(projectname, filter, repository);
+        // ad ten because of state may update slowly and actual issues
+        // count may be greater than rest returned
+        int issuesCount = queryIssuesAmount(projectname, filter, repository);
         issues =
             getClient(repository).getIssuesByFilter(getFilter(projectname, filter, repository),
-                MAX_ISSUES_PER_ONE_QUERY);
+                issuesCount + 10);
 
         for (YouTrackIssue issue : issues) {
           TaskData taskData = taskDataHandler.readTaskData(repository, issue, monitor);
