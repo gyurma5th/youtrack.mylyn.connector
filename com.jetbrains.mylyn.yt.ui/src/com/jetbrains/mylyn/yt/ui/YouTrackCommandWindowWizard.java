@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Label;
 import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
-public class YouTrackCommandWizard extends Wizard {
+public class YouTrackCommandWindowWizard extends Wizard {
 
   public YouTrackCommandDialogPage commandDialogPage = new YouTrackCommandDialogPage(
       "Apply Command");
@@ -68,7 +68,7 @@ public class YouTrackCommandWizard extends Wizard {
       }
       getCommandBoxText().setLayoutData(gd);
 
-      getCommandBoxText().addFocusListener(new CommandDialogFocusAdapter(getClient(), false, null));
+      getCommandBoxText().addFocusListener(new CommandIntellisenseFocusAdapter(getClient(), false, null));
 
       setControl(composite);
     }
@@ -91,7 +91,7 @@ public class YouTrackCommandWizard extends Wizard {
     }
   }
 
-  public YouTrackCommandWizard(TaskData data, TaskRepository repository, TaskEditor editor) {
+  public YouTrackCommandWindowWizard(TaskData data, TaskRepository repository, TaskEditor editor) {
     super();
     setWindowTitle("Command Dialog");
     setTaskData(data);

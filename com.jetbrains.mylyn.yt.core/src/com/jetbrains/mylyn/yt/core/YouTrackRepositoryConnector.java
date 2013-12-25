@@ -4,15 +4,21 @@
 
 package com.jetbrains.mylyn.yt.core;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.mylyn.internal.tasks.core.RepositoryQuery;
+import org.eclipse.mylyn.internal.tasks.core.TaskList;
 import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
@@ -20,9 +26,11 @@ import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.ITask.PriorityLevel;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
+import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
+import org.eclipse.mylyn.tasks.core.data.TaskRelation;
 import org.eclipse.mylyn.tasks.core.sync.ISynchronizationSession;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.ui.IEditorPart;
@@ -38,7 +46,7 @@ import com.jetbrains.youtrack.javarest.utils.MyRunnable;
 
 public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
-  private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+  private static final long REPOSITORY_CONFIGURATION_UPDATE_INTERVAL = 60 * 1000;
 
   private static Map<TaskRepository, YouTrackClient> clientByRepository =
       new HashMap<TaskRepository, YouTrackClient>();
@@ -141,9 +149,12 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   }
 
   @Override
-  public String getRepositoryUrlFromTaskUrl(String taskFullUrl) {
-    // ignore
-    return null;
+  public String getRepositoryUrlFromTaskUrl(String taskUrl) {
+    if (taskUrl == null) {
+      return null;
+    }
+    int index = taskUrl.indexOf(ISSUE_URL_PREFIX);
+    return (index != -1) ? taskUrl.substring(0, index) : null;
   }
 
   @Override
@@ -158,9 +169,33 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   }
 
   @Override
-  public String getTaskIdFromTaskUrl(String taskFullUrl) {
-    // ignore
+  public String getTaskIdFromTaskUrl(String taskUrl) {
+    if (taskUrl == null) {
+      return null;
+    }
+    int index = taskUrl.indexOf(ISSUE_URL_PREFIX);
+    if (index != -1) {
+      String taskId = taskUrl.substring(index + ISSUE_URL_PREFIX.length());
+      if (taskId.contains("-")) {
+        return taskId;
+      }
+    }
     return null;
+  }
+
+  @Override
+  public String getTaskIdPrefix() {
+    return "issue";
+  }
+
+  @Override
+  public Collection<TaskRelation> getTaskRelations(@NonNull TaskData taskData) {
+    return null;
+  }
+
+  @Override
+  public String getShortLabel() {
+    return "YouTrack";
   }
 
   @Override
@@ -217,13 +252,6 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   public int queryIssuesAmount(String projectname, String filter, TaskRepository repository)
       throws CoreException {
     return getClient(repository).getNumberOfIssues(getFilter(projectname, filter, repository));
-  }
-
-  @Override
-  public void updateRepositoryConfiguration(TaskRepository taskRepository, IProgressMonitor monitor)
-      throws CoreException {
-    // ignore
-
   }
 
   @Override
@@ -305,6 +333,42 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
       }
       return TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId)
           .getTaskKey();
+    }
+  }
+
+  @Override
+  public boolean canDeleteTask(TaskRepository repository, ITask task) {
+    return true;
+  }
+
+  @Override
+  public boolean isRepositoryConfigurationStale(TaskRepository repository, IProgressMonitor monitor)
+      throws CoreException {
+    Date configDate = repository.getConfigurationDate();
+    if (configDate != null) {
+      return (new Date().getTime() - configDate.getTime()) > REPOSITORY_CONFIGURATION_UPDATE_INTERVAL;
+    }
+    return true;
+  }
+
+  @Override
+  public void updateRepositoryConfiguration(TaskRepository taskRepository, IProgressMonitor monitor)
+      throws CoreException {
+
+    // update project settings for all projects or already existed?
+
+    Set<String> projects = new HashSet<String>();
+    TaskList taskList = TasksUiPlugin.getTaskList();
+    for (RepositoryQuery query : taskList.getRepositoryQueries(taskRepository.getRepositoryUrl())) {
+      for (ITask task : query.getChildren()) {
+        projects.add(getTaskData(taskRepository, task.getTaskId(), monitor).getRoot()
+            .getMappedAttribute(TaskAttribute.PRODUCT).getValue());
+        // get TaskData from local
+      }
+    }
+
+    for (String projectname : projects) {
+      forceUpdateProjectCustomFields(taskRepository, projectname);
     }
   }
 }

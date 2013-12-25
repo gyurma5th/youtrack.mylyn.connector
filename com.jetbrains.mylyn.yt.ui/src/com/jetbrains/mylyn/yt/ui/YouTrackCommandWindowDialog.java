@@ -7,9 +7,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-public class YouTrackCommandDialogWizard extends WizardDialog {
+public class YouTrackCommandWindowDialog extends WizardDialog {
 
-  public YouTrackCommandDialogWizard(Shell parentShell, IWizard newWizard) {
+  public YouTrackCommandWindowDialog(Shell parentShell, IWizard newWizard) {
     super(parentShell, newWizard);
   }
 
@@ -24,10 +24,10 @@ public class YouTrackCommandDialogWizard extends WizardDialog {
 
   @Override
   protected void finishPressed() {
-    boolean finish = ((YouTrackCommandWizard) getWizard()).finishPressed();
+    boolean finish = ((YouTrackCommandWindowWizard) getWizard()).finishPressed();
     if (finish) {
       super.finishPressed();
-      YouTrackTaskEditorPageFactory.synchronizeTaskUi(((YouTrackCommandWizard) getWizard())
+      YouTrackTaskEditorPageFactory.synchronizeTaskUi(((YouTrackCommandWindowWizard) getWizard())
           .getEditor());
     }
   }

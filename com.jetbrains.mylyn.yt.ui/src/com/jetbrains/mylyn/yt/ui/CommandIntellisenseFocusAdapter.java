@@ -28,7 +28,7 @@ import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
 
-public class CommandDialogFocusAdapter implements FocusListener {
+public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private Job autocomletionJob;
 
@@ -65,7 +65,7 @@ public class CommandDialogFocusAdapter implements FocusListener {
 
   private long lastTryTime = 0;
 
-  public CommandDialogFocusAdapter(YouTrackClient client, boolean isCountIssues,
+  public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
       Text issuesCountText) {
     this.client = client;
     this.isCountIssuses = isCountIssues;
