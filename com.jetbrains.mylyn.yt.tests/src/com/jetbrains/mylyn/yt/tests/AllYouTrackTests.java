@@ -44,7 +44,7 @@ public class AllYouTrackTests {
 
     fixture.createSuite(suite);
     fixture.add(YouTrackRepositoryConnectorStandaloneTest.class);
-    fixture.add(YouTrackRepositoryPageTest.class);
+    fixture.add(YouTrackRepositorySettingsPageTest.class);
     fixture.add(YouTrackTaskEditorTest.class);
     fixture.add(CorrectJaxbBindingTest.class);
 

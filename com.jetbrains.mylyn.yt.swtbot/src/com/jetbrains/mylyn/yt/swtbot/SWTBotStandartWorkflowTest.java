@@ -91,11 +91,8 @@ public class SWTBotStandartWorkflowTest extends TestCase {
     bot.text().setText(TEST_REPO_NAME);
     bot.checkBox().setFocus();
     bot.checkBox().setFocus();
-    bot.checkBox("Anonymous").deselect();
     bot.textWithLabel("User ID: ").setText(REAL_USER_ID);
     bot.textWithLabel("Password: ").setText(REAL_USER_PASSWORD);
-    bot.checkBox("Save Password").select();
-    bot.button("Validate Settings").click();
     bot.captureScreenshot("screenshots/fillYTRepositoryData.jpg");
     bot.button("Finish").click();
     bot.button("Yes").click();

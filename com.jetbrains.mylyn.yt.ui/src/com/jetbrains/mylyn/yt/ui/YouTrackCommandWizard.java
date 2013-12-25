@@ -8,11 +8,11 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
@@ -34,7 +34,7 @@ public class YouTrackCommandWizard extends Wizard {
 
   public class YouTrackCommandDialogPage extends WizardPage {
 
-    private Text commandBoxText;
+    private StyledText commandBoxText;
 
     protected YouTrackCommandDialogPage(String pageName) {
       super(pageName);
@@ -57,10 +57,11 @@ public class YouTrackCommandWizard extends Wizard {
 
       Label commandBoxLabel = new Label(composite, SWT.FILL);
       commandBoxLabel.setText("Command for "
-          + YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(), getTaskRepository()) + ": "
+          + YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(),
+              getTaskRepository()) + ": "
           + getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY).getValue());
 
-      commandBoxText = new Text(composite, SWT.SINGLE | SWT.FILL);
+      commandBoxText = new StyledText(composite, SWT.SINGLE | SWT.FILL);
       if (importedCommand != null) {
         commandBoxText.setText(importedCommand);
         commandBoxText.setSelection(commandBoxText.getCharCount());
@@ -77,7 +78,7 @@ public class YouTrackCommandWizard extends Wizard {
       return true;
     }
 
-    public Text getCommandBoxText() {
+    public StyledText getCommandBoxText() {
       return commandBoxText;
     }
 

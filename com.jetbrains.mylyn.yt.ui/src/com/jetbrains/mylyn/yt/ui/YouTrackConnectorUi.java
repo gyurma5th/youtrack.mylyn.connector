@@ -30,7 +30,7 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
 
   @Override
   public ITaskRepositoryPage getSettingsPage(TaskRepository taskRepository) {
-    return new YouTrackRepositoryPage(taskRepository);
+    return new YouTrackRepositorySettingsPage(taskRepository);
   }
 
   @Override

@@ -27,14 +27,14 @@ import org.eclipse.ui.PlatformUI;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
-import com.jetbrains.mylyn.yt.ui.YouTrackRepositoryPage;
+import com.jetbrains.mylyn.yt.ui.YouTrackRepositorySettingsPage;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
 /**
  * @author Rob Elves
  * @author Alexander Marchuk
  */
-public class YouTrackRepositoryPageTest extends TestCase {
+public class YouTrackRepositorySettingsPageTest extends TestCase {
 
   private TaskRepository repository;
 
@@ -88,8 +88,8 @@ public class YouTrackRepositoryPageTest extends TestCase {
 
 
   public void testLoginInvalidPassword() throws Exception {
-    YouTrackRepositoryPage page =
-        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
+    YouTrackRepositorySettingsPage page =
+        (YouTrackRepositorySettingsPage) createEditRepositoryWizard().getSettingsPage();
     page.setPassword("bogus");
     try {
       YouTrackClient client =
@@ -103,8 +103,8 @@ public class YouTrackRepositoryPageTest extends TestCase {
   }
 
   public void testValidationInvalidUserid() throws Exception {
-    YouTrackRepositoryPage page =
-        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
+    YouTrackRepositorySettingsPage page =
+        (YouTrackRepositorySettingsPage) createEditRepositoryWizard().getSettingsPage();
     page.setUserId("bogus");
     try {
       YouTrackClient client =
@@ -118,8 +118,8 @@ public class YouTrackRepositoryPageTest extends TestCase {
   }
 
   public void testLoginWithValidCredentials() throws Exception {
-    YouTrackRepositoryPage page =
-        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
+    YouTrackRepositorySettingsPage page =
+        (YouTrackRepositorySettingsPage) createEditRepositoryWizard().getSettingsPage();
     try {
       YouTrackClient client =
           createClient(page.getRepositoryUrl(), page.getUserName(), page.getPassword(),
@@ -135,8 +135,8 @@ public class YouTrackRepositoryPageTest extends TestCase {
   }
 
   public void testValidationInvalidUrl() throws Exception {
-    YouTrackRepositoryPage page =
-        (YouTrackRepositoryPage) createEditRepositoryWizard().getSettingsPage();
+    YouTrackRepositorySettingsPage page =
+        (YouTrackRepositorySettingsPage) createEditRepositoryWizard().getSettingsPage();
     page.setUrl("http://nylym.myjetbrains.com");
     try {
       YouTrackClient client =
@@ -152,7 +152,7 @@ public class YouTrackRepositoryPageTest extends TestCase {
     String tempUid = repository.getUserName();
     String tempPass = repository.getPassword();
     EditRepositoryWizard wizard = createEditRepositoryWizard();
-    YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
+    YouTrackRepositorySettingsPage page = (YouTrackRepositorySettingsPage) wizard.getSettingsPage();
     YouTrackClient client =
         createClient(page.getRepositoryUrl(), page.getUserName(), page.getPassword(),
             page.getHttpAuthUserId(), page.getHttpAuthPassword(), page.getCharacterEncoding());
@@ -170,7 +170,7 @@ public class YouTrackRepositoryPageTest extends TestCase {
   public void testValidateOnFinishInvalidUserId() throws Exception {
     assertEquals(1, TasksUiPlugin.getRepositoryManager().getAllRepositories().size());
     EditRepositoryWizard wizard = createEditRepositoryWizard();
-    YouTrackRepositoryPage page = (YouTrackRepositoryPage) wizard.getSettingsPage();
+    YouTrackRepositorySettingsPage page = (YouTrackRepositorySettingsPage) wizard.getSettingsPage();
     YouTrackClient client =
         createClient(page.getRepositoryUrl(), page.getUserName(), page.getPassword(),
             page.getHttpAuthUserId(), page.getHttpAuthPassword(), page.getCharacterEncoding());
