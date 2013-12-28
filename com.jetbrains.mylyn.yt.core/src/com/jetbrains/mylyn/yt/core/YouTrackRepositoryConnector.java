@@ -16,7 +16,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.mylyn.internal.tasks.core.RepositoryQuery;
 import org.eclipse.mylyn.internal.tasks.core.TaskList;
 import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
@@ -188,7 +187,7 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   }
 
   @Override
-  public Collection<TaskRelation> getTaskRelations(@NonNull TaskData taskData) {
+  public Collection<TaskRelation> getTaskRelations(TaskData taskData) {
     return null;
   }
 
