@@ -26,7 +26,6 @@ import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.ITask.PriorityLevel;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
-import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
@@ -46,7 +45,7 @@ import com.jetbrains.youtrack.javarest.utils.MyRunnable;
 
 public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
-  private static final long REPOSITORY_CONFIGURATION_UPDATE_INTERVAL = 60 * 1000;
+  private static final long REPOSITORY_CONFIGURATION_UPDATE_INTERVAL = 2 * 60 * 60 * 1000;
 
   private static Map<TaskRepository, YouTrackClient> clientByRepository =
       new HashMap<TaskRepository, YouTrackClient>();
@@ -351,24 +350,37 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
     return true;
   }
 
+  /*
+   * update projects data for every existed project in every query associated with repository
+   */
   @Override
   public void updateRepositoryConfiguration(TaskRepository taskRepository, IProgressMonitor monitor)
       throws CoreException {
-
-    // update project settings for all projects or already existed?
 
     Set<String> projects = new HashSet<String>();
     TaskList taskList = TasksUiPlugin.getTaskList();
     for (RepositoryQuery query : taskList.getRepositoryQueries(taskRepository.getRepositoryUrl())) {
       for (ITask task : query.getChildren()) {
-        projects.add(getTaskData(taskRepository, task.getTaskId(), monitor).getRoot()
-            .getMappedAttribute(TaskAttribute.PRODUCT).getValue());
-        // get TaskData from local
+        projects.add(getProjectNameFromId(task.getTaskKey()));
       }
     }
 
     for (String projectname : projects) {
       forceUpdateProjectCustomFields(taskRepository, projectname);
     }
+  }
+
+  public String getProjectNameFromId(String taskId) {
+    if (taskId != null && taskId.contains("-")) {
+      return taskId.substring(0, taskId.indexOf("-"));
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public void updateRepositoryConfiguration(TaskRepository taskRepository, ITask task,
+      IProgressMonitor monitor) throws CoreException {
+    forceUpdateProjectCustomFields(taskRepository, getProjectNameFromId(task.getTaskKey()));
   }
 }
