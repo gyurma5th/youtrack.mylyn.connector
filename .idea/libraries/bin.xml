@@ -1,0 +1,51 @@
+<component name="libraryTable">
+  <library name="bin">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-api-1.5.11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-client-1.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/fluent-hc-4.2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/asm-3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-client-1.12-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-simple-1.6.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/grizzly-http-2.2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/commons-logging-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-api-1.6.99.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/grizzly-http-server-2.2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/httpclient-4.2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-bundle-1.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-server-1.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-server-1.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/httpclient-cache-4.2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/httpmime-4.2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-api-1.6.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/grizzly-framework-2.2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-api-2.0.99.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/commons-httpclient-3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/org.eclipse.persistence.core_2.1.1.v20100817-r8050.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jackson-jaxrs-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/httpcore-4.2.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-simple-1.5.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-grizzly2-1.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-core-1.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jackson-xc-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-nop-1.5.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-simple-1.5.4-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-simple-1.6.99.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jettison-1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-core-1.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jackson-mapper-asl-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-apache-client-1.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-servlet-1.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jackson-core-asl-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/junit-3.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-simple-1.4.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/commons-codec-1.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/slf4j-simple-1.5.11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/org.eclipse.persistence.moxy_2.1.1.v20100817-r8050.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jersey-json-1.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/bin/jsr311-api-1.1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/com.jetbrains.mylyn.yt.core/com.jetbrains.mylyn.yt.core.iml" filepath="$PROJECT_DIR$/com.jetbrains.mylyn.yt.core/com.jetbrains.mylyn.yt.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.jetbrains.mylyn.yt.ui/com.jetbrains.mylyn.yt.ui.iml" filepath="$PROJECT_DIR$/com.jetbrains.mylyn.yt.ui/com.jetbrains.mylyn.yt.ui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.jetbrains.youtrack.javarest/com.jetbrains.youtrack.javarest.iml" filepath="$PROJECT_DIR$/com.jetbrains.youtrack.javarest/com.jetbrains.youtrack.javarest.iml" />
+    </modules>
+  </component>
+</project>
+

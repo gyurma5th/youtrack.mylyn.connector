@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.mylyn.tasks.ui.repositories">
+      <connectorCore
+            class="com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector">
+      </connectorCore>
+      <connectorUi
+            brandingIcon="resource/icon.png"
+			overlayIcon="resource/youtrack-overlay-icon.png"
+            class="com.jetbrains.mylyn.yt.ui.YouTrackConnectorUi">
+      </connectorUi>
+   </extension>
+   <extension
+         point="org.eclipse.mylyn.tasks.ui.editors">
+      <pageFactory
+            class="com.jetbrains.mylyn.yt.ui.YouTrackTaskEditorPageFactory"
+            id="org.eclipse.mylyn.yt.ui.pageFactory">
+      </pageFactory>
+   </extension>
+</plugin>
