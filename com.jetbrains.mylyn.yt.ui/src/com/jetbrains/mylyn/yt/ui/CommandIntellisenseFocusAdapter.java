@@ -65,6 +65,8 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private long lastTryTime = 0;
 
+  private Job countIssuesJob;
+
   public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
       Text issuesCountText) {
     this.client = client;
@@ -78,23 +80,38 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
       autocomletionJob.cancel();
       timer.cancel();
     }
+
+    final String filterText = widgetText.getText();
+
+    countIssuesJob = new Job("count.issues.job") {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        if (isCountIssuses) {
+          queryIssuesAmount = getClient().getNumberOfIssues(filterText);
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    countIssuesJob.setUser(true);
+    countIssuesJob.schedule();
   }
 
   private void syncWithUi(final boolean needOpen) {
     Display.getDefault().asyncExec(new Runnable() {
       @Override
       public void run() {
+
         if (needOpen) {
           scp.setProposals(intellisense.getFullOptions());
           openPopupProposals();
         } else {
           adapter.closeProposalPopup();
-          if (isCountIssuses && issuesCountText != null) {
+          if (isCountIssuses && issuesCountText != null && !issuesCountText.isDisposed()) {
             issuesCountText.setText("");
           }
         }
 
-        if (isCountIssuses && issuesCountText != null) {
+        if (isCountIssuses && issuesCountText != null && !issuesCountText.isDisposed()) {
           if (queryIssuesAmount == -1) {
             issuesCountText.setText("Can't get number of issues. Please try another query.");
           } else if (queryIssuesAmount == 1) {
@@ -141,15 +158,20 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
     public void run() {
       if (widgetText.isDisposed()) {
         autocomletionJob.cancel();
+        countIssuesJob.cancel();
         timer.cancel();
         return;
       } else {
 
         Display.getDefault().syncExec(new Runnable() {
           public void run() {
-            if (searchSequence == null || !searchSequence.equals(widgetText.getText())) {
+            if (!widgetText.isDisposed()
+                && (searchSequence == null || !searchSequence.equals(widgetText.getText()))) {
               searchSequence2 = widgetText.getText();
               caret = widgetText.getCaretPosition();
+              if (countIssuesJob != null) {
+                countIssuesJob.cancel();
+              }
             }
           }
         });
@@ -160,7 +182,26 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
           intellisense = getClient().intellisenseSearchValues(searchSequence2, caret);
 
           if (isCountIssuses && issuesCountText != null) {
-            queryIssuesAmount = getClient().getNumberOfIssues(searchSequence2);
+            final String filterText = searchSequence2;
+            countIssuesJob = new Job("count.issues.job") {
+              @Override
+              protected IStatus run(IProgressMonitor monitor) {
+                if (isCountIssuses) {
+                  queryIssuesAmount = getClient().getNumberOfIssues(filterText);
+                }
+
+                Display.getDefault().asyncExec(new Runnable() {
+                  @Override
+                  public void run() {
+                    syncWithUi(true);
+                  }
+                });
+
+                return Status.OK_STATUS;
+              }
+            };
+            countIssuesJob.setUser(true);
+            countIssuesJob.schedule();
           }
 
           items = intellisense.getIntellisenseItems();

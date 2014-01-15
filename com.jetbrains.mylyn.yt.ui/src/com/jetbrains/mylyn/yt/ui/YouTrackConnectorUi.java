@@ -14,7 +14,6 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.AbstractRepositoryConnectorUi;
 import org.eclipse.mylyn.tasks.ui.wizards.ITaskRepositoryPage;
-import org.eclipse.mylyn.tasks.ui.wizards.RepositoryQueryWizard;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 
@@ -45,7 +44,7 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
 
   @Override
   public IWizard getQueryWizard(TaskRepository repository, IRepositoryQuery query) {
-    RepositoryQueryWizard wizard = new RepositoryQueryWizard(repository);
+    YouTrackRepositoryQueryWizard wizard = new YouTrackRepositoryQueryWizard(repository);
     wizard.addPage(new YouTrackRepositoryQueryPage("youtrack.repository.query.page", repository,
         query));
     return wizard;

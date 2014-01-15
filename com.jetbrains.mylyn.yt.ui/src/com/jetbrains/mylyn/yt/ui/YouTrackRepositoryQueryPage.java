@@ -418,8 +418,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     numberOfIssues2.setLayoutData(gd);
     numberOfIssues2.setEnabled(false);
 
-    searchBoxText
-        .addFocusListener(new CommandIntellisenseFocusAdapter(getClient(), true, numberOfIssues2));
+    searchBoxText.addFocusListener(new CommandIntellisenseFocusAdapter(getClient(), true,
+        numberOfIssues2));
 
     createTitleGroup(customQueryComposite);
 
