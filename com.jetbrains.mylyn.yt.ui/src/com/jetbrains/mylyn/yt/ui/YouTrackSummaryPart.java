@@ -11,6 +11,7 @@ import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorSummaryPart;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
+import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionEvent;
@@ -25,11 +26,13 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
 
 public class YouTrackSummaryPart extends TaskEditorSummaryPart {
+
+  private String partId;
 
   private static final String ADD_TAG_TEXT = "Add tag";
 
@@ -134,7 +137,8 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       public void widgetSelected(SelectionEvent e) {
         CCombo combo = (CCombo) e.widget;
         String selectedText = combo.getItem(combo.getSelectionIndex());
-        openCommandWizard(secondLineComposite.getShell(), capitalize(selectedText) + ": ", true);
+        openCommandWizard(secondLineComposite.getShell(), capitalize(selectedText) + ": ", true,
+            getTaskEditorPage());
         combo.setText(ADD_LINK_TEXT);
       }
 
@@ -152,7 +156,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        openCommandWizard(composite.getShell(), null, true);
+        openCommandWizard(composite.getShell(), null, true, getTaskEditorPage());
       }
 
       @Override
@@ -171,7 +175,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       @Override
       public void handleEvent(Event event) {
         CCombo combo = (CCombo) event.widget;
-        combo.setItems(YouTrackConnector.getClient(
+        combo.setItems(YouTrackRepositoryConnector.getClient(
             getTaskEditorPage().getModel().getTaskRepository()).getAllSuitableTags());
         combo.add(ADD_NEW_TAG_PROPOSAL, 0);
         combo.setText(ADD_TAG_TEXT);
@@ -187,11 +191,12 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
         String selectedText = combo.getItem(combo.getSelectionIndex());
 
         if (selectedText.equals(ADD_NEW_TAG_PROPOSAL)) {
-          openCommandWizard(secondLineComposite.getShell(), ADD_TAG_TEXT.toLowerCase() + ": ", true);
+          openCommandWizard(secondLineComposite.getShell(), ADD_TAG_TEXT.toLowerCase() + ": ",
+              true, getTaskEditorPage());
         } else {
           TaskRepository repository = getTaskEditorPage().getModel().getTaskRepository();
-          YouTrackConnector.getClient(repository)
-              .addNewTag(YouTrackConnector.getRealIssueId(getTaskData().getTaskId(), repository),
+          YouTrackRepositoryConnector.getClient(repository)
+              .addNewTag(YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(), repository),
                   selectedText);
 
           TaskAttribute attribute =
@@ -211,22 +216,31 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
   }
 
 
-  private void openCommandWizard(Shell shell, String initialCommand, boolean needUISynchronization) {
-    YouTrackCommandWizard commandWizard =
-        new YouTrackCommandWizard(getTaskData(),
-            getTaskEditorPage().getModel().getTaskRepository(), getTaskEditorPage().getTaskEditor());
+  public static void openCommandWizard(Shell shell, String initialCommand,
+      boolean needUISynchronization, AbstractTaskEditorPage page) {
+    YouTrackCommandWindowWizard commandWizard =
+        new YouTrackCommandWindowWizard(page.getModel().getTaskData(), page.getModel()
+            .getTaskRepository(), page.getTaskEditor());
 
     if (initialCommand != null) {
       commandWizard.getCommandDialogPage().setCommandBoxText(initialCommand);
     }
 
-    YouTrackCommandDialogWizard dialog = new YouTrackCommandDialogWizard(shell, commandWizard);
+    YouTrackCommandWindowDialog dialog = new YouTrackCommandWindowDialog(shell, commandWizard);
     if (dialog.open() == Window.OK && needUISynchronization) {
-      YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
+      YouTrackTaskEditorPageFactory.synchronizeTaskUi(page.getTaskEditor());
     }
   }
 
   private String capitalize(String line) {
     return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+  }
+
+  public void setPartId(String partId) {
+    this.partId = partId;
+  }
+
+  public String getPartId() {
+    return partId;
   }
 }

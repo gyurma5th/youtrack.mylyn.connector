@@ -84,6 +84,7 @@ public class YouTrackProject {
 
   public synchronized void updateCustomFields(final YouTrackClient client) {
 
+
     if (client != null) {
 
       setCustomFieldsMap(new HashMap<String, YouTrackCustomField>());
@@ -107,8 +108,6 @@ public class YouTrackProject {
       setCustomFieldsUpdated(true);
       setCustomFieldsUpdatedDate(new Date());
     }
-
-    // updateModelIssue(client);
   }
 
   public String getBothNames() {
@@ -121,6 +120,10 @@ public class YouTrackProject {
     } else {
       return "";
     }
+  }
+
+  public boolean isCustomField(String field) {
+    return getCustomFieldsMap().keySet().contains(field);
   }
 
   public static String getShortNameFromBoth(String both) {

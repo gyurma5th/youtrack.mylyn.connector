@@ -84,11 +84,11 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
     setSection(toolkit, section);
   }
 
-  public void setPartId(String partId) {
-    this.partId = partId;
-  }
-
   public String getPartId() {
     return partId;
+  }
+
+  public void setPartId(String partId) {
+    this.partId = partId;
   }
 }

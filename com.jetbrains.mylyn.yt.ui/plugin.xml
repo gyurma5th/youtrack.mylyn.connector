@@ -4,10 +4,11 @@
    <extension
          point="org.eclipse.mylyn.tasks.ui.repositories">
       <connectorCore
-            class="com.jetbrains.mylyn.yt.core.YouTrackConnector">
+            class="com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector">
       </connectorCore>
       <connectorUi
-            brandingIcon="icon.png"
+            brandingIcon="resource/icon.png"
+			overlayIcon="resource/youtrack-overlay-icon.png"
             class="com.jetbrains.mylyn.yt.ui.YouTrackConnectorUi">
       </connectorUi>
    </extension>

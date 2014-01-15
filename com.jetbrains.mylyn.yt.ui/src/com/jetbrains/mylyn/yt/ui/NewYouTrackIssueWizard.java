@@ -14,8 +14,6 @@ import org.eclipse.mylyn.tasks.core.TaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.wizards.NewTaskWizard;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -26,7 +24,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.jetbrains.mylyn.yt.core.YouTrackConnector;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
 
 public class NewYouTrackIssueWizard extends NewTaskWizard implements INewWizard {
@@ -62,7 +60,7 @@ public class NewYouTrackIssueWizard extends NewTaskWizard implements INewWizard 
 
       LinkedList<YouTrackProject> projects;
       projects =
-          (LinkedList<YouTrackProject>) YouTrackConnector.getClient(getTaskRepository())
+          (LinkedList<YouTrackProject>) YouTrackRepositoryConnector.getClient(getTaskRepository())
               .getProjects();
       if (getProjectCombo() != null) {
         for (YouTrackProject project : projects) {
@@ -77,14 +75,16 @@ public class NewYouTrackIssueWizard extends NewTaskWizard implements INewWizard 
         }
       });
 
-      projectCombo.addFocusListener(new FocusListener() {
+      projectCombo.addListener(SWT.Paint, new Listener() {
+
+        private boolean showed = false;
 
         @Override
-        public void focusLost(FocusEvent e) {}
-
-        @Override
-        public void focusGained(FocusEvent e) {
-          projectCombo.setListVisible(true);
+        public void handleEvent(Event event) {
+          if (!showed && isCurrentPage()) {
+            showed = true;
+            projectCombo.setListVisible(true);
+          }
         }
       });
     }

@@ -26,6 +26,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
+import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.osgi.util.NLS;
 
 import util.CastCheck;
@@ -43,8 +44,8 @@ import com.jetbrains.youtrack.javarest.utils.StateValue;
 
 public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
-  private final YouTrackConnector connector;
-
+  private final YouTrackRepositoryConnector connector;
+  // TODO: Rename?
   private static boolean enableEditMode = false;
 
   private static boolean postNewCommentMode = false;
@@ -61,10 +62,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String CUSTOM_FIELD_KIND = "TaslAttributeKind.CUSTOM_FIELD_KIND";
 
-  public static final String SUMMARY_CREATED_FROM_ECLIPSE =
-      "<Issue created from Eclipse Connector. Please specify issue summary.>";
+  public static final String SINGLE_FIELD_KIND = "TaslAttributeKind.ORDINARY_FIELD_KIND";
 
-  public YouTrackTaskDataHandler(YouTrackConnector connector) {
+  public YouTrackTaskDataHandler(YouTrackRepositoryConnector connector) {
     this.connector = connector;
   }
 
@@ -81,15 +81,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     return name + ":";
   }
 
-  private boolean isCustomField(YouTrackProject project, String field) {
-    return project.getCustomFieldsMap().keySet().contains(field);
-  }
-
   @Override
   public RepositoryResponse postTaskData(TaskRepository repository, TaskData taskData,
       Set<TaskAttribute> oldAttributes, IProgressMonitor monitor) throws CoreException {
 
-    YouTrackClient client = YouTrackConnector.getClient(repository);
+    YouTrackClient client = YouTrackRepositoryConnector.getClient(repository);
     YouTrackIssue issue = new YouTrackIssue();
 
     if (postNewCommentMode) {
@@ -105,7 +101,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     try {
       issue = buildIssue(repository, taskData);
-      YouTrackProject project = YouTrackConnector.getProject(repository, issue.getProjectName());
 
       if (taskData.isNew()) {
         String uploadIssueId = client.putNewIssue(issue);
@@ -136,68 +131,56 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
   }
 
+  public TaskAttribute createAttribute(TaskData data, YouTrackAttribute attribute) {
+    TaskAttribute taskAttribute = data.getRoot().createAttribute(attribute.getName());
+    taskAttribute.getMetaData().setReadOnly(attribute.isReadOnly()).setType(attribute.getType())
+        .setLabel(attribute.getLabel()).setKind(attribute.getKind());
+    return taskAttribute;
+  }
+
+  public TaskAttribute createAttribute(TaskData data, YouTrackCustomField field) {
+    TaskAttribute attribute = data.getRoot().createAttribute(field.getName());
+    attribute.getMetaData().setReadOnly(true).setLabel(labelFromName(field.getName()))
+        .setKind(CUSTOM_FIELD_KIND);
+
+    if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
+      attribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
+    } else {
+      if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
+        attribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
+      } else {
+        attribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
+      }
+    }
+
+    if (field.getDefaultValues() != null) {
+      attribute.setValues(field.getDefaultValues());
+    } else {
+      if (field.isCanBeEmpty()) {
+        attribute.setValue(field.getEmptyText());
+      }
+    }
+    return attribute;
+  }
+
   @Override
   public boolean initializeTaskData(TaskRepository repository, TaskData data,
       ITaskMapping initializationData, IProgressMonitor monitor) throws CoreException {
 
-    if (data.isNew() && initializationData.getProduct() != null
-        && initializationData.getProduct().length() > 0) {
-      YouTrackProject project =
-          YouTrackConnector.getProject(repository, initializationData.getProduct());
-      TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
-      attribute.setValue(SUMMARY_CREATED_FROM_ECLIPSE);
-      attribute = data.getRoot().createAttribute(TaskAttribute.PRODUCT);
-      attribute.setValue(initializationData.getProduct());
-      attribute = data.getRoot().createAttribute(TaskAttribute.DESCRIPTION);
-      attribute.setValue("");
-    }
-
-    TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.SUMMARY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_RICH_TEXT)
-        .setLabel("Summary:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.DATE_CREATION);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME)
-        .setLabel("Created:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.TASK_KEY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
-        .setLabel("Issue key:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.DATE_MODIFICATION);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_DATETIME)
-        .setLabel("Updated:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.DESCRIPTION);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_LONG_RICH_TEXT)
-        .setLabel("Description:");
-
-    attribute = data.getRoot().createAttribute(WIKIFY_DESCRIPTION);
-    attribute.getMetaData().setReadOnly(true).setType(TYPE_HTML).setLabel("Wikify Description:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.USER_REPORTER);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_RICH_TEXT)
-        .setLabel("Reporter:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.USER_ASSIGNED);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
-        .setLabel("Assignee:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.PRIORITY);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT)
-        .setLabel("Priority level:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.STATUS);
-    attribute.getMetaData().setReadOnly(false).setType(TaskAttribute.TYPE_BOOLEAN)
-        .setLabel("Resolved:");
-
-    attribute = data.getRoot().createAttribute(TaskAttribute.PRODUCT);
-    attribute.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SINGLE_SELECT)
-        .setLabel("Project:");
+    createAttribute(data, YouTrackAttribute.SUMMARY);
+    createAttribute(data, YouTrackAttribute.DATE_CREATION);
+    createAttribute(data, YouTrackAttribute.TASK_KEY);
+    createAttribute(data, YouTrackAttribute.UPDATED_DATE);
+    createAttribute(data, YouTrackAttribute.DESCRIPTION);
+    createAttribute(data, YouTrackAttribute.WIKIFY_DESCRIPTION);
+    createAttribute(data, YouTrackAttribute.USER_REPORTER);
+    createAttribute(data, YouTrackAttribute.USER_ASSIGNED);
+    createAttribute(data, YouTrackAttribute.PRIORITY_LEVEL);
+    createAttribute(data, YouTrackAttribute.RESOLVED);
+    createAttribute(data, YouTrackAttribute.PROJECT);
 
     if (!data.isNew()) {
-      attribute = data.getRoot().createAttribute(COMMENT_NEW);
-      attribute.getMetaData().setReadOnly(false).setType(TaskAttribute.TYPE_LONG_RICH_TEXT);
+      createAttribute(data, YouTrackAttribute.COMMENT_NEW);
     }
 
     if (data.isNew()) {
@@ -210,40 +193,20 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         return false;
       }
 
-      YouTrackProject project = YouTrackConnector.getProject(repository, product);
-
+      YouTrackProject project = YouTrackRepositoryConnector.getProject(repository, product);
       if (project == null) {
         return false;
       }
 
       if (!project.isCustomFieldsUpdated()) {
-        project.updateCustomFields(YouTrackConnector.getClient(repository));
+        project.updateCustomFields(YouTrackRepositoryConnector.getClient(repository));
       }
 
       for (YouTrackCustomField field : project.getCustomFields()) {
-        TaskAttribute customFieldAttribute = data.getRoot().createAttribute(field.getName());
-        customFieldAttribute.getMetaData().setReadOnly(true)
-            .setLabel(labelFromName(field.getName())).setKind(CUSTOM_FIELD_KIND);
-        if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
-          customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
-        } else {
-          if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
-            customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
-          } else {
-            customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
-          }
-        }
-
-        if (field.getDefaultValues() != null) {
-          customFieldAttribute.setValues(field.getDefaultValues());
-        } else {
-          if (field.isCanBeEmpty()) {
-            customFieldAttribute.setValue(field.getEmptyText());
-          }
-        }
+        createAttribute(data, field);
       }
 
-      attribute = data.getRoot().getMappedAttribute(TaskAttribute.PRODUCT);
+      TaskAttribute attribute = data.getRoot().getMappedAttribute(TaskAttribute.PRODUCT);
       attribute.setValue(product);
       attribute.getMetaData().setReadOnly(true);
     }
@@ -267,7 +230,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
   }
 
-  private TaskData parseIssue(TaskRepository repository, YouTrackIssue issue,
+  public TaskData parseIssue(TaskRepository repository, YouTrackIssue issue,
       IProgressMonitor monitor) throws CoreException {
 
     issue.mapFields();
@@ -328,7 +291,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     if (issue.getCustomFieldsValues().containsKey("Priority")) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
       // TODO: NullPointer here!
-      if (project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
+      if (project.isCustomFieldsUpdated()
+          && project.getCustomFieldsMap().get("Priority").getBundle() != null
+          && project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
         attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),
             project.getCustomFieldsMap().get("Priority").getBundle().getValues()).toString());
       }
@@ -461,21 +426,21 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     YouTrackProject project =
-        YouTrackConnector.getProject(repository,
+        YouTrackRepositoryConnector.getProject(repository,
             taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue());
 
     if (!project.isCustomFieldsUpdated()) {
-      project.updateCustomFields(YouTrackConnector.getClient(repository));
+      project.updateCustomFields(YouTrackRepositoryConnector.getClient(repository));
     }
 
     for (TaskAttribute attribute : taskData.getRoot().getAttributes().values()) {
-      if (isCustomField(project, attribute.getId()) && attribute.getValue() != null
+      if (project.isCustomField(attribute.getId()) && attribute.getValue() != null
           && !attribute.getValue().equals("")) {
 
         // TODO: fix this mess
 
         String emptyText =
-            YouTrackConnector
+            YouTrackRepositoryConnector
                 .getProject(repository,
                     taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
                 .getCustomFieldsMap().get(getNameFromLabel(attribute)).getEmptyText();
@@ -485,7 +450,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         } else {
           Class fieldClass =
               YouTrackCustomFieldType.getTypeByName(
-                  YouTrackConnector
+                  YouTrackRepositoryConnector
                       .getProject(repository,
                           taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
                       .getCustomFieldsMap().get(getNameFromLabel(attribute)).getType())
@@ -508,7 +473,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
     }
 
-    issue.fillCustomFieldsFromProject(project, YouTrackConnector.getClient(repository));
+    issue.fillCustomFieldsFromProject(project, YouTrackRepositoryConnector.getClient(repository));
     if (taskData.getRoot().getMappedAttribute(TAG_PREFIX) != null
         && taskData.getRoot().getMappedAttribute(TAG_PREFIX).getValues() != null) {
       LinkedList<IssueTag> tags = new LinkedList<IssueTag>();
@@ -543,14 +508,14 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       if (taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT) != null) {
 
         YouTrackProject project =
-            YouTrackConnector.getProject(taskRepository,
-                taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
+            YouTrackRepositoryConnector.getProject(taskRepository, taskData.getRoot()
+                .getMappedAttribute(TaskAttribute.PRODUCT).getValue());
 
         if (isEnableEditMode() && !project.isCustomFieldsUpdated()) {
-          project.updateCustomFields(YouTrackConnector.getClient(taskRepository));
+          project.updateCustomFields(YouTrackRepositoryConnector.getClient(taskRepository));
         }
 
-        String[] tags = YouTrackConnector.getClient(taskRepository).getAllSuitableTags();
+        String[] tags = YouTrackRepositoryConnector.getClient(taskRepository).getAllSuitableTags();
 
         for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
           if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
@@ -571,11 +536,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                 attr.addValue(value.replace("\n", ""));
               }
             }
-          } else if (isCustomField(project, attr.getId())) {
+          } else if (project.isCustomField(attr.getId())) {
             attr.getMetaData().setReadOnly(false);
             String customFieldName = getNameFromLabel(attr);
             if (project.getCustomFieldsMap().get(customFieldName) == null) {
-              project.updateCustomFields(YouTrackConnector.getClient(taskRepository));
+              project.updateCustomFields(YouTrackRepositoryConnector.getClient(taskRepository));
             }
             YouTrackCustomField customField = project.getCustomFieldsMap().get(customFieldName);
             if (!YouTrackCustomFieldType.getTypeByName(customField.getType()).isSimple()) {
@@ -631,10 +596,26 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static URL getIssueURL(TaskData data, TaskRepository repository) {
     try {
-      return new URL(data.getRepositoryUrl() + YouTrackConnector.ISSUE_URL_PREFIX
-          + YouTrackConnector.getRealIssueId(data.getTaskId(), repository));
+      return new URL(data.getRepositoryUrl() + YouTrackRepositoryConnector.ISSUE_URL_PREFIX
+          + YouTrackRepositoryConnector.getRealIssueId(data.getTaskId(), repository));
     } catch (MalformedURLException e) {
       return null;
     }
   }
+
+  @Override
+  public void getMultiTaskData(final TaskRepository repository, Set<String> taskIds,
+      final TaskDataCollector collector, IProgressMonitor monitor) throws CoreException {
+    try {
+      monitor.beginTask("Receiving_tasks", taskIds.size());
+      final YouTrackClient client = connector.getClient(repository);
+
+      for (String id : taskIds) {
+        collector.accept(parseIssue(repository, client.getIssue(id), monitor));
+      }
+    } finally {
+      monitor.done();
+    }
+  }
+
 }
