@@ -62,7 +62,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -89,10 +88,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
   private CCombo savedSearchesCombo;
 
-  private Text numberOfIssues1;
-
-  private Text numberOfIssues2;
-
   private Button customizeQueryCheckbox;
 
   private Text searchBoxText;
@@ -108,6 +103,10 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
   private final AbstractRepositoryConnector connector;
 
   private boolean firstTime = true;
+
+  private int queryIssuesAmount;
+
+  private String countForFilterString;
 
   private SectionComposite innerComposite;
 
@@ -127,12 +126,15 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
   private Text titleText;
 
+  private final CommandIntellisenseFocusAdapter intellisenseAdapter;
+
   public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository,
       IRepositoryQuery query) {
     super("youtrack.repository.query.page", repository, query);
     this.connector = TasksUi.getRepositoryConnector(getTaskRepository().getConnectorKind());
     this.repository = repository;
     setTitle("YouTrack Repository Query");
+    intellisenseAdapter = new CommandIntellisenseFocusAdapter(getClient(), false, null);
   }
 
   protected void doRefreshControls() {
@@ -147,7 +149,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
     if (filter != null) {
       if (customizeQueryCheckbox.getSelection()) {
-        searchBoxText.setText(filter);
+        getSearchBoxText().setText(filter);
       } else {
         for (SavedSearch savedSearch : searches) {
           if (savedSearch.getSearchText().equals(filter)) {
@@ -169,8 +171,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER,
           searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
     }
-    if (searchBoxText.getText() != null && customizeQueryCheckbox.getSelection()) {
-      query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER, searchBoxText.getText());
+    if (getSearchBoxText().getText() != null && customizeQueryCheckbox.getSelection()) {
+      query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER, getSearchBoxText().getText());
     }
     setMessage(defaultMessage);
   }
@@ -196,13 +198,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
           setMessage("Choose saved search.");
           recursiveSetEnabled(fastQueryComposite, true);
           recursiveSetEnabled(customQueryComposite, false);
-          numberOfIssues1.setText("");
-          numberOfIssues1.setEnabled(false);
         } else {
           recursiveSetEnabled(fastQueryComposite, false);
           recursiveSetEnabled(customQueryComposite, true);
-          numberOfIssues2.setText("");
-          numberOfIssues2.setEnabled(false);
           setQueryTitle("");
           setMessage("Enter query into search box (press Ctrl+Space for query completion).");
         }
@@ -230,10 +228,6 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     Composite numberOfIssuesComposite = new Composite(fastQueryComposite, SWT.NONE);
     numberOfIssuesComposite.setLayout(new GridLayout(2, false));
 
-    numberOfIssues1 = new Text(fastQueryComposite, SWT.SINGLE | SWT.FILL);
-    numberOfIssues1.setLayoutData(gd);
-    numberOfIssues1.setEnabled(false);
-
     savedSearchesCombo.addListener(SWT.Selection, new Listener() {
       @Override
       public void handleEvent(Event event) {
@@ -259,137 +253,69 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       public void handleEvent(Event event) {
         setErrorMessage(null);
         setMessage(defaultMessage, INFORMATION);
-        numberOfIssues1.setText("");
         fillSearches();
       }
     });
 
-    savedSearchesCombo.addSelectionListener(new CountIssuesSelectionAdapter(numberOfIssues1,
-        searches));
+    savedSearchesCombo.addSelectionListener(new CountIssuesAdapter(searches));
   }
 
-  public class CountIssuesFocusAdapter implements FocusListener {
+  public class CountIssuesAdapter implements SelectionListener, FocusListener {
 
-    private Text issuesCountText;
+    public String queryFilter;
 
-    private String queryFilter;
+    public List<SavedSearch> searches;
 
-    private int queryIssuesAmount;
+    public Job countJob;
 
-    private List<SavedSearch> searches;
-
-    private Job job;
-
-    public CountIssuesFocusAdapter(Text setText, List<SavedSearch> searches) {
-      this.issuesCountText = setText;
+    public CountIssuesAdapter(List<SavedSearch> searches) {
       this.searches = searches;
-      this.queryIssuesAmount = 0;
+      queryIssuesAmount = 0;
     }
 
-
-    @Override
-    public void focusGained(FocusEvent e) {
-      issuesCountText.setText("");
-      if (e.getSource() instanceof Combo && ((Combo) e.getSource()).getSelectionIndex() > 0) {
-        queryFilter = searches.get(((Combo) e.getSource()).getSelectionIndex()).getSearchText();
-      }
-
-      job = new Job("Count Number of Issues") {
+    private void sheduleCountJob() {
+      Job countJob = new Job("count.issues.job") {
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-          queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
-          syncWithUi();
+          if (queryFilter.length() > 0) {
+            queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
+          }
           return Status.OK_STATUS;
         }
 
       };
-      job.setUser(true);
-      job.schedule();
-    }
-
-    private void syncWithUi() {
-      Display.getDefault().asyncExec(new Runnable() {
-        @Override
-        public void run() {
-          if (queryIssuesAmount == -1) {
-            issuesCountText.setText("Can't get number of issues. Please try another query.");
-          } else if (queryIssuesAmount == 1) {
-            issuesCountText.setText("1 issue");
-          } else {
-            issuesCountText.setText(queryIssuesAmount + " issues");
-          }
-        }
-      });
-    }
-
-
-    @Override
-    public void focusLost(FocusEvent e) {
-      issuesCountText.setText("");
-      if (job != null) {
-        job.cancel();
-      }
-    }
-
-  }
-
-  public class CountIssuesSelectionAdapter implements SelectionListener {
-
-    public Text issuesCountText;
-
-    public String queryFilter;
-
-    public int queryIssuesAmount;
-
-    public List<SavedSearch> searches;
-
-    public CountIssuesSelectionAdapter(Text setText, List<SavedSearch> searches) {
-      this.issuesCountText = setText;
-      this.searches = searches;
-      this.queryIssuesAmount = 0;
-    }
-
-    private void syncWithUi() {
-      Display.getDefault().asyncExec(new Runnable() {
-        @Override
-        public void run() {
-          if (queryIssuesAmount == -1) {
-            issuesCountText.setText("Can't get number of issues. Please try another query.");
-          } else if (queryIssuesAmount == 1) {
-            issuesCountText.setText("1 issue");
-          } else if (queryIssuesAmount >= 0) {
-            issuesCountText.setText(queryIssuesAmount + " issues");
-          }
-        }
-      });
+      countJob.setUser(true);
+      countJob.schedule();
     }
 
     @Override
     public void widgetSelected(SelectionEvent e) {
-      issuesCountText.setText("");
       queryFilter = "";
       queryIssuesAmount = Integer.MIN_VALUE;
       if (e.getSource() instanceof CCombo && ((CCombo) e.getSource()).getSelectionIndex() > 0) {
         queryFilter = searches.get(((CCombo) e.getSource()).getSelectionIndex()).getSearchText();
       }
 
-      Job job = new Job("count.issues.job") {
-        @Override
-        protected IStatus run(IProgressMonitor monitor) {
-          if (queryFilter.length() > 0) {
-            queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
-          }
-          syncWithUi();
-          return Status.OK_STATUS;
-        }
-
-      };
-      job.setUser(true);
-      job.schedule();
+      sheduleCountJob();
     }
 
     @Override
     public void widgetDefaultSelected(SelectionEvent e) {}
+
+    @Override
+    public void focusGained(FocusEvent e) {
+      queryFilter = "";
+      queryIssuesAmount = Integer.MIN_VALUE;
+      if (e.getSource() instanceof Text) {
+        queryFilter = getSearchBoxText().getText();
+        countForFilterString = queryFilter;
+      }
+
+      sheduleCountJob();
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {}
 
   }
 
@@ -411,15 +337,10 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     Label searchBoxLabel = new Label(customQueryComposite, SWT.NONE);
     searchBoxLabel.setText("Search Box:");
 
-    searchBoxText = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
-    searchBoxText.setLayoutData(gd);
+    setSearchBoxText(new Text(customQueryComposite, SWT.SINGLE | SWT.FILL));
+    getSearchBoxText().setLayoutData(gd);
 
-    numberOfIssues2 = new Text(customQueryComposite, SWT.SINGLE | SWT.FILL);
-    numberOfIssues2.setLayoutData(gd);
-    numberOfIssues2.setEnabled(false);
-
-    searchBoxText.addFocusListener(new CommandIntellisenseFocusAdapter(getClient(), true,
-        numberOfIssues2));
+    getSearchBoxText().addFocusListener(intellisenseAdapter);
 
     createTitleGroup(customQueryComposite);
 
@@ -431,10 +352,8 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
   }
 
   protected void doPartialRefresh() {
-    numberOfIssues1.setText("");
     fillSearches();
-    searchBoxText.setText("");
-    numberOfIssues2.setText("");
+    getSearchBoxText().setText("");
   }
 
   protected void doFullRefresh() {
@@ -484,6 +403,10 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     } else {
       ctrl.setEnabled(enabled);
     }
+  }
+
+  public int getQueryIssuesAmount() {
+    return this.queryIssuesAmount;
   }
 
   /*
@@ -673,6 +596,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
         getContainer().updateButtons();
       }
     });
+    titleText.addFocusListener(new CountIssuesAdapter(searches));
   }
 
   private void initializePage() {
@@ -844,5 +768,17 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       }
     }
     return false;
+  }
+
+  public String getCountForFilterString() {
+    return countForFilterString;
+  }
+
+  public Text getSearchBoxText() {
+    return searchBoxText;
+  }
+
+  public void setSearchBoxText(Text searchBoxText) {
+    this.searchBoxText = searchBoxText;
   }
 }

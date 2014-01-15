@@ -61,7 +61,7 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private int showDelay = 500;
 
-  private String searchSequence;
+  private String lastSeenSearchSequence;
 
   private long lastTryTime = 0;
 
@@ -146,13 +146,13 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
     public Text widgetText;
 
-    public String searchSequence2;
+    public String newSearchSequence;
 
     public int caret;
 
     public CheckModification(Text widgetText2) {
       this.widgetText = widgetText2;
-      searchSequence2 = searchSequence;
+      newSearchSequence = lastSeenSearchSequence;
     }
 
     public void run() {
@@ -166,8 +166,8 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
         Display.getDefault().syncExec(new Runnable() {
           public void run() {
             if (!widgetText.isDisposed()
-                && (searchSequence == null || !searchSequence.equals(widgetText.getText()))) {
-              searchSequence2 = widgetText.getText();
+                && (lastSeenSearchSequence == null || !lastSeenSearchSequence.equals(widgetText.getText()))) {
+              newSearchSequence = widgetText.getText();
               caret = widgetText.getCaretPosition();
               if (countIssuesJob != null) {
                 countIssuesJob.cancel();
@@ -176,13 +176,13 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
           }
         });
 
-        if (searchSequence == null || !searchSequence.equals(searchSequence2)) {
-          searchSequence = searchSequence2;
+        if (lastSeenSearchSequence == null || !lastSeenSearchSequence.equals(newSearchSequence)) {
+          lastSeenSearchSequence = newSearchSequence;
           lastTryTime = System.currentTimeMillis();
-          intellisense = getClient().intellisenseSearchValues(searchSequence2, caret);
+          intellisense = getClient().intellisenseSearchValues(newSearchSequence, caret);
 
           if (isCountIssuses && issuesCountText != null) {
-            final String filterText = searchSequence2;
+            final String filterText = newSearchSequence;
             countIssuesJob = new Job("count.issues.job") {
               @Override
               protected IStatus run(IProgressMonitor monitor) {
@@ -274,5 +274,9 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private YouTrackClient getClient() {
     return client;
+  }
+
+  public int getQueryIssuesAmount() {
+    return this.queryIssuesAmount;
   }
 }
