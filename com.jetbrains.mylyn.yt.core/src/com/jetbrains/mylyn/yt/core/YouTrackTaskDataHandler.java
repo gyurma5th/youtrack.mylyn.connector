@@ -508,8 +508,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       if (taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT) != null) {
 
         YouTrackProject project =
-            YouTrackRepositoryConnector.getProject(taskRepository,
-                taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT).getValue());
+            YouTrackRepositoryConnector.getProject(taskRepository, taskData.getRoot()
+                .getMappedAttribute(TaskAttribute.PRODUCT).getValue());
 
         if (isEnableEditMode() && !project.isCustomFieldsUpdated()) {
           project.updateCustomFields(YouTrackRepositoryConnector.getClient(taskRepository));

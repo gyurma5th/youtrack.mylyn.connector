@@ -74,11 +74,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 
-import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.utils.SavedSearch;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
@@ -418,7 +419,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     numberOfIssues2.setEnabled(false);
 
     searchBoxText
-        .addFocusListener(new CommandDialogFocusAdapter(getClient(), true, numberOfIssues2));
+        .addFocusListener(new CommandIntellisenseFocusAdapter(getClient(), true, numberOfIssues2));
 
     createTitleGroup(customQueryComposite);
 
@@ -446,16 +447,22 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     savedSearchesCombo.removeAll();
     if (repository.getUserName() != null) {
       searches = new LinkedList<SavedSearch>();
-      LinkedList<UserSavedSearch> userSearches =
-          getClient().getSavedSearchesForUser(repository.getUserName());
-      for (UserSavedSearch userSearch : userSearches) {
-        searches.add(userSearch.convertIntoSavedSearch());
+      try {
+        LinkedList<UserSavedSearch> userSearches =
+            getClient().getSavedSearchesForUser(repository.getUserName());
+        for (UserSavedSearch userSearch : userSearches) {
+          searches.add(userSearch.convertIntoSavedSearch());
+        }
+      } catch (UniformInterfaceException e) {
+        searches = getClient().getSavedSearches();
       }
     } else {
       searches = getClient().getSavedSearches();
     }
-    for (SavedSearch search : searches) {
-      savedSearchesCombo.add(search.getName());
+    if (searches != null) {
+      for (SavedSearch search : searches) {
+        savedSearchesCombo.add(search.getName());
+      }
     }
   }
 

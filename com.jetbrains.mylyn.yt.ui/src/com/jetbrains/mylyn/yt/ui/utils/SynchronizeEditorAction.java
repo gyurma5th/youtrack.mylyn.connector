@@ -13,9 +13,11 @@ public class SynchronizeEditorAction extends BaseSelectionListenerAction {
 
   public static final String ID = "org.eclipse.mylyn.tasklist.actions.synchronize.editor"; //$NON-NLS-1$
 
+  private static final String tooltipText = "Synchronize Incoming changes (F5)";
+
   public SynchronizeEditorAction() {
     super("Synchronize");
-    setToolTipText("Synchronize Incoming changes (F5)");
+    setToolTipText(tooltipText);
     setId(ID);
     setImageDescriptor(CommonImages.REFRESH);
   }

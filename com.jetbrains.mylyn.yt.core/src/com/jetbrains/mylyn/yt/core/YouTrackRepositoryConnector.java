@@ -4,15 +4,20 @@
 
 package com.jetbrains.mylyn.yt.core;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.internal.tasks.core.RepositoryQuery;
+import org.eclipse.mylyn.internal.tasks.core.TaskList;
 import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
@@ -23,6 +28,7 @@ import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
+import org.eclipse.mylyn.tasks.core.data.TaskRelation;
 import org.eclipse.mylyn.tasks.core.sync.ISynchronizationSession;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.ui.IEditorPart;
@@ -38,7 +44,7 @@ import com.jetbrains.youtrack.javarest.utils.MyRunnable;
 
 public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
-  private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+  private static final long REPOSITORY_CONFIGURATION_UPDATE_INTERVAL = 2 * 60 * 60 * 1000;
 
   private static Map<TaskRepository, YouTrackClient> clientByRepository =
       new HashMap<TaskRepository, YouTrackClient>();
@@ -115,6 +121,7 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
     if (client == null) {
       client = clientFactory.getClient(repository.getRepositoryUrl());
       clientByRepository.put(repository, client);
+      client.login(repository.getUserName(), repository.getPassword());
     }
     return client;
   }
@@ -140,9 +147,12 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   }
 
   @Override
-  public String getRepositoryUrlFromTaskUrl(String taskFullUrl) {
-    // ignore
-    return null;
+  public String getRepositoryUrlFromTaskUrl(String taskUrl) {
+    if (taskUrl == null) {
+      return null;
+    }
+    int index = taskUrl.indexOf(ISSUE_URL_PREFIX);
+    return (index != -1) ? taskUrl.substring(0, index) : null;
   }
 
   @Override
@@ -157,9 +167,33 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   }
 
   @Override
-  public String getTaskIdFromTaskUrl(String taskFullUrl) {
-    // ignore
+  public String getTaskIdFromTaskUrl(String taskUrl) {
+    if (taskUrl == null) {
+      return null;
+    }
+    int index = taskUrl.indexOf(ISSUE_URL_PREFIX);
+    if (index != -1) {
+      String taskId = taskUrl.substring(index + ISSUE_URL_PREFIX.length());
+      if (taskId.contains("-")) {
+        return taskId;
+      }
+    }
     return null;
+  }
+
+  @Override
+  public String getTaskIdPrefix() {
+    return "issue";
+  }
+
+  @Override
+  public Collection<TaskRelation> getTaskRelations(TaskData taskData) {
+    return null;
+  }
+
+  @Override
+  public String getShortLabel() {
+    return "YouTrack";
   }
 
   @Override
@@ -185,10 +219,12 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
         String projectname = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_PROJECT);
         String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
 
-        // int issuesCount = queryIssuesAmount(projectname, filter, repository);
+        // ad ten because of state may update slowly and actual issues
+        // count may be greater than rest returned
+        int issuesCount = queryIssuesAmount(projectname, filter, repository);
         issues =
             getClient(repository).getIssuesByFilter(getFilter(projectname, filter, repository),
-                MAX_ISSUES_PER_ONE_QUERY);
+                issuesCount + 10);
 
         for (YouTrackIssue issue : issues) {
           TaskData taskData = taskDataHandler.readTaskData(repository, issue, monitor);
@@ -214,13 +250,6 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   public int queryIssuesAmount(String projectname, String filter, TaskRepository repository)
       throws CoreException {
     return getClient(repository).getNumberOfIssues(getFilter(projectname, filter, repository));
-  }
-
-  @Override
-  public void updateRepositoryConfiguration(TaskRepository taskRepository, IProgressMonitor monitor)
-      throws CoreException {
-    // ignore
-
   }
 
   @Override
@@ -303,5 +332,54 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
       return TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId)
           .getTaskKey();
     }
+  }
+
+  @Override
+  public boolean canDeleteTask(TaskRepository repository, ITask task) {
+    return true;
+  }
+
+  @Override
+  public boolean isRepositoryConfigurationStale(TaskRepository repository, IProgressMonitor monitor)
+      throws CoreException {
+    Date configDate = repository.getConfigurationDate();
+    if (configDate != null) {
+      return (new Date().getTime() - configDate.getTime()) > REPOSITORY_CONFIGURATION_UPDATE_INTERVAL;
+    }
+    return true;
+  }
+
+  /*
+   * update projects data for every existed project in every query associated with repository
+   */
+  @Override
+  public void updateRepositoryConfiguration(TaskRepository taskRepository, IProgressMonitor monitor)
+      throws CoreException {
+
+    Set<String> projects = new HashSet<String>();
+    TaskList taskList = TasksUiPlugin.getTaskList();
+    for (RepositoryQuery query : taskList.getRepositoryQueries(taskRepository.getRepositoryUrl())) {
+      for (ITask task : query.getChildren()) {
+        projects.add(getProjectNameFromId(task.getTaskKey()));
+      }
+    }
+
+    for (String projectname : projects) {
+      forceUpdateProjectCustomFields(taskRepository, projectname);
+    }
+  }
+
+  public String getProjectNameFromId(String taskId) {
+    if (taskId != null && taskId.contains("-")) {
+      return taskId.substring(0, taskId.indexOf("-"));
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public void updateRepositoryConfiguration(TaskRepository taskRepository, ITask task,
+      IProgressMonitor monitor) throws CoreException {
+    forceUpdateProjectCustomFields(taskRepository, getProjectNameFromId(task.getTaskKey()));
   }
 }
