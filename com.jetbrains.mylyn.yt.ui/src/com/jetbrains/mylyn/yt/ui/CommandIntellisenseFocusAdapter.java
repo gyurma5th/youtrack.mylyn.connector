@@ -14,14 +14,25 @@ import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalListener;
+import org.eclipse.jface.fieldassist.IContentProposalListener2;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.TextLayout;
+import org.eclipse.swt.graphics.TextStyle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
@@ -80,20 +91,6 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
       autocomletionJob.cancel();
       timer.cancel();
     }
-
-    final String filterText = widgetText.getText();
-
-    countIssuesJob = new Job("count.issues.job") {
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        if (isCountIssuses) {
-          queryIssuesAmount = getClient().getNumberOfIssues(filterText);
-        }
-        return Status.OK_STATUS;
-      }
-    };
-    countIssuesJob.setUser(true);
-    countIssuesJob.schedule();
   }
 
   private void syncWithUi(final boolean needOpen) {
@@ -158,7 +155,9 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
     public void run() {
       if (widgetText.isDisposed()) {
         autocomletionJob.cancel();
-        countIssuesJob.cancel();
+        if (countIssuesJob != null) {
+          countIssuesJob.cancel();
+        }
         timer.cancel();
         return;
       } else {
@@ -166,7 +165,8 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
         Display.getDefault().syncExec(new Runnable() {
           public void run() {
             if (!widgetText.isDisposed()
-                && (lastSeenSearchSequence == null || !lastSeenSearchSequence.equals(widgetText.getText()))) {
+                && (lastSeenSearchSequence == null || !lastSeenSearchSequence.equals(widgetText
+                    .getText()))) {
               newSearchSequence = widgetText.getText();
               caret = widgetText.getCaretPosition();
               if (countIssuesJob != null) {
@@ -240,6 +240,47 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
           insertAcceptedProposal(proposal);
         }
       });
+      adapter.addContentProposalListener(new IContentProposalListener2() {
+
+        @Override
+        public void proposalPopupOpened(ContentProposalAdapter adapter) {
+          Shell[] shells = Display.getDefault().getShells();
+          Shell result = shells[shells.length - 1];
+          Table table = (Table) ((Composite) result.getChildren()[0]).getChildren()[0];
+
+          final Display display = table.getDisplay();
+          final TextLayout textLayout = new TextLayout(display);
+          Font proposalFont = new Font(display, table.getFont().getFontData());
+          final TextStyle proposalStyleUnderlined =
+              new TextStyle(proposalFont, display.getSystemColor(SWT.COLOR_BLACK), null);
+          proposalStyleUnderlined.underline = true;
+          final TextStyle proposalStyle =
+              new TextStyle(proposalFont, display.getSystemColor(SWT.COLOR_BLACK), null);
+
+          table.addListener(SWT.PaintItem, new Listener() {
+            @Override
+            public void handleEvent(Event event) {
+              if (event.item instanceof TableItem) {
+                TableItem tableItem = (TableItem) event.item;
+                tableItem.setForeground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+                textLayout.setText(tableItem.getText());
+                IntellisenseItem intellisenseItem = itemByNameMap.get(tableItem.getText());
+                textLayout.setStyle(proposalStyle, 0, tableItem.getText().length());
+                int prefixLen =
+                    intellisenseItem.getPrefix() == null ? 0 : intellisenseItem.getPrefix()
+                        .length();
+                textLayout.setStyle(proposalStyleUnderlined, prefixLen
+                    + intellisenseItem.getMatchPositions().getStart(), prefixLen
+                    + intellisenseItem.getMatchPositions().getEnd() - 1);
+                textLayout.draw(event.gc, event.x, event.y);
+              }
+            }
+          });
+        }
+
+        @Override
+        public void proposalPopupClosed(ContentProposalAdapter adapter) {}
+      });
     } catch (Exception e1) {
       throw new RuntimeException(e1);
     }
@@ -256,9 +297,8 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
     autocomletionJob.schedule();
   }
 
-
   private void insertAcceptedProposal(IContentProposal proposal) {
-    IntellisenseItem item = itemByNameMap.get((proposal.getContent()));
+    IntellisenseItem item = itemByNameMap.get(proposal.getContent());
     String beforeInsertion = widgetText.getText();
     String afterInsertion =
         beforeInsertion.substring(0, item.getCompletionPositions().getStart())
