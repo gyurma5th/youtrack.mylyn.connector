@@ -8,11 +8,11 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
@@ -34,7 +34,7 @@ public class YouTrackCommandWindowWizard extends Wizard {
 
   public class YouTrackCommandDialogPage extends WizardPage {
 
-    private StyledText commandBoxText;
+    private Text commandBoxText;
 
     protected YouTrackCommandDialogPage(String pageName) {
       super(pageName);
@@ -61,15 +61,15 @@ public class YouTrackCommandWindowWizard extends Wizard {
               getTaskRepository()) + ": "
           + getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY).getValue());
 
-      commandBoxText = new StyledText(composite, SWT.SINGLE | SWT.FILL);
+      commandBoxText = new Text(composite, SWT.SINGLE | SWT.FILL);
       if (importedCommand != null) {
         commandBoxText.setText(importedCommand);
         commandBoxText.setSelection(commandBoxText.getCharCount());
       }
       getCommandBoxText().setLayoutData(gd);
 
-      // getCommandBoxText().addFocusListener(
-      // new CommandIntellisenseFocusAdapter(getClient(), false, getCommandBoxText()));
+      getCommandBoxText().addFocusListener(
+          new CommandIntellisenseFocusAdapter(getClient(), false, null));
 
       setControl(composite);
     }
@@ -79,7 +79,7 @@ public class YouTrackCommandWindowWizard extends Wizard {
       return true;
     }
 
-    public StyledText getCommandBoxText() {
+    public Text getCommandBoxText() {
       return commandBoxText;
     }
 
