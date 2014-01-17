@@ -78,16 +78,12 @@ public class YouTrackClient {
     if (id == null) {
       throw new RuntimeException("Null issue id");
     } else {
-      if (!issueExist(id)) {
-        throw new RuntimeException("Issue with such id dont exist in tracker.");
-      } else {
-        YouTrackIssue issue =
-            service.path("/issue/").path(id)
-                .queryParam("wikifyDescription", String.valueOf(wikifyDescription))
-                .accept("application/xml").get(YouTrackIssue.class);
-        issue.mapFields();
-        return issue;
-      }
+      YouTrackIssue issue =
+          service.path("/issue/").path(id)
+              .queryParam("wikifyDescription", String.valueOf(wikifyDescription))
+              .accept("application/xml").get(YouTrackIssue.class);
+      issue.mapFields();
+      return issue;
     }
   }
 
@@ -446,7 +442,7 @@ public class YouTrackClient {
     }
   }
 
-  public String[] getAllSuitableTags() {
+  public String[] getUserTags() {
     return service.path("/user/tag").accept("application/xml").get(UserTagList.class).getOptions();
   }
 

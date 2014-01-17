@@ -176,7 +176,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       public void handleEvent(Event event) {
         CCombo combo = (CCombo) event.widget;
         combo.setItems(YouTrackRepositoryConnector.getClient(
-            getTaskEditorPage().getModel().getTaskRepository()).getAllSuitableTags());
+            getTaskEditorPage().getModel().getTaskRepository()).getUserTags());
         combo.add(ADD_NEW_TAG_PROPOSAL, 0);
         combo.setText(ADD_TAG_TEXT);
       }

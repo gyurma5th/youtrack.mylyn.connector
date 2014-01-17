@@ -290,8 +290,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     // because 'priority' icon needs priority level
     if (issue.getCustomFieldsValues().containsKey("Priority")) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
-      // TODO: NullPointer here!
-      if (project.isCustomFieldsUpdated()
+      if (project.isCustomFieldsUpdated() && project.getCustomFieldsMap().containsKey("Priority")
           && project.getCustomFieldsMap().get("Priority").getBundle() != null
           && project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
         attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),
@@ -515,7 +514,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
           project.updateCustomFields(YouTrackRepositoryConnector.getClient(taskRepository));
         }
 
-        String[] tags = YouTrackRepositoryConnector.getClient(taskRepository).getAllSuitableTags();
+        String[] tags = YouTrackRepositoryConnector.getClient(taskRepository).getUserTags();
 
         for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
           if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {

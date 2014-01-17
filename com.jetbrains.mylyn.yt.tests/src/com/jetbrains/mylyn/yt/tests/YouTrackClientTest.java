@@ -572,8 +572,8 @@ public class YouTrackClientTest extends TestCase {
 
 
   public void testGetUserTags() throws Exception {
-    String[] tags = client.getAllSuitableTags();
-    assertTrue(tags.length == 2);
+    String[] tags = client.getUserTags();
+    assertTrue(tags.length == 3);
     LinkedList<String> tagList = new LinkedList<String>();
     for (String tag : tags) {
       tagList.add(tag);
