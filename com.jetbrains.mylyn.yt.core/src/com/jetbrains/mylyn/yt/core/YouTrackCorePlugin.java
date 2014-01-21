@@ -5,10 +5,7 @@
 package com.jetbrains.mylyn.yt.core;
 
 import java.io.File;
-import java.net.URL;
 
-import org.apache.log4j.PropertyConfigurator;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
@@ -45,10 +42,6 @@ public class YouTrackCorePlugin extends Plugin {
             osgiLog.getAbsolutePath().length() - osgiLog.getName().length());
     System.setProperty("com.jetbrains.mylyn.yt.logfile", baseOsgiPath + ".youtrack-mylyn-connector"
         + File.separator + ".log");
-
-    URL installURL = plugin.getBundle().getEntry("/");
-    String installPath = Platform.asLocalURL(installURL).getFile();
-    PropertyConfigurator.configure(installPath + "/log4j.properties");
 
     StdOutErrLog.tieSystemOutAndErrToLog();
   }
