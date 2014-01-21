@@ -277,9 +277,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       Job countJob = new Job("count.issues.job") {
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-          if (queryFilter.length() > 0) {
-            queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
-          }
+          queryIssuesAmount = getClient().getNumberOfIssues(queryFilter);
           return Status.OK_STATUS;
         }
 
@@ -309,9 +307,10 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
       if (e.getSource() instanceof Text) {
         queryFilter = getSearchBoxText().getText();
         countForFilterString = queryFilter;
+
+        sheduleCountJob();
       }
 
-      sheduleCountJob();
     }
 
     @Override
@@ -780,5 +779,9 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
   public void setSearchBoxText(Text searchBoxText) {
     this.searchBoxText = searchBoxText;
+  }
+
+  public boolean isCustomQuery() {
+    return this.savedSearchesCombo.getSelectionIndex() == -1;
   }
 }

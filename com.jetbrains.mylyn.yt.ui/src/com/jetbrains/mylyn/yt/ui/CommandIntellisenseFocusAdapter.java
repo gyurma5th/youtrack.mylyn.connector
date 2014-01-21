@@ -78,6 +78,8 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private Job countIssuesJob;
 
+  private Shell popupShell = null;
+
   public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
       Text issuesCountText) {
     this.client = client;
@@ -244,9 +246,20 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
         @Override
         public void proposalPopupOpened(ContentProposalAdapter adapter) {
-          Shell[] shells = Display.getDefault().getShells();
-          Shell result = shells[shells.length - 1];
-          Table table = (Table) ((Composite) result.getChildren()[0]).getChildren()[0];
+
+          if (popupShell == null || popupShell.isDisposed()) {
+            Shell[] shells = Display.getDefault().getShells();
+            for (Shell shell : shells) {
+              if (shell.isVisible() && shell.isEnabled()
+                  && shell.getChildren()[0] instanceof Composite
+                  && ((Composite) shell.getChildren()[0]).getChildren()[0] instanceof Table) {
+                popupShell = shell;
+                break;
+              }
+            }
+          }
+
+          Table table = (Table) ((Composite) popupShell.getChildren()[0]).getChildren()[0];
 
           final Display display = table.getDisplay();
           final TextLayout textLayout = new TextLayout(display);

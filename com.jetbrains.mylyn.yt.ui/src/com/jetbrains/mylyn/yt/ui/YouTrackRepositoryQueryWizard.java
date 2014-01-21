@@ -33,7 +33,8 @@ public class YouTrackRepositoryQueryWizard extends RepositoryQueryWizard {
     queryIssuesAmount = thisPage.getQueryIssuesAmount();
     String lastCountForFilterString = thisPage.getCountForFilterString();
 
-    if (thisPage.getSearchBoxText().getText() != lastCountForFilterString) {
+    if (thisPage.isCustomQuery()
+        && thisPage.getSearchBoxText().getText() != lastCountForFilterString) {
 
       final String queryFilter = thisPage.getSearchBoxText().getText();
       queryIssuesAmount =
