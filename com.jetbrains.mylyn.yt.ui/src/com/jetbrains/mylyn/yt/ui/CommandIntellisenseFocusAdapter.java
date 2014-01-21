@@ -274,8 +274,21 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
             @Override
             public void handleEvent(Event event) {
               if (event.item instanceof TableItem) {
+                TableItem[] selectedItems = ((Table) event.widget).getSelection();
                 TableItem tableItem = (TableItem) event.item;
-                tableItem.setForeground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+                boolean selected = false;
+                for (TableItem item : selectedItems) {
+                  if (item == tableItem) {
+                    tableItem.setForeground(display.getSystemColor(SWT.COLOR_GRAY));
+                    tableItem.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
+                    selected = true;
+                    break;
+                  }
+                }
+                if (!selected) {
+                  tableItem.setForeground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+                  tableItem.setBackground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+                }
                 textLayout.setText(tableItem.getText());
                 IntellisenseItem intellisenseItem = itemByNameMap.get(tableItem.getText());
                 textLayout.setStyle(proposalStyle, 0, tableItem.getText().length());
@@ -285,6 +298,9 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
                 textLayout.setStyle(proposalStyleUnderlined, prefixLen
                     + intellisenseItem.getMatchPositions().getStart(), prefixLen
                     + intellisenseItem.getMatchPositions().getEnd() - 1);
+
+                event.gc.fillRectangle(0, event.y, ((Table) event.widget).getClientArea().width,
+                    event.height);
                 textLayout.draw(event.gc, event.x, event.y);
               }
             }
