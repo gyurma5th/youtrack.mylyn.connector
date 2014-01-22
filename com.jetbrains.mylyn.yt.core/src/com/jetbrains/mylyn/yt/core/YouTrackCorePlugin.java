@@ -4,8 +4,12 @@
 
 package com.jetbrains.mylyn.yt.core;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
+
+import util.StdOutErrLog;
 
 public class YouTrackCorePlugin extends Plugin {
 
@@ -32,15 +36,14 @@ public class YouTrackCorePlugin extends Plugin {
     super.start(context);
     plugin = this;
 
-    // File osgiLog = new File(System.getProperty("osgi.logfile"));
-    // String baseOsgiPath =
-    // osgiLog.getAbsolutePath().substring(0,
-    // osgiLog.getAbsolutePath().length() - osgiLog.getName().length());
-    // System.setProperty("com.jetbrains.mylyn.yt.logfile", baseOsgiPath +
-    // ".youtrack-mylyn-connector"
-    // + File.separator + ".log");
-    //
-    // StdOutErrLog.tieSystemOutAndErrToLog();
+    File osgiLog = new File(System.getProperty("osgi.logfile"));
+    String baseOsgiPath =
+        osgiLog.getAbsolutePath().substring(0,
+            osgiLog.getAbsolutePath().length() - osgiLog.getName().length());
+    System.setProperty("com.jetbrains.mylyn.yt.logfile", baseOsgiPath + ".youtrack-mylyn-connector"
+        + File.separator + ".log");
+
+    StdOutErrLog.tieSystemOutAndErrToLog();
   }
 
   @Override
