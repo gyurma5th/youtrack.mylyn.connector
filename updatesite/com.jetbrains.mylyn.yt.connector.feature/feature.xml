@@ -86,6 +86,10 @@ where such changes and/or additions to the Program originate from and are distri
   This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.
    </license>
 
+   <requires>
+      <import plugin="org.apache.log4j"/>
+   </requires>
+
    <plugin
          id="com.jetbrains.mylyn.yt.core"
          download-size="0"
@@ -103,5 +107,12 @@ where such changes and/or additions to the Program originate from and are distri
          download-size="0"
          install-size="0"
          version="1.0.0.qualifier"/>
+
+   <plugin
+         id="Log4JProperties"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.qualifier"
+         fragment="true"/>
 
 </feature>
