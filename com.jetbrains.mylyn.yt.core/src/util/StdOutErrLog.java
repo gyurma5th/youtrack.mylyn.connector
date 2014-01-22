@@ -19,7 +19,6 @@ public class StdOutErrLog {
 
       @Override
       public void print(final String string) {
-        // possible StackOverflow in Ubuntu 12.04 here
         realPrintStream.print(string);
         logger.info(string);
       }
