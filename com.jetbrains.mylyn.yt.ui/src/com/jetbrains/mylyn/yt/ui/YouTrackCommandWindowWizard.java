@@ -69,7 +69,7 @@ public class YouTrackCommandWindowWizard extends Wizard {
       getCommandBoxText().setLayoutData(gd);
 
       getCommandBoxText().addFocusListener(
-          new CommandIntellisenseFocusAdapter(getClient(), false, null));
+          new CommandIntellisenseFocusAdapter(getClient(), false, null, true));
 
       setControl(composite);
     }

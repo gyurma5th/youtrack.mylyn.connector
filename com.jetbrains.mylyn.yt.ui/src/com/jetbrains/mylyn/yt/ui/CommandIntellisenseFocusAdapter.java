@@ -80,11 +80,14 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private Shell popupShell = null;
 
+  private boolean isCommand;
+
   public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
-      Text issuesCountText) {
+      Text issuesCountText, boolean isCommand) {
     this.client = client;
     this.isCountIssuses = isCountIssues;
     this.issuesCountText = issuesCountText;
+    this.isCommand = isCommand;
   }
 
   @Override
@@ -328,10 +331,10 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private void insertAcceptedProposal(IContentProposal proposal) {
     IntellisenseItem item = itemByNameMap.get(proposal.getContent());
+    String insertedContent = this.isCommand ? item.getOption() : item.getFullOption();
     String beforeInsertion = widgetText.getText();
     String afterInsertion =
-        beforeInsertion.substring(0, item.getCompletionPositions().getStart())
-            + proposal.getContent()
+        beforeInsertion.substring(0, item.getCompletionPositions().getStart()) + insertedContent
             + beforeInsertion.substring(item.getCompletionPositions().getEnd());
     widgetText.setText(afterInsertion);
     widgetText.setSelection(Integer.parseInt(item.getCaret()));

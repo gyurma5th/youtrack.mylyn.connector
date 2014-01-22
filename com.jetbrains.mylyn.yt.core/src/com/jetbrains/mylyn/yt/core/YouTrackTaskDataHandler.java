@@ -226,7 +226,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       return taskData;
     } catch (Exception e) {
       throw new CoreException(new Status(IStatus.ERROR, YouTrackCorePlugin.ID_PLUGIN, NLS.bind(
-          "Error parsing task {0}", issue.getId()), e));
+          "Error parsing task {0}\n" + e.getMessage(), issue.getId()), e));
     }
   }
 
@@ -290,7 +290,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     // because 'priority' icon needs priority level
     if (issue.getCustomFieldsValues().containsKey("Priority")) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
-      if (project.isCustomFieldsUpdated() && project.getCustomFieldsMap().containsKey("Priority")
+      if (project.isCustomFieldsUpdated() && project.getCustomFieldsMap() != null
+          && project.getCustomFieldsMap().containsKey("Priority")
           && project.getCustomFieldsMap().get("Priority").getBundle() != null
           && project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
         attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),

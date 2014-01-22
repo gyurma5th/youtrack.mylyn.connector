@@ -7,8 +7,8 @@
             class="com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector">
       </connectorCore>
       <connectorUi
-            brandingIcon="resource/icon.png"
-			overlayIcon="resource/youtrack-overlay-icon.png"
+            brandingIcon="icons/icon.png"
+			overlayIcon="icons/youtrack-overlay-icon.png"
             class="com.jetbrains.mylyn.yt.ui.YouTrackConnectorUi">
       </connectorUi>
    </extension>

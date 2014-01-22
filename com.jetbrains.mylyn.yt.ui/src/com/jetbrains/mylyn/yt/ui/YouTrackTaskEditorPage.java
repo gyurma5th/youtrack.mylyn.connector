@@ -66,7 +66,9 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
       } else if (e.stateMask == 327680 && e.keyCode == 106) {
         // press CTRL+ALT+J
         YouTrackSummaryPart.openCommandWizard(getEditorComposite().getShell(), null, true,
-            (AbstractTaskEditorPage) getEditor().getActivePageInstance());
+            (AbstractTaskEditorPage) ((TaskEditor) PlatformUI.getWorkbench()
+                .getActiveWorkbenchWindow().getActivePage().getActiveEditor())
+                .getActivePageInstance());
       }
     }
   }
