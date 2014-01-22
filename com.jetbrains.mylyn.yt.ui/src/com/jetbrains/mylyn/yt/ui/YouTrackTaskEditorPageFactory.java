@@ -43,7 +43,7 @@ public class YouTrackTaskEditorPageFactory extends AbstractTaskEditorPageFactory
   @Override
   public Image getPageImage() {
     Bundle bundle = Platform.getBundle(getPluginId());
-    URL fullPathString = BundleUtility.find(bundle, "resource/icon16.png");
+    URL fullPathString = BundleUtility.find(bundle, "icons/icon16.png");
     return CommonImages.getImage(ImageDescriptor.createFromURL(fullPathString));
   }
 
