@@ -13,6 +13,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
+import com.sun.jersey.client.apache.ApacheHttpClient;
+import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
 
 public class YouTrackClientFactory {
 
@@ -30,9 +32,11 @@ public class YouTrackClientFactory {
 
   public YouTrackClientFactory() {
     defaultConfig = new DefaultClientConfig();
-    this.baseClient = Client.create(defaultConfig);
+    // this.baseClient = Client.create(defaultConfig);
+    defaultConfig.getProperties().put(ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
+    this.baseClient = ApacheHttpClient.create(defaultConfig);
     getClientFactory().addFilter(new LoggingFilter(System.out));
-    handleCookies();
+    // handleCookies();
   }
 
   public void handleCookies() {
