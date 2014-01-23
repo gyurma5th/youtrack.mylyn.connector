@@ -20,7 +20,6 @@ import org.eclipse.mylyn.internal.tasks.ui.editors.RichTextEditor.StateChangedEv
 import org.eclipse.mylyn.internal.tasks.ui.editors.RichTextEditor.StateChangedListener;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
-import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -88,18 +87,19 @@ public class YouTrackTaskEditorRichTextPart extends AbstractTaskEditorPart {
       Browser browser = new Browser(composite, SWT.NONE);
       GridData gd = EditorUtil.getTextControlLayoutData(getTaskEditorPage(), browser, true);
 
-      if (getTaskEditorPage() != null
-          && getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES) != null
-          && getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl() != null) {
-        gd.heightHint =
-            getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl()
-                .computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-        // TODO: check the margins width, not hardcode constants
-        gd.widthHint =
-            getTaskEditorPage().getEditorComposite().getSize().x
-                - getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES)
-                    .getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT).x - 40;
-      }
+      // if (getTaskEditorPage() != null
+      // && getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES) != null
+      // && getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl() !=
+      // null) {
+      // gd.heightHint =
+      // getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES).getControl()
+      // .computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+      // // TODO: check the margins width, not hardcode constants
+      // gd.widthHint =
+      // getTaskEditorPage().getEditorComposite().getSize().x
+      // - getTaskEditorPage().getPart(AbstractTaskEditorPage.ID_PART_ATTRIBUTES)
+      // .getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT).x - 40;
+      // }
 
       browser.setLayoutData(gd);
       String wikifyDescription =

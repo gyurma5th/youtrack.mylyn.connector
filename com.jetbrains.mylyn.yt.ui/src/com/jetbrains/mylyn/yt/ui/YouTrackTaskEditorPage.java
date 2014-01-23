@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorOutlineNode;
@@ -116,7 +115,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         part.setExpandVertically(true);
         return new YouTrackAttributesPart();
       }
-    }.setPath(PATH_ACTIONS));
+    }.setPath(PATH_ATTRIBUTES));
 
     descriptors.add(new TaskEditorPartDescriptor(ID_PART_DESCRIPTION) {
       @Override
@@ -124,7 +123,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         YouTrackDescriptionPart part = new YouTrackDescriptionPart();
         return part;
       }
-    }.setPath(PATH_ACTIONS));
+    }.setPath(PATH_ATTRIBUTES));
 
     descriptors.add(new TaskEditorPartDescriptor(ID_PART_COMMENTS) {
       @Override
@@ -216,12 +215,14 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
     // single column
     createParts(PATH_HEADER, getEditorComposite(), descriptors);
     // two column
-    Composite bottomComposite = getManagedForm().getToolkit().createComposite(getEditorComposite());
-    bottomComposite.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(bottomComposite);
-    createParts(PATH_ACTIONS, bottomComposite, descriptors);
-    createParts(PATH_PEOPLE, bottomComposite, descriptors);
-    bottomComposite.pack(true);
+    // Composite bottomComposite =
+    // getManagedForm().getToolkit().createComposite(getEditorComposite());
+    // bottomComposite.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
+    // GridDataFactory.fillDefaults().grab(true, false).applyTo(bottomComposite);
+    // createParts(PATH_ACTIONS, bottomComposite, descriptors);
+    // createParts(PATH_PEOPLE, bottomComposite, descriptors);
+    // bottomComposite.pack(true);
+    createParts(PATH_ATTRIBUTES, getEditorComposite(), descriptors);
     createParts(PATH_COMMENTS, getEditorComposite(), descriptors);
   }
 
