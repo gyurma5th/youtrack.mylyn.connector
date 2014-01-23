@@ -367,7 +367,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         }
       }
 
-      if (issue.getCustomFieldsValues().containsKey(field.getName())) {
+      if (issue.getCustomFieldsValues() != null
+          && issue.getCustomFieldsValues().containsKey(field.getName())) {
 
         // check if issue complete
         if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(

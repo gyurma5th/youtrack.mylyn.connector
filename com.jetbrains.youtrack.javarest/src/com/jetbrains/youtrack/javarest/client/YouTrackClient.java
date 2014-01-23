@@ -487,6 +487,11 @@ public class YouTrackClient {
     return service.path("/user/tag").accept("application/xml").get(UserTagList.class).getOptions();
   }
 
+  public String[] getAllLinkTypeCommands() {
+    return service.path("/admin/issueLinkType").accept("application/xml")
+        .get(IssueLinkTypesList.class).getAllLinkTypeCommands();
+  }
+
   /**
    * summary can't be empty by rest restriction
    * 

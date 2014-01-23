@@ -40,8 +40,10 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
   private static final String ADD_LINK_TEXT = "Add link";
 
-  private static final String[] linkTypeSentences = {"relates to", "is required for", "depends on",
-      "is duplicated by", "duplicates", "parent for", "subtask of"};
+  private static String[] linkTypeSentences;
+
+  private static final String[] defaultLinkTypeSentences = {"relates to", "is required for",
+      "depends on", "is duplicated by", "duplicates", "parent for", "subtask of"};
 
   private CCombo addTagCombo;
 
@@ -135,8 +137,29 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
     addLinkCombo = new CCombo(composite, SWT.DOWN | SWT.ARROW | SWT.BORDER);
     addLinkCombo.setEditable(false);
-    addLinkCombo.setItems(linkTypeSentences);
     addLinkCombo.setText(ADD_LINK_TEXT);
+
+
+    addLinkCombo.addListener(SWT.DROP_DOWN, new Listener() {
+      @Override
+      public void handleEvent(Event event) {
+        CCombo combo = (CCombo) event.widget;
+        combo.setItems(YouTrackRepositoryConnector.getClient(
+            getTaskEditorPage().getModel().getTaskRepository()).getUserTags());
+        TaskRepository repository = getTaskEditorPage().getModel().getTaskRepository();
+        try {
+          linkTypeSentences =
+              YouTrackRepositoryConnector.getClient(repository).getAllLinkTypeCommands();
+        } catch (RuntimeException e) {
+          linkTypeSentences = defaultLinkTypeSentences;
+        }
+        addLinkCombo.setItems(linkTypeSentences);
+        combo.setText(ADD_LINK_TEXT);
+      }
+    });
+
+
+
     addLinkCombo.addSelectionListener(new SelectionListener() {
 
       @Override
@@ -151,24 +174,6 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {}
     });
-  }
-
-  private void putOpenCommandDialogItem(final Composite composite) {
-
-    ToolBar toolBar = new ToolBar(composite, SWT.NONE);
-    ToolItem commandDialog = new ToolItem(toolBar, SWT.PUSH | SWT.BORDER);
-    commandDialog.setText("Command Dialog");
-    commandDialog.addSelectionListener(new SelectionListener() {
-
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        openCommandWizard(composite.getShell(), null, true, getTaskEditorPage());
-      }
-
-      @Override
-      public void widgetDefaultSelected(SelectionEvent e) {}
-    });
-
   }
 
   private void putAddTagCombo(Composite composite) {
@@ -221,6 +226,24 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
     });
   }
 
+
+  private void putOpenCommandDialogItem(final Composite composite) {
+
+    ToolBar toolBar = new ToolBar(composite, SWT.NONE);
+    ToolItem commandDialog = new ToolItem(toolBar, SWT.PUSH | SWT.BORDER);
+    commandDialog.setText("Command Dialog");
+    commandDialog.addSelectionListener(new SelectionListener() {
+
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        openCommandWizard(composite.getShell(), null, true, getTaskEditorPage());
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {}
+    });
+
+  }
 
   public static void openCommandWizard(Shell shell, String initialCommand,
       boolean needUISynchronization, AbstractTaskEditorPage page) {
