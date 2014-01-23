@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "IntelliSense")
-public class IntellisenseSearchValues {
+public class IntellisenseValues {
 
-  public static class SuggestIntellisenseSearchValues {
+  public static class SuggestIntellisenseValues {
 
     private LinkedList<IntellisenseItem> values = new LinkedList<IntellisenseItem>();
 
@@ -24,9 +24,9 @@ public class IntellisenseSearchValues {
   }
 
   @XmlElement(name = "suggest")
-  public SuggestIntellisenseSearchValues suggest;
+  public SuggestIntellisenseValues suggest;
 
-  public static class RecentIntellisenseSearchValues {
+  public static class RecentIntellisenseValues {
 
     private LinkedList<IntellisenseItem> values = new LinkedList<IntellisenseItem>();
 
@@ -38,7 +38,7 @@ public class IntellisenseSearchValues {
   }
 
   @XmlElement(name = "recent")
-  public RecentIntellisenseSearchValues recent;
+  public RecentIntellisenseValues recent;
 
   public String[] getFullOptions() {
     LinkedList<String> values = new LinkedList<String>();
@@ -85,7 +85,7 @@ public class IntellisenseSearchValues {
     return merge;
   }
 
-  public IntellisenseSearchValues getIntellisenseSearchValues() {
+  public IntellisenseValues getIntellisenseValues() {
     return this;
   }
 }

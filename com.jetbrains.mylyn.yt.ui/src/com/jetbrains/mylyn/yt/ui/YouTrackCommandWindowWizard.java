@@ -56,9 +56,10 @@ public class YouTrackCommandWindowWizard extends Wizard {
       composite.setLayoutData(gd);
 
       Label commandBoxLabel = new Label(composite, SWT.FILL);
-      commandBoxLabel.setText("Command for "
-          + YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(),
-              getTaskRepository()) + ": "
+      String issueId =
+          YouTrackRepositoryConnector
+              .getRealIssueId(getTaskData().getTaskId(), getTaskRepository());
+      commandBoxLabel.setText("Command for " + issueId + ": "
           + getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY).getValue());
 
       commandBoxText = new Text(composite, SWT.SINGLE | SWT.FILL);
@@ -69,7 +70,7 @@ public class YouTrackCommandWindowWizard extends Wizard {
       getCommandBoxText().setLayoutData(gd);
 
       getCommandBoxText().addFocusListener(
-          new CommandIntellisenseFocusAdapter(getClient(), false, null, true));
+          new CommandIntellisenseFocusAdapter(getClient(), false, null, issueId));
 
       setControl(composite);
     }

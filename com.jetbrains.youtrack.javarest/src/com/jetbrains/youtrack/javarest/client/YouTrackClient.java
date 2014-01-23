@@ -12,7 +12,7 @@ import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustom
 import com.jetbrains.youtrack.javarest.utils.BuildBundleValues;
 import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
-import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
+import com.jetbrains.youtrack.javarest.utils.IntellisenseValues;
 import com.jetbrains.youtrack.javarest.utils.OwnedFieldBundleValues;
 import com.jetbrains.youtrack.javarest.utils.SavedSearch;
 import com.jetbrains.youtrack.javarest.utils.SavedSearches;
@@ -368,29 +368,70 @@ public class YouTrackClient {
   public String[] intellisenseFullOptions(String filter, int caret) {
     return service.path("/issue/intellisense").queryParam("filter", filter)
         .queryParam("caret", String.valueOf(caret)).accept("application/xml")
-        .get(IntellisenseSearchValues.class).getFullOptions();
+        .get(IntellisenseValues.class).getFullOptions();
   }
 
   public String[] intellisenseOptions(String filter, int caret) {
     return service.path("/issue/intellisense").queryParam("filter", filter)
         .queryParam("caret", String.valueOf(caret)).accept("application/xml")
-        .get(IntellisenseSearchValues.class).getOptions();
+        .get(IntellisenseValues.class).getOptions();
   }
 
   public LinkedList<IntellisenseItem> intellisenseItems(String filter, int caret) {
     return service.path("/issue/intellisense").queryParam("filter", filter)
         .queryParam("caret", String.valueOf(caret)).accept("application/xml")
-        .get(IntellisenseSearchValues.class).getIntellisenseItems();
+        .get(IntellisenseValues.class).getIntellisenseItems();
   }
 
-  public IntellisenseSearchValues intellisenseSearchValues(String filter, int caret) {
+  public IntellisenseValues intellisenseSearchValues(String filter, int caret) {
     return service.path("/issue/intellisense").queryParam("filter", filter)
         .queryParam("caret", String.valueOf(caret)).accept("application/xml")
-        .get(IntellisenseSearchValues.class).getIntellisenseSearchValues();
+        .get(IntellisenseValues.class).getIntellisenseValues();
   }
 
-  public IntellisenseSearchValues intellisenseSearchValues(String filter) {
+  public IntellisenseValues intellisenseSearchValues(String filter) {
     return intellisenseSearchValues(filter, filter.length());
+  }
+
+  public IntellisenseValues intellisenseCommandValues(String command, int caret, String issueId) {
+    return service.path("/issue/").path(issueId).path("/execute/intellisense")
+        .queryParam("command", command).queryParam("caret", String.valueOf(caret))
+        .accept("application/xml").get(IntellisenseValues.class).getIntellisenseValues();
+  }
+
+  public String[] intellisenseCommandFullOptions(String filter, String issueId) {
+    return intellisenseCommandFullOptions(filter, filter.length(), issueId);
+  }
+
+  public String[] intellisenseCommandOptions(String filter, String issueId) {
+    return intellisenseCommandOptions(filter, filter.length(), issueId);
+  }
+
+  public LinkedList<IntellisenseItem> intellisenseCommandItems(String filter, String issueId) {
+    return intellisenseCommandItems(filter, filter.length(), issueId);
+  }
+
+  public String[] intellisenseCommandFullOptions(String command, int caret, String issueId) {
+    return service.path("/issue/").path(issueId).path("/execute/intellisense")
+        .queryParam("command", command).queryParam("caret", String.valueOf(caret))
+        .accept("application/xml").get(IntellisenseValues.class).getFullOptions();
+  }
+
+  public String[] intellisenseCommandOptions(String command, int caret, String issueId) {
+    return service.path("/issue/").path(issueId).path("/execute/intellisense")
+        .queryParam("command", command).queryParam("caret", String.valueOf(caret))
+        .accept("application/xml").get(IntellisenseValues.class).getOptions();
+  }
+
+  public LinkedList<IntellisenseItem> intellisenseCommandItems(String command, int caret,
+      String issueId) {
+    return service.path("/issue/").path(issueId).path("/execute/intellisense")
+        .queryParam("command", command).queryParam("caret", String.valueOf(caret))
+        .accept("application/xml").get(IntellisenseValues.class).getIntellisenseItems();
+  }
+
+  public IntellisenseValues intellisenseCommandValues(String filter, String issueId) {
+    return intellisenseCommandValues(filter, filter.length(), issueId);
   }
 
   public LinkedList<String> getSavedSearchesNames() {

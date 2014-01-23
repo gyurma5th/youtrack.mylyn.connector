@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
-import com.jetbrains.youtrack.javarest.utils.IntellisenseSearchValues;
+import com.jetbrains.youtrack.javarest.utils.IntellisenseValues;
 
 public class CommandIntellisenseFocusAdapter implements FocusListener {
 
@@ -49,7 +49,7 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private Map<String, IntellisenseItem> itemByNameMap = new HashMap<String, IntellisenseItem>();
 
-  private IntellisenseSearchValues intellisense;
+  private IntellisenseValues intellisense;
 
   private SimpleContentProposalProvider scp;
 
@@ -82,12 +82,24 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private boolean isCommand;
 
+  private final String issueId;
+
   public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
-      Text issuesCountText, boolean isCommand) {
+      Text issuesCountText) {
     this.client = client;
     this.isCountIssuses = isCountIssues;
     this.issuesCountText = issuesCountText;
-    this.isCommand = isCommand;
+    this.isCommand = false;
+    this.issueId = "";
+  }
+
+  public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
+      Text issuesCountText, String issueId) {
+    this.client = client;
+    this.isCountIssuses = isCountIssues;
+    this.issuesCountText = issuesCountText;
+    this.isCommand = true;
+    this.issueId = issueId;
   }
 
   @Override
@@ -184,7 +196,12 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
         if (lastSeenSearchSequence == null || !lastSeenSearchSequence.equals(newSearchSequence)) {
           lastSeenSearchSequence = newSearchSequence;
           lastTryTime = System.currentTimeMillis();
-          intellisense = getClient().intellisenseSearchValues(newSearchSequence, caret);
+
+          if (isCommand) {
+            intellisense = getClient().intellisenseCommandValues(newSearchSequence, caret, issueId);
+          } else {
+            intellisense = getClient().intellisenseSearchValues(newSearchSequence, caret);
+          }
 
           if (isCountIssuses && issuesCountText != null) {
             final String filterText = newSearchSequence;
@@ -232,7 +249,12 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
     }
 
     try {
-      intellisense = getClient().intellisenseSearchValues(widgetText.getText());
+
+      if (this.isCommand) {
+        intellisense = getClient().intellisenseCommandValues(widgetText.getText(), issueId);
+      } else {
+        intellisense = getClient().intellisenseSearchValues(widgetText.getText());
+      }
       scp = new SimpleContentProposalProvider(intellisense.getFullOptions());
       KeyStroke ks = KeyStroke.getInstance(KEY_PRESS);
       adapter =
