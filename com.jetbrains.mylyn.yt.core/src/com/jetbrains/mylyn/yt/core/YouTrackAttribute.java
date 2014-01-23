@@ -45,6 +45,12 @@ public enum YouTrackAttribute {
       "Reporter:",
       YouTrackTaskDataHandler.SINGLE_FIELD_KIND,
       true),
+  USER_UPDATER(
+      YouTrackTaskDataHandler.USER_UPDATER,
+      TaskAttribute.TYPE_SHORT_TEXT,
+      "Updated by:",
+      YouTrackTaskDataHandler.SINGLE_FIELD_KIND,
+      true),
   USER_ASSIGNED(
       TaskAttribute.USER_ASSIGNED,
       TaskAttribute.TYPE_SHORT_TEXT,

@@ -90,6 +90,12 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       addAttribute(composite, toolkit, attribute, true);
     }
 
+    // Updater name
+    attribute = getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.USER_UPDATER);
+    if (attribute != null) {
+      addAttribute(composite, toolkit, attribute, true);
+    }
+
     // Date of update
     attribute = getTaskData().getRoot().getMappedAttribute(TaskAttribute.DATE_MODIFICATION);
     if (attribute != null) {
@@ -195,9 +201,9 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
               true, getTaskEditorPage());
         } else {
           TaskRepository repository = getTaskEditorPage().getModel().getTaskRepository();
-          YouTrackRepositoryConnector.getClient(repository)
-              .addNewTag(YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(), repository),
-                  selectedText);
+          YouTrackRepositoryConnector.getClient(repository).addNewTag(
+              YouTrackRepositoryConnector.getRealIssueId(getTaskData().getTaskId(), repository),
+              selectedText);
 
           TaskAttribute attribute =
               getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX);

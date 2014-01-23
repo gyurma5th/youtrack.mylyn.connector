@@ -52,6 +52,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String COMMENT_NEW = "TaskAttribute.COMMENT_NEW";
 
+  public static final String USER_UPDATER = "TaskAttribute.USER_UPDATER";
+
   public static final String WIKIFY_DESCRIPTION = "TaskAttribute.WIKIFY_DESCRIPTION";
 
   public static final String TYPE_HTML = "TaskAttribute.TYPE_HTML";
@@ -174,6 +176,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     createAttribute(data, YouTrackAttribute.DESCRIPTION);
     createAttribute(data, YouTrackAttribute.WIKIFY_DESCRIPTION);
     createAttribute(data, YouTrackAttribute.USER_REPORTER);
+    createAttribute(data, YouTrackAttribute.USER_UPDATER);
     createAttribute(data, YouTrackAttribute.USER_ASSIGNED);
     createAttribute(data, YouTrackAttribute.PRIORITY_LEVEL);
     createAttribute(data, YouTrackAttribute.RESOLVED);
@@ -266,7 +269,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         new Date(Long.parseLong(issue.getSingleField("updated"))));
 
     attribute = taskData.getRoot().getAttribute(TaskAttribute.USER_REPORTER);
-    attribute.setValue(issue.getSingleField("reporterName"));
+    attribute.setValue(issue.getSingleField("reporterFullName"));
+
+    attribute = taskData.getRoot().getAttribute(USER_UPDATER);
+    attribute.setValue(issue.getSingleField("updaterFullName"));
 
     attribute = taskData.getRoot().getAttribute(TaskAttribute.PRODUCT);
     attribute.setValue(issue.getProjectName());

@@ -30,8 +30,10 @@ public class YouTrackClientFactory {
     this.baseClient = baseClient;
   }
 
+
   public YouTrackClientFactory() {
     defaultConfig = new DefaultClientConfig();
+    // dont use simple Client because cookies not handle properly
     // this.baseClient = Client.create(defaultConfig);
     defaultConfig.getProperties().put(ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
     this.baseClient = ApacheHttpClient.create(defaultConfig);
