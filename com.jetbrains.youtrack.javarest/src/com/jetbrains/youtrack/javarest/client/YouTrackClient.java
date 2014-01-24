@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlValue;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
 import com.jetbrains.youtrack.javarest.utils.BuildBundleValues;
 import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
+import com.jetbrains.youtrack.javarest.utils.GroupUsersList;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseValues;
 import com.jetbrains.youtrack.javarest.utils.OwnedFieldBundleValues;
@@ -19,12 +20,18 @@ import com.jetbrains.youtrack.javarest.utils.SavedSearches;
 import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
 import com.jetbrains.youtrack.javarest.utils.StateValue;
 import com.jetbrains.youtrack.javarest.utils.UserBundleValues;
+import com.jetbrains.youtrack.javarest.utils.UserGroupValue;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearches;
 import com.jetbrains.youtrack.javarest.utils.VersionBundleValues;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 
+/**
+ * @author Alexander Marchuk
+ * 
+ */
 public class YouTrackClient {
 
   private String username = null;
@@ -339,6 +346,26 @@ public class YouTrackClient {
   public UserBundleValues getUserBundleValues(String bundlename) {
     return service.path("/admin/customfield/userBundle/").path(bundlename)
         .accept("application/xml").get(UserBundleValues.class);
+  }
+
+  /**
+   * Add all unique users from userGroups and add them to bundle values
+   */
+  public UserBundleValues getAllUserBundleValues(String bundlename) {
+    UserBundleValues userBundleValues = getUserBundleValues(bundlename);
+    for (UserGroupValue groupValue : userBundleValues.getUserGroupValues()) {
+      try {
+        userBundleValues.addUsersFromGroup(getUsersListInGroup(groupValue.getValue()).getUsers());
+      } catch (UniformInterfaceException e) {
+        // You do not have permissions to read user
+      }
+    }
+    return userBundleValues;
+  }
+
+  public GroupUsersList getUsersListInGroup(String groupname) {
+    return service.path("/admin/user").queryParam("group", groupname).accept("application/xml")
+        .get(GroupUsersList.class);
   }
 
   public void addComment(final String issueId, final String comment) {

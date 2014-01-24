@@ -3,10 +3,10 @@ package com.jetbrains.youtrack.javarest.utils;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "user")
-public class UserValue extends BundleValue {
+@XmlRootElement(name = "userGroup")
+public class UserGroupValue extends BundleValue {
 
-  @XmlAttribute(name = "login")
+  @XmlAttribute(name = "name")
   private String value;
 
   public String getValue() {

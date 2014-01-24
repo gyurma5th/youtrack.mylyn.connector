@@ -71,13 +71,12 @@ public class YouTrackCustomFieldBundle<T extends BundleValues> {
             return (T) client.getVersionBundleValues(name);
           case USER_SINGLE:
           case USER_MULTI:
-            return (T) client.getUserBundleValues(name);
-            // TODO: where is "group" rest api methods?
+            return (T) client.getAllUserBundleValues(name);
           default:
             return null;
         }
       } catch (Exception e) {
-        // TODO:
+        throw new RuntimeException("Error while get bundle values: " + e.getMessage(), e);
       }
     }
     return null;
