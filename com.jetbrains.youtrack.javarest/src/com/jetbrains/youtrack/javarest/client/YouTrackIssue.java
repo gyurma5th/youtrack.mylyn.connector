@@ -89,6 +89,9 @@ public class YouTrackIssue {
             addCustomField(field.getName(), field.getStringValues(), null);
           } else if (field.getType().equals(IssueSchemaField.TYPE_SINGLE_FIELD)) {
             addSingleField(field.getName(), field.getStringValues().get(0));
+          } else if (field.getType().equals(IssueSchemaField.TYPE_MULTIUSER_FIELD)) {
+            // trick: work with TYPE_MULTIUSER_FIELD as a usual Custom Field
+            addCustomField(field.getName(), field.getStringValues(), null);
           }
         }
       }
