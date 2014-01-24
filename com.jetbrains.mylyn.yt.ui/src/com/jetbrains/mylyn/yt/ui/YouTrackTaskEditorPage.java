@@ -35,6 +35,7 @@ import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.forms.IManagedForm;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 import com.jetbrains.mylyn.yt.ui.utils.DeleteTaskAction;
 import com.jetbrains.mylyn.yt.ui.utils.EditAction;
@@ -64,10 +65,19 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
         doSubmit();
       } else if (e.stateMask == 327680 && e.keyCode == 106) {
         // press CTRL+ALT+J
-        YouTrackSummaryPart.openCommandWizard(getEditorComposite().getShell(), null, true,
-            (AbstractTaskEditorPage) ((TaskEditor) PlatformUI.getWorkbench()
-                .getActiveWorkbenchWindow().getActivePage().getActiveEditor())
-                .getActivePageInstance());
+
+        String issueId =
+            YouTrackRepositoryConnector.getRealIssueId(
+                ((AbstractTaskEditorPage) ((TaskEditor) PlatformUI.getWorkbench()
+                    .getActiveWorkbenchWindow().getActivePage().getActiveEditor())
+                    .getActivePageInstance()).getTask().getTaskId(), getTaskRepository());
+
+        if (issueId != null) {
+          YouTrackSummaryPart.openCommandWizard(getEditorComposite().getShell(), null, true,
+              (AbstractTaskEditorPage) ((TaskEditor) PlatformUI.getWorkbench()
+                  .getActiveWorkbenchWindow().getActivePage().getActiveEditor())
+                  .getActivePageInstance());
+        }
       }
     }
   }
