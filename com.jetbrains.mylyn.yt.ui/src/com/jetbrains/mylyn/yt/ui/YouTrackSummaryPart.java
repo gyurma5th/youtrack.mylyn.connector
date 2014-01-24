@@ -155,6 +155,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
         }
         addLinkCombo.setItems(linkTypeSentences);
         combo.setText(ADD_LINK_TEXT);
+        combo.setVisibleItemCount(combo.getItemCount() - 1);
       }
     });
 
@@ -190,6 +191,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
             getTaskEditorPage().getModel().getTaskRepository()).getUserTags());
         combo.add(ADD_NEW_TAG_PROPOSAL, 0);
         combo.setText(ADD_TAG_TEXT);
+        combo.setVisibleItemCount(combo.getItemCount() - 1);
       }
     });
 
@@ -217,6 +219,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
           YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
         }
         combo.setText(ADD_TAG_TEXT);
+        combo.setVisibleItemCount(combo.getItemCount() - 1);
       }
 
       @Override
