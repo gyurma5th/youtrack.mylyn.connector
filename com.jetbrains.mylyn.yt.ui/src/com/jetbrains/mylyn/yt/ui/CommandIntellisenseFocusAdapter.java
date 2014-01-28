@@ -197,10 +197,15 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
           lastSeenSearchSequence = newSearchSequence;
           lastTryTime = System.currentTimeMillis();
 
-          if (isCommand) {
-            intellisense = getClient().intellisenseCommandValues(newSearchSequence, caret, issueId);
+          if (newSearchSequence != null) {
+            if (isCommand) {
+              intellisense =
+                  getClient().intellisenseCommandValues(newSearchSequence, caret, issueId);
+            } else {
+              intellisense = getClient().intellisenseSearchValues(newSearchSequence, caret);
+            }
           } else {
-            intellisense = getClient().intellisenseSearchValues(newSearchSequence, caret);
+            this.cancel();
           }
 
           if (isCountIssuses && issuesCountText != null) {
@@ -354,6 +359,7 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
   private void insertAcceptedProposal(IContentProposal proposal) {
     IntellisenseItem item = itemByNameMap.get(proposal.getContent());
     String insertedContent = this.isCommand ? item.getOption() : item.getFullOption();
+    insertedContent += " ";
     String beforeInsertion = widgetText.getText();
     String afterInsertion =
         beforeInsertion.substring(0, item.getCompletionPositions().getStart()) + insertedContent

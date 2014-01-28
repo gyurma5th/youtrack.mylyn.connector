@@ -59,9 +59,9 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
   public String getReplyText(TaskRepository taskRepository, ITask task, ITaskComment taskComment,
       boolean includeTask) {
     if (taskComment == null) {
-      return String.format("Reply to description:", task.getAttribute(TaskAttribute.DESCRIPTION));
+      return String.format("\nReply to description:", task.getAttribute(TaskAttribute.DESCRIPTION));
     } else {
-      return String.format("Reply to comment:", taskComment.getText());
+      return String.format("\nReply to comment:", taskComment.getText());
     }
   }
 
