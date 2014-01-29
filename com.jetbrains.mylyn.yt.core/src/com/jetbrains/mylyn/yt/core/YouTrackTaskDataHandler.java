@@ -245,7 +245,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     String issueId = issue.getId();
     TaskData taskData =
         new TaskData(getAttributeMapper(repository), repository.getConnectorKind(),
-            repository.getRepositoryUrl(), issueId.substring(issueId.indexOf("-") + 1));
+            repository.getRepositoryUrl(), issueId.replace("-", "_"));
     initializeTaskData(repository, taskData, null, monitor);
 
     TaskAttribute attribute = taskData.getRoot().getAttribute(TaskAttribute.SUMMARY);

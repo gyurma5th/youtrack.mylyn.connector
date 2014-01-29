@@ -30,11 +30,6 @@ import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskRelation;
 import org.eclipse.mylyn.tasks.core.sync.ISynchronizationSession;
-import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.client.YouTrackClientFactory;
@@ -291,46 +286,13 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
       default:
         return PriorityLevel.P4;
     }
-
-    // switch (priority) {
-    // case "Show-stopper":
-    // return PriorityLevel.P1;
-    // case "Critical":
-    // return PriorityLevel.P2;
-    // case "Major":
-    // return PriorityLevel.P3;
-    // case "Normal":
-    // return PriorityLevel.P4;
-    // case "Minor":
-    // return PriorityLevel.P5;
-    // default:
-    // return null;
-    // }
   }
 
   public static String getRealIssueId(String pseudoIssueId, TaskRepository taskRepository) {
     if (pseudoIssueId.contains("-")) {
       return pseudoIssueId;
     } else {
-      if (TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId) == null) {
-        // Check if issue open from repository directly and not added into TaskList yet
-        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        if (window == null) {
-          IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
-          if (windows != null && windows.length > 0) {
-            window = windows[0];
-          }
-        }
-        IWorkbenchPage page = window.getActivePage();
-        IEditorPart part = page.getActiveEditor();
-        if (part instanceof TaskEditor) {
-          TaskEditor taskPage = (TaskEditor) part;
-          return taskPage.getTaskEditorInput().getTask().getTaskKey();
-        }
-        return null;
-      }
-      return TasksUiPlugin.getTaskList().getTask(taskRepository.getRepositoryUrl(), pseudoIssueId)
-          .getTaskKey();
+      return pseudoIssueId.replace("_", "-");
     }
   }
 
