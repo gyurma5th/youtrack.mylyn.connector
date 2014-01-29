@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.eclipse.core.runtime.CoreException;
+
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
@@ -99,7 +101,8 @@ public class YouTrackIssue {
     }
   }
 
-  public void fillCustomFieldsFromProject(YouTrackProject project, YouTrackClient client) {
+  public void fillCustomFieldsFromProject(YouTrackProject project, YouTrackClient client)
+      throws CoreException {
     if (!project.isCustomFieldsUpdated()) {
       project.updateCustomFields(client);
     }
@@ -107,7 +110,6 @@ public class YouTrackIssue {
       getCustomFieldsInfo().put(field.getName(), field);
     }
   }
-
 
   @XmlElement(name = "comment")
   public LinkedList<YouTrackComment> getComments() {

@@ -76,7 +76,8 @@ public class YouTrackCustomFieldBundle<T extends BundleValues> {
             return null;
         }
       } catch (Exception e) {
-        throw new RuntimeException("Error while get bundle values: " + e.getMessage(), e);
+        // throw new RuntimeException("Error while get bundle values: " + e.getMessage(), e);
+        // suppress for create new issue purpose without get bundle values privilegies
       }
     }
     return null;

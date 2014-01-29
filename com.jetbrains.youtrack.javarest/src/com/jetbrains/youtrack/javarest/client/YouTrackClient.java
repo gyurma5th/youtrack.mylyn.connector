@@ -353,11 +353,14 @@ public class YouTrackClient {
    */
   public UserBundleValues getAllUserBundleValues(String bundlename) {
     UserBundleValues userBundleValues = getUserBundleValues(bundlename);
-    for (UserGroupValue groupValue : userBundleValues.getUserGroupValues()) {
-      try {
-        userBundleValues.addUsersFromGroup(getUsersListInGroup(groupValue.getValue()).getUsers());
-      } catch (UniformInterfaceException e) {
-        // You do not have permissions to read user
+    if (userBundleValues.getUserGroupValues() != null) {
+      for (UserGroupValue groupValue : userBundleValues.getUserGroupValues()) {
+        try {
+          userBundleValues.addUsersFromGroup(getUsersListInGroup(groupValue.getValue()).getUsers());
+        } catch (UniformInterfaceException e) {
+          // You do not have permissions to read user,
+          // supress for possibility create issue.
+        }
       }
     }
     return userBundleValues;
