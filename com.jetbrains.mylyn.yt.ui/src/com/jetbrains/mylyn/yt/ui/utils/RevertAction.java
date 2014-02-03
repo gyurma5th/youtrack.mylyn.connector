@@ -15,6 +15,8 @@ import org.eclipse.mylyn.tasks.core.ITask.SynchronizationState;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 
+import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
+
 public class RevertAction extends Action {
 
   public static final String ID = "org.eclipse.mylyn.tasklist.actions.mark.discard"; //$NON-NLS-1$
@@ -70,6 +72,7 @@ public class RevertAction extends Action {
             taskEditorPage.doSave(null);
           }
           try {
+            YouTrackTaskDataHandler.setEnableEditMode(false);
             TasksUi.getTaskDataManager().discardEdits(task);
           } catch (CoreException e) {
             TasksUiInternal.displayStatus("Clear outgoing failed", e.getStatus());
@@ -77,7 +80,6 @@ public class RevertAction extends Action {
         }
       }
     }
-
     getTaskEditorPage().getEditor().refreshPages();
   }
 }

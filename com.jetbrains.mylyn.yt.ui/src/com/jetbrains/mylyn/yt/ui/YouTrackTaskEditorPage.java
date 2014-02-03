@@ -51,7 +51,6 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
 
   private boolean refreshed = false;
 
-
   /**
    * submit task by Ctrl+Enter
    * 
@@ -146,7 +145,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
     descriptors.add(new TaskEditorPartDescriptor(ID_NEW_COMMENTS_PART) {
       @Override
       public AbstractTaskEditorPart createPart() {
-        AbstractTaskEditorPart part = new YouTrackTaskEditorNewCommentPart();
+        AbstractTaskEditorPart part = new YouTrackNewCommentPart();
         return part;
       }
     }.setPath(PATH_COMMENTS));
@@ -250,8 +249,8 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
               ((YouTrackDescriptionPart) part).setPartId(descriptor.getId());
             } else if (part instanceof YouTrackAttributesPart) {
               ((YouTrackAttributesPart) part).setPartId(descriptor.getId());
-            } else if (part instanceof YouTrackTaskEditorNewCommentPart) {
-              ((YouTrackTaskEditorNewCommentPart) part).setPartId(descriptor.getId());
+            } else if (part instanceof YouTrackNewCommentPart) {
+              ((YouTrackNewCommentPart) part).setPartId(descriptor.getId());
             } else if (part instanceof YouTrackSummaryPart) {
               ((YouTrackSummaryPart) part).setPartId(descriptor.getId());
             }
@@ -296,7 +295,5 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
   @Override
   public void doSubmit() {
     super.doSubmit();
-    YouTrackTaskDataHandler.setEnableEditMode(false);
   }
-
 }

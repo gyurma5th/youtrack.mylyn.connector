@@ -120,8 +120,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
         client.updateIssue(taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY).getValue(),
             issue);
-
-        return new RepositoryResponse(ResponseKind.TASK_UPDATED, taskData.getTaskId());
+        setEnableEditMode(false);
+        return new RepositoryResponse(taskData.isNew()
+            ? ResponseKind.TASK_CREATED
+            : ResponseKind.TASK_UPDATED, taskData.getTaskId());
       }
     } catch (CoreException e) {
       if (issue.getId() != null) {
@@ -346,6 +348,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
         TaskAttribute commentAttribute =
             taskData.getRoot().createAttribute(TaskAttribute.PREFIX_COMMENT + count);
+        commentAttribute.getMetaData().setType(TaskAttribute.TYPE_COMMENT);
         mapper.applyTo(commentAttribute);
         count++;
       }
@@ -562,6 +565,25 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                 }
               }
             }
+          }
+        }
+      }
+    } else if (!isEnableEditMode()) {
+      if (taskData.getRoot().getMappedAttribute(TaskAttribute.PRODUCT) != null) {
+
+        YouTrackProject project =
+            YouTrackRepositoryConnector.getProject(taskRepository, taskData.getRoot()
+                .getMappedAttribute(TaskAttribute.PRODUCT).getValue());
+
+        for (TaskAttribute attr : taskData.getRoot().getAttributes().values()) {
+          if (TaskAttribute.DESCRIPTION.equals(attr.getId())) {
+            attr.getMetaData().setReadOnly(true);
+          } else if (TaskAttribute.SUMMARY.equals(attr.getId())) {
+            attr.getMetaData().setReadOnly(true);
+          } else if (TAG_PREFIX.equals(attr.getId())) {
+            attr.getMetaData().setReadOnly(true);
+          } else if (project.isCustomField(attr.getId())) {
+            attr.getMetaData().setReadOnly(true);
           }
         }
       }

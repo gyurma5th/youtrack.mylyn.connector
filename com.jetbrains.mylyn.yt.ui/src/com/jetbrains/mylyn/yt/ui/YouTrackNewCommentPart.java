@@ -4,19 +4,22 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorRichTextPart;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
+import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
 import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
+import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 
-public class YouTrackTaskEditorNewCommentPart extends TaskEditorRichTextPart {
+public class YouTrackNewCommentPart extends TaskEditorRichTextPart {
 
   private String partId;
 
-  public YouTrackTaskEditorNewCommentPart() {
+  public YouTrackNewCommentPart() {
     setPartName("New Comment");
     setSectionStyle(ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
     setExpandVertically(true);
@@ -51,10 +54,35 @@ public class YouTrackTaskEditorNewCommentPart extends TaskEditorRichTextPart {
   }
 
   private void doSubmit() {
-    if (getAttribute().getValue() != null && getAttribute().getValue().length() > 0) {
-      YouTrackTaskDataHandler.setPostNewCommentMode(true);
-      getTaskEditorPage().doSubmit();
+
+    boolean taskEdited = false;
+    if (!getTaskEditorPage().getModel().getTaskData().getRoot()
+        .getMappedAttribute(TaskAttribute.SUMMARY).getMetaData().isReadOnly()) {
+      taskEdited = true;
     }
+
+    if (getAttribute().getValue() != null && getAttribute().getValue().length() > 0) {
+      YouTrackClient client =
+          YouTrackRepositoryConnector.getClient(getTaskEditorPage().getTaskRepository());
+      String newComment = getNewComment(getTaskData());
+      if (newComment != null && newComment.length() > 0) {
+        client.addComment(getTaskData().getRoot().getAttribute(TaskAttribute.TASK_KEY).getValue(),
+            newComment);
+        getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.COMMENT_NEW)
+            .clearValues();
+      }
+      YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getEditor());
+    }
+  }
+
+  private String getNewComment(TaskData taskData) {
+    String newComment = "";
+    TaskAttribute attribute =
+        taskData.getRoot().getMappedAttribute(YouTrackTaskDataHandler.COMMENT_NEW);
+    if (attribute != null) {
+      newComment = taskData.getAttributeMapper().getValue(attribute);
+    }
+    return newComment;
   }
 
   @Override
@@ -89,4 +117,5 @@ public class YouTrackTaskEditorNewCommentPart extends TaskEditorRichTextPart {
   public String getPartId() {
     return partId;
   }
+
 }
