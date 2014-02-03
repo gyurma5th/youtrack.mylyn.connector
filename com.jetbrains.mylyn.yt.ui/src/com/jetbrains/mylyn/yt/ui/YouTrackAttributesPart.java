@@ -31,7 +31,6 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
         GridDataFactory.defaultsFor(editor.getLabelControl()).indent(COLUMN_MARGIN, 0)
             .applyTo(editor.getLabelControl());
         editor.createControl(composite, toolkit);
-        // getTaskEditorPage().getAttributeEditorToolkit().adapt(editor);
         if (editor instanceof YouTrackAttributeEditor) {
           GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL)
               .applyTo(editor.getControl());

@@ -362,8 +362,10 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
     insertedContent += " ";
     String beforeInsertion = widgetText.getText();
     String afterInsertion =
-        beforeInsertion.substring(0, item.getCompletionPositions().getStart()) + insertedContent
-            + beforeInsertion.substring(item.getCompletionPositions().getEnd());
+        beforeInsertion.substring(0, item.getCompletionPositions().getStart())
+            + insertedContent
+            + beforeInsertion.substring(beforeInsertion.length() == 0 ? 0 : item
+                .getCompletionPositions().getEnd());
     widgetText.setText(afterInsertion);
     widgetText.setSelection(Integer.parseInt(item.getCaret()));
   }
