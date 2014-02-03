@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
@@ -27,6 +28,7 @@ import com.jetbrains.youtrack.javarest.utils.VersionBundleValues;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.representation.Form;
 
 /**
  * @author Alexander Marchuk
@@ -206,10 +208,12 @@ public class YouTrackClient {
 
   public void applyCommand(final String issueId, final String command) {
     if (issueId != null && command != null) {
-      WebResource resource =
-          service.path("/issue/").path(issueId).path("/execute").queryParam("command", command);
-      checkClientResponse(resource.post(ClientResponse.class), 200, "Failed apply command "
-          + command + " to issue " + issueId);
+      WebResource resource = service.path("/issue/").path(issueId).path("/execute");
+      Form form = new Form();
+      form.add("command", command);
+      checkClientResponse(
+          resource.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form),
+          200, "Failed apply command " + command + " to issue " + issueId);
     } else {
       throw new RuntimeException("Null issue id or command while apply command.");
     }
@@ -373,11 +377,10 @@ public class YouTrackClient {
 
   public void addComment(final String issueId, final String comment) {
     if (issueId != null && comment != null) {
-      WebResource resource =
-          service.path("/issue/").path(issueId).path("/execute").queryParam("comment", comment);
-
-      checkClientResponse(resource.post(ClientResponse.class), 200, "Failed add comment to issue "
-          + issueId);
+      Form form = new Form();
+      form.add("comment", comment);
+      service.path("/issue/").path(issueId).path("/execute")
+          .type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
     } else {
       throw new RuntimeException("Null issue id or comment body.");
     }
@@ -531,17 +534,19 @@ public class YouTrackClient {
    */
   public void updateIssueSummaryAndDescription(final String issueId, final String newSummary,
       final String newDescription) {
+    Form form = new Form();
     WebResource resource = service.path("/issue/").path(issueId);
     if (newSummary != null && newSummary.length() > 0) {
-      resource = resource.queryParam("summary", newSummary);
+      form.add("summary", newSummary);
       if (newDescription != null) {
-        resource = resource.queryParam("description", newDescription);
+        form.add("description", newDescription);
       }
     } else {
       throw new RuntimeException("Failed to update issue: summary cant be empty");
     }
 
-    checkClientResponse(resource.post(ClientResponse.class), 200,
+    checkClientResponse(
+        resource.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form), 200,
         "Failed to update issue description and summary ");
   }
 
