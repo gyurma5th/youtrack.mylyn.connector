@@ -4,7 +4,6 @@
 
 package com.jetbrains.mylyn.yt.ui;
 
-import org.eclipse.mylyn.internal.tasks.ui.editors.CheckboxMultiSelectAttributeEditor;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
@@ -29,8 +28,8 @@ public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
   public AbstractAttributeEditor createEditor(String type, TaskAttribute taskAttribute) {
 
     if (TaskAttribute.TYPE_MULTI_SELECT.equals(type)) {
-      CheckboxMultiSelectAttributeEditor attributeEditor =
-          new CheckboxMultiSelectAttributeEditor(model, taskAttribute);
+      CheckboxMultiSelectOpenableAttributeEditor attributeEditor =
+          new CheckboxMultiSelectOpenableAttributeEditor(model, taskAttribute);
       attributeEditor.setLayoutHint(new LayoutHint(RowSpan.SINGLE, ColumnSpan.SINGLE));
       return attributeEditor;
     }
