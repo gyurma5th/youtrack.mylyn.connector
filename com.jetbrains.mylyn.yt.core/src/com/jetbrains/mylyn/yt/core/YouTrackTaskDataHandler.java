@@ -256,8 +256,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     attribute = taskData.getRoot().getAttribute(TaskAttribute.DESCRIPTION);
     attribute.setValue(issue.getDescription());
 
+    YouTrackIssue wikifyIssue = connector.getClient(repository).getIssue(issueId, true);
     attribute = taskData.getRoot().getAttribute(WIKIFY_DESCRIPTION);
-    attribute.setValue(connector.getClient(repository).getIssueWikifyDescription(issueId));
+    attribute.setValue(wikifyIssue.getDescription());
 
     attribute = taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY);
     attribute.setValue(issueId);
@@ -335,11 +336,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
     }
 
-    if (issue.getComments() != null && issue.getComments().size() > 0) {
+    if (wikifyIssue.getComments() != null && wikifyIssue.getComments().size() > 0) {
 
       TaskCommentMapper mapper = new TaskCommentMapper();
       int count = 0;
-      for (YouTrackComment comment : issue.getComments()) {
+      for (YouTrackComment comment : wikifyIssue.getComments()) {
 
         mapper.setAuthor(repository.createPerson(comment.getAuthorName()));
         mapper.setCreationDate(comment.getCreationDate());

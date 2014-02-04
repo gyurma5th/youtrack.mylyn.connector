@@ -53,7 +53,7 @@ import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
  */
 public class CheckboxMultiSelectOpenableAttributeEditor extends CheckboxMultiSelectAttributeEditor {
 
-
+  // full override because there is no acess to org.eclipse.ui.forms.widgets.LayoutComposite
   public CheckboxMultiSelectOpenableAttributeEditor(TaskDataModel manager,
       TaskAttribute taskAttribute) {
     super(manager, taskAttribute);

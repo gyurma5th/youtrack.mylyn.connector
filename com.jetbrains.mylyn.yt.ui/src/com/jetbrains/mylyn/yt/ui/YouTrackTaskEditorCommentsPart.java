@@ -43,6 +43,9 @@ import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
@@ -75,6 +78,8 @@ import org.eclipse.ui.forms.widgets.Section;
 public class YouTrackTaskEditorCommentsPart extends AbstractTaskEditorPart {
 
   private static final String ID_POPUP_MENU = "org.eclipse.mylyn.tasks.ui.editor.menu.comments"; //$NON-NLS-1$
+
+  private static final int MAX_COMMENT_HEIGHT = 250;
 
   private class CommentGroupViewer {
 
@@ -338,6 +343,37 @@ public class YouTrackTaskEditorCommentsPart extends AbstractTaskEditorPart {
       // commentTextComposite.setLayout(new FillWidthLayout(EditorUtil
       // .getLayoutAdvisor(getTaskEditorPage()), 15, 0, 0, 3));
       commentTextComposite.setLayout(new GridLayout(1, false));
+
+
+      final Browser browser = new Browser(commentTextComposite, SWT.NO_SCROLL);
+      final GridData gd = EditorUtil.getTextControlLayoutData(getTaskEditorPage(), browser, true);
+      gd.heightHint = 1;
+      browser.setLayoutData(gd);
+      TaskAttribute textAttribute =
+          getTaskData().getAttributeMapper()
+              .getAssoctiatedAttribute(taskComment.getTaskAttribute());
+      browser.setText(textAttribute.getValue());
+
+      browser.addProgressListener(new ProgressListener() {
+        @Override
+        public void completed(ProgressEvent event) {
+          int windowContentHeight =
+              ((Double) browser
+                  .evaluate("var D = document; "
+                      + "return Math.max(Math.max(D.body.scrollHeight, D.documentElement.scrollHeight), "
+                      + "Math.max(D.body.offsetHeight, D.documentElement.offsetHeight), "
+                      + "Math.max(D.body.clientHeight, D.documentElement.clientHeight));"))
+                  .intValue();
+          gd.heightHint = Math.min(windowContentHeight, MAX_COMMENT_HEIGHT);
+          browser.setLayoutData(gd);
+          getTaskEditorPage().reflow();
+        }
+
+        @Override
+        public void changed(ProgressEvent event) {}
+      });
+
+
       commentComposite.addExpansionListener(new ExpansionAdapter() {
         @Override
         public void expansionStateChanged(ExpansionEvent event) {
@@ -440,14 +476,19 @@ public class YouTrackTaskEditorCommentsPart extends AbstractTaskEditorPart {
       return formHyperlink;
     }
 
+
     private void expandComment(FormToolkit toolkit, Composite composite, boolean expanded) {
       buttonComposite.setVisible(expanded);
       if (expanded && composite.getData(KEY_EDITOR) == null) {
         // create viewer
-        TaskAttribute textAttribute =
-            getTaskData().getAttributeMapper().getAssoctiatedAttribute(
-                taskComment.getTaskAttribute());
-        editor = createAttributeEditor(textAttribute);
+        // TaskAttribute textAttribute =
+        // getTaskData().getAttributeMapper().getAssoctiatedAttribute(
+        // taskComment.getTaskAttribute());
+
+        TaskAttribute taskAttribute = getTaskData().getRoot().createAttribute("plane_comment");
+        taskAttribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
+
+        editor = createAttributeEditor(taskAttribute);
         if (editor != null) {
           editor.setDecorationEnabled(false);
           editor.createControl(composite, toolkit);
@@ -504,6 +545,12 @@ public class YouTrackTaskEditorCommentsPart extends AbstractTaskEditorPart {
       return commentComposite;
     }
 
+  }
+
+  @Override
+  protected AbstractAttributeEditor createAttributeEditor(TaskAttribute attribute) {
+    // TODO Auto-generated method stub
+    return super.createAttributeEditor(attribute);
   }
 
   private class ReplyToCommentAction extends AbstractReplyToCommentAction implements IMenuCreator {
