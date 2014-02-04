@@ -77,6 +77,8 @@ public class RevertAction extends Action {
           } catch (CoreException e) {
             TasksUiInternal.displayStatus("Clear outgoing failed", e.getStatus());
           }
+        } else {
+          return;
         }
       }
     }
