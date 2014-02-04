@@ -5,7 +5,9 @@
 package com.jetbrains.mylyn.yt.ui;
 
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.mylyn.internal.tasks.ui.util.TasksUiInternal;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.ITaskComment;
@@ -14,6 +16,8 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.AbstractRepositoryConnectorUi;
 import org.eclipse.mylyn.tasks.ui.wizards.ITaskRepositoryPage;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
 
@@ -65,4 +69,18 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
     }
   }
 
+  @Override
+  public ImageDescriptor getTaskPriorityOverlay(ITask task) {
+    ImageDescriptor descriptor = new ImageDescriptor() {
+
+      @Override
+      public ImageData getImageData() {
+        ImageData imageData = new ImageData(8, 8, 32, new PaletteData(0xFF0000, 0xFF00, 0xFF));
+        imageData.setPixel(5, 5, 5);
+        return imageData;
+      }
+    };
+    // return descriptor;
+    return TasksUiInternal.getPriorityImage(task);
+  }
 }
