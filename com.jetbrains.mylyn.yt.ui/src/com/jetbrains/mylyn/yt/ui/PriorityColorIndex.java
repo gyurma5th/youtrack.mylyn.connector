@@ -1,6 +1,6 @@
 package com.jetbrains.mylyn.yt.ui;
 
-import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.RGB;
 
 public enum PriorityColorIndex {
 
@@ -27,25 +27,25 @@ public enum PriorityColorIndex {
   COLOR_20(20, 255, 227, 227, 204, 0, 0);
 
 
-  private PaletteData backgroundPalette;
+  private RGB backgroundColor;
 
-  private PaletteData fontPalette;
+  private RGB fontColor;
 
   private int index;
 
   PriorityColorIndex(int index, int backgroundRed, int backgroundGreen, int backgroundBlue,
       int fontRed, int fontGreen, int fontBlue) {
     this.index = index;
-    this.backgroundPalette = new PaletteData(backgroundRed, backgroundGreen, backgroundBlue);
-    this.fontPalette = new PaletteData(fontRed, fontGreen, fontBlue);
+    this.backgroundColor = new RGB(backgroundRed, backgroundGreen, backgroundBlue);
+    this.fontColor = new RGB(fontRed, fontGreen, fontBlue);
   }
 
-  public PaletteData getBackgroundPalette() {
-    return this.backgroundPalette;
+  public RGB getBackground() {
+    return this.backgroundColor;
   }
 
-  public PaletteData getFontPalette() {
-    return this.fontPalette;
+  public RGB getFont() {
+    return this.fontColor;
   }
 
 

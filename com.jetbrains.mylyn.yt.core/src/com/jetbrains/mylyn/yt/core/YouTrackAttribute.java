@@ -65,8 +65,8 @@ public enum YouTrackAttribute {
       false),
   PRIORITY_LEVEL(
       TaskAttribute.PRIORITY,
-      TaskAttribute.TYPE_SHORT_TEXT,
-      "Priority level:",
+      TaskAttribute.TYPE_INTEGER,
+      "Priority color index:",
       YouTrackTaskDataHandler.SINGLE_FIELD_KIND,
       true),
   PROJECT(

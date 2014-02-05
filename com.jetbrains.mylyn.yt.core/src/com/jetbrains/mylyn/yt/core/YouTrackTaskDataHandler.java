@@ -39,6 +39,8 @@ import com.jetbrains.youtrack.javarest.client.YouTrackCustomField;
 import com.jetbrains.youtrack.javarest.client.YouTrackCustomField.YouTrackCustomFieldType;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
+import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
+import com.jetbrains.youtrack.javarest.utils.EnumerationValue;
 import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
 import com.jetbrains.youtrack.javarest.utils.StateValue;
 
@@ -299,12 +301,17 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     // because 'priority' icon needs priority level
     if (issue.getCustomFieldsValues().containsKey("Priority")) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
-      if (project.isCustomFieldsUpdated() && project.getCustomFieldsMap() != null
-          && project.getCustomFieldsMap().containsKey("Priority")
+      if (project.isCustomFieldsUpdated()
           && project.getCustomFieldsMap().get("Priority").getBundle() != null
-          && project.getCustomFieldsMap().get("Priority").getBundle().getValues() != null) {
-        attribute.setValue(connector.toPriorityLevel(issue.getCustomFieldValue("Priority").get(0),
-            project.getCustomFieldsMap().get("Priority").getBundle().getValues()).toString());
+          && project.getCustomFieldsMap().get("Priority").getBundle().getBundleValues() != null) {
+        LinkedList<EnumerationValue> priorities =
+            ((EnumerationBundleValues) project.getCustomFieldsMap().get("Priority").getBundle()
+                .getBundleValues()).getEnumerationValues();
+        for (EnumerationValue value : priorities) {
+          if (value.getValue().equals(issue.getCustomFieldValue("Priority").get(0))) {
+            attribute.setValue(new Integer(value.getColorIndex()).toString());
+          }
+        }
       }
     }
 

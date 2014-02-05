@@ -5,9 +5,13 @@
 package com.jetbrains.mylyn.yt.ui;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.window.Window;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
+import org.eclipse.mylyn.internal.tasks.ui.editors.RichTextAttributeEditor;
+import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorExtensions;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorSummaryPart;
+import org.eclipse.mylyn.internal.tasks.ui.editors.UserAttributeEditor;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
@@ -20,6 +24,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
@@ -31,6 +36,8 @@ import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
 
 public class YouTrackSummaryPart extends TaskEditorSummaryPart {
+
+  private AbstractAttributeEditor summaryEditor;
 
   private String partId;
 
@@ -274,5 +281,90 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
 
   public String getPartId() {
     return partId;
+  }
+
+  private boolean isAttribute(TaskAttribute attribute, String id) {
+    return attribute.getId().equals(
+        attribute.getTaskData().getAttributeMapper()
+            .mapToRepositoryKey(attribute.getParentAttribute(), id));
+  }
+
+  private void addSummaryText(Composite composite, final FormToolkit toolkit) {
+    TaskAttribute summaryAttrib = getTaskData().getRoot().getMappedAttribute(TaskAttribute.SUMMARY);
+    summaryEditor = createAttributeEditor(summaryAttrib);
+    if (summaryEditor != null) {
+      if (summaryAttrib.getMetaData().isReadOnly()) {
+        summaryEditor.setReadOnly(true);
+      }
+      if (summaryEditor instanceof RichTextAttributeEditor) {
+        // create composite to hold rounded border
+        Composite roundedBorder =
+            EditorUtil.createBorder(composite, toolkit, !summaryEditor.isReadOnly());
+        summaryEditor.createControl(roundedBorder, toolkit);
+        EditorUtil.setHeaderFontSizeAndStyle(summaryEditor.getControl());
+      } else {
+        final Composite border = toolkit.createComposite(composite);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING)
+            .hint(EditorUtil.MAXIMUM_WIDTH, SWT.DEFAULT).grab(true, false).applyTo(border);
+        // leave some padding for the border of the attribute editor
+        border.setLayout(GridLayoutFactory.fillDefaults().margins(1, 4).create());
+        summaryEditor.createControl(border, toolkit);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
+            .applyTo(summaryEditor.getControl());
+        toolkit.paintBordersFor(border);
+      }
+      getTaskEditorPage().getAttributeEditorToolkit().adapt(summaryEditor);
+    }
+  }
+
+  @Override
+  public void createControl(Composite parent, FormToolkit toolkit) {
+    Composite composite = toolkit.createComposite(parent);
+    GridLayout layout = EditorUtil.createSectionClientLayout();
+    layout.numColumns = 1;
+    layout.marginHeight = 0;
+    layout.marginTop = 0;
+    layout.marginWidth = 0;
+    layout.verticalSpacing = 3;
+    composite.setLayout(layout);
+
+    TaskAttribute colorIndexAttribute =
+        getTaskData().getRoot().getAttribute(TaskAttribute.PRIORITY);
+
+    if (colorIndexAttribute != null && colorIndexAttribute.getValue() != null
+        && colorIndexAttribute.getValue().length() > 0
+        && getTaskData().getRoot().getAttribute("Priority") != null) {
+      String colorIndex = getTaskData().getRoot().getAttribute(TaskAttribute.PRIORITY).getValue();
+      String priority = getTaskData().getRoot().getAttribute("Priority").getValue();
+      Label label = toolkit.createLabel(composite, null);
+      label.setImage(YouTrackConnectorUi.getPriorityIconImage(Integer.parseInt(colorIndex),
+          priority, false));
+      GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).span(1, 2).applyTo(label);
+      layout.numColumns++;
+    }
+
+    addSummaryText(composite, toolkit);
+
+    if (Boolean.parseBoolean(getModel().getTaskRepository().getProperty(
+        TaskEditorExtensions.REPOSITORY_PROPERTY_AVATAR_SUPPORT))) {
+      TaskAttribute userAssignedAttribute =
+          getTaskData().getRoot().getMappedAttribute(TaskAttribute.USER_ASSIGNED);
+      if (userAssignedAttribute != null) {
+        UserAttributeEditor editor = new UserAttributeEditor(getModel(), userAssignedAttribute);
+        editor.createControl(composite, toolkit);
+        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).span(1, 2).indent(0, 2)
+            .applyTo(editor.getControl());
+        layout.marginRight = 1;
+        layout.numColumns++;
+      }
+    }
+
+    if (needsHeader()) {
+      createHeaderLayout(composite, toolkit);
+    }
+
+    toolkit.paintBordersFor(composite);
+
+    setControl(composite);
   }
 }

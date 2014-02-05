@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,6 @@ import org.eclipse.mylyn.internal.tasks.ui.TasksUiPlugin;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
-import org.eclipse.mylyn.tasks.core.ITask.PriorityLevel;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
@@ -260,32 +258,6 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   @Override
   public AbstractTaskDataHandler getTaskDataHandler() {
     return taskDataHandler;
-  }
-
-  /**
-   * @param priority
-   * @param priorities - priorities in descending order
-   * @return Mylyn PriorityLevel of priority
-   */
-  public PriorityLevel toPriorityLevel(String priority, LinkedList<String> priorities) {
-    int level;
-    int count = priorities.size();
-    level = (priorities.indexOf(priority) + 1) / ((int) Math.ceil((double) count / 5));
-
-    switch (level) {
-      case 1:
-        return PriorityLevel.P1;
-      case 2:
-        return PriorityLevel.P2;
-      case 3:
-        return PriorityLevel.P3;
-      case 4:
-        return PriorityLevel.P4;
-      case 5:
-        return PriorityLevel.P5;
-      default:
-        return PriorityLevel.P4;
-    }
   }
 
   public static String getRealIssueId(String pseudoIssueId, TaskRepository taskRepository) {
