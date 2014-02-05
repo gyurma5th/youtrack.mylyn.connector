@@ -116,12 +116,14 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
     int height = 22;
     int xText = 4;
     int yText = 2;
+    int fontHeight = 13;
 
     if (small) {
       width = 8;
       height = 14;
       xText = 1;
       yText = 0;
+      fontHeight = 7;
     }
     String text = "";
     if (priority != null) {
@@ -134,9 +136,10 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
     gc.setBackground(color);
     gc.setForeground(new Color(null, PriorityColorIndex.getColorByIndex(colorIndex).getFont()));
     gc.fillRectangle(0, 0, width, height);
-    Font font = new Font(null, "Arial", 7, SWT.NONE);
+    Font font = new Font(null, "Arial", fontHeight, SWT.NONE);
     gc.setFont(font);
-    gc.drawText(text, xText, yText, true);
+    int charWidth = gc.getCharWidth(text.charAt(0));
+    gc.drawText(text, (width - charWidth) / 2, ((height - fontHeight) / 2) - 1, true);
     if (colorIndex == 20) {
       gc.drawRectangle(0, 0, width - 1, height - 1);
     }
