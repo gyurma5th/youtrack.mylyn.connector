@@ -18,5 +18,8 @@
    <feature url="features/com.jetbrains.mylyn.yt.connector.feature_1.0.0.201402042127.jar" id="com.jetbrains.mylyn.yt.connector.feature" version="1.0.0.201402042127">
       <category name="versions"/>
    </feature>
+   <feature url="features/com.jetbrains.mylyn.yt.connector.feature_1.0.0.201402052022.jar" id="com.jetbrains.mylyn.yt.connector.feature" version="1.0.0.201402052022">
+      <category name="versions"/>
+   </feature>
    <category-def name="versions" label="Versions"/>
 </site>
