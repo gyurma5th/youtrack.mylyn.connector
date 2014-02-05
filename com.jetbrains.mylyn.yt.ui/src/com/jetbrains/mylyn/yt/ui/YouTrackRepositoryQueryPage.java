@@ -126,7 +126,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
   private Text titleText;
 
-  private final CommandIntellisenseFocusAdapter intellisenseAdapter;
+  private final IntellisenseFocusAdapter intellisenseAdapter;
 
   public YouTrackRepositoryQueryPage(String pageName, TaskRepository repository,
       IRepositoryQuery query) {
@@ -134,7 +134,7 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     this.connector = TasksUi.getRepositoryConnector(getTaskRepository().getConnectorKind());
     this.repository = repository;
     setTitle("YouTrack Repository Query");
-    intellisenseAdapter = new CommandIntellisenseFocusAdapter(getClient(), false, null);
+    intellisenseAdapter = new IntellisenseFocusAdapter(getClient(), false, null);
   }
 
   protected void doRefreshControls() {

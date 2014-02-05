@@ -39,7 +39,7 @@ import com.jetbrains.youtrack.javarest.client.YouTrackClient;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseItem;
 import com.jetbrains.youtrack.javarest.utils.IntellisenseValues;
 
-public class CommandIntellisenseFocusAdapter implements FocusListener {
+public class IntellisenseFocusAdapter implements FocusListener {
 
   private Job autocomletionJob;
 
@@ -84,7 +84,7 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
 
   private final String issueId;
 
-  public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
+  public IntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
       Text issuesCountText) {
     this.client = client;
     this.isCountIssuses = isCountIssues;
@@ -93,7 +93,7 @@ public class CommandIntellisenseFocusAdapter implements FocusListener {
     this.issueId = "";
   }
 
-  public CommandIntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
+  public IntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
       Text issuesCountText, String issueId) {
     this.client = client;
     this.isCountIssuses = isCountIssues;
