@@ -652,7 +652,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       final YouTrackClient client = connector.getClient(repository);
 
       for (String id : taskIds) {
-        collector.accept(parseIssue(repository, client.getIssue(id), monitor));
+        collector.accept(parseIssue(repository,
+            client.getIssue(YouTrackRepositoryConnector.getRealIssueId(id, repository)), monitor));
       }
     } finally {
       monitor.done();

@@ -379,8 +379,10 @@ public class YouTrackClient {
     if (issueId != null && comment != null) {
       Form form = new Form();
       form.add("comment", comment);
-      service.path("/issue/").path(issueId).path("/execute")
-          .type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
+      checkClientResponse(
+          service.path("/issue/").path(issueId).path("/execute")
+              .type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form), 200,
+          "Failed to login");
     } else {
       throw new RuntimeException("Null issue id or comment body.");
     }

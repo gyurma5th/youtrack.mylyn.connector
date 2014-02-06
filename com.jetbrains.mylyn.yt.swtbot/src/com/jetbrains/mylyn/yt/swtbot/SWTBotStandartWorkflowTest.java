@@ -103,6 +103,7 @@ public class SWTBotStandartWorkflowTest extends TestCase {
     bot.textWithLabel("Search Box:").setText(QUERY_FILTER_STRING);
     bot.textWithLabel("Title:").setText(QUERY_NAME);
     bot.button("Finish").click();
+    bot.button("OK").click();
     bot.captureScreenshot("screenshots/justCreateNewQuery.jpg");
     bot.menu("Window").menu("Show View").menu("Task List").click();
     assertEquals("Task List", bot.activeView().getTitle());
