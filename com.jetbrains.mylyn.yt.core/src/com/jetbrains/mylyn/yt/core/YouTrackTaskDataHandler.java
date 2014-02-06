@@ -145,8 +145,12 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
   }
 
   public TaskAttribute createAttribute(TaskData data, YouTrackCustomField field) {
+    return createAttribute(data, field, true);
+  }
+
+  public TaskAttribute createAttribute(TaskData data, YouTrackCustomField field, boolean readOnly) {
     TaskAttribute attribute = data.getRoot().createAttribute(field.getName());
-    attribute.getMetaData().setReadOnly(true).setLabel(labelFromName(field.getName()))
+    attribute.getMetaData().setReadOnly(readOnly).setLabel(labelFromName(field.getName()))
         .setKind(CUSTOM_FIELD_KIND);
 
     if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
@@ -210,7 +214,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
 
       for (YouTrackCustomField field : project.getCustomFields()) {
-        createAttribute(data, field);
+        createAttribute(data, field, false);
       }
 
       TaskAttribute attribute = data.getRoot().getMappedAttribute(TaskAttribute.PRODUCT);
