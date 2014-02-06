@@ -154,7 +154,12 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         .setKind(CUSTOM_FIELD_KIND);
 
     if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
-      attribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
+      if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
+          YouTrackCustomFieldType.DATE)) {
+        attribute.getMetaData().setType(TaskAttribute.TYPE_DATE);
+      } else {
+        attribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
+      }
     } else {
       if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
         attribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
@@ -368,19 +373,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     for (YouTrackCustomField field : project.getCustomFields()) {
 
-      TaskAttribute customFieldAttribute = taskData.getRoot().createAttribute(field.getName());
-      customFieldAttribute.getMetaData().setReadOnly(true).setLabel(labelFromName(field.getName()))
-          .setKind(CUSTOM_FIELD_KIND);
-
-      if (YouTrackCustomFieldType.getTypeByName(field.getType()).isSimple()) {
-        customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SHORT_TEXT);
-      } else {
-        if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
-          customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
-        } else {
-          customFieldAttribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
-        }
-      }
+      TaskAttribute customFieldAttribute = createAttribute(taskData, field, true);
 
       if (issue.getCustomFieldsValues() != null
           && issue.getCustomFieldsValues().containsKey(field.getName())) {
@@ -408,8 +401,11 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             }
           }
         }
-
-        customFieldAttribute.setValues(issue.getCustomFieldValue(field.getName()));
+        if (customFieldAttribute.getMetaData().getType().equals(TaskAttribute.TYPE_DATE)) {
+          customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());
+        } else {
+          customFieldAttribute.setValues(issue.getCustomFieldValue(field.getName()));
+        }
       } else {
         if (project.getCustomFieldsMap().get(field.getName()).isCanBeEmpty()) {
           customFieldAttribute.setValue(project.getCustomFieldsMap().get(field.getName())
@@ -649,7 +645,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       final TaskDataCollector collector, IProgressMonitor monitor) throws CoreException {
     try {
       monitor.beginTask("Receiving_tasks", taskIds.size());
-      final YouTrackClient client = connector.getClient(repository);
+      final YouTrackClient client = YouTrackRepositoryConnector.getClient(repository);
 
       for (String id : taskIds) {
         collector.accept(parseIssue(repository,

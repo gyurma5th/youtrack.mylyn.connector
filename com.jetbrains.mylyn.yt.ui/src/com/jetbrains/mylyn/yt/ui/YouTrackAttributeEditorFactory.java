@@ -32,6 +32,8 @@ public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
           new CheckboxMultiSelectOpenableAttributeEditor(model, taskAttribute);
       attributeEditor.setLayoutHint(new LayoutHint(RowSpan.SINGLE, ColumnSpan.SINGLE));
       return attributeEditor;
+    } else if (TaskAttribute.TYPE_DATE.equals(type)) {
+      return new CustomFieldDateAttributeEditor(model, taskAttribute);
     }
 
     return super.createEditor(type, taskAttribute);
