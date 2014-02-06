@@ -292,9 +292,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     if (!project.isCustomFieldsUpdated()) {
       project.updateCustomFields(connector.getClient(repository));
     }
-    // TODO: change everywhere project name to full project name
-    // attribute.setValue(connector.getProject(repository,
-    // issue.getProjectName()).getProjectFullName());
 
     if (issue.getSingleCustomFieldValue("Assignee") != null) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.USER_ASSIGNED);
@@ -302,9 +299,12 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     // Duplicate field from custom fileds
-    // because 'priority' icon needs priority level
+    // because 'priority' icon needs color index
     if (issue.getCustomFieldsValues().containsKey("Priority")) {
       attribute = taskData.getRoot().getAttribute(TaskAttribute.PRIORITY);
+      if (!project.isCustomFieldsUpdated()) {
+        project.updateCustomFields(connector.getClient(repository));
+      }
       if (project.isCustomFieldsUpdated()
           && project.getCustomFieldsMap().get("Priority").getBundle() != null
           && project.getCustomFieldsMap().get("Priority").getBundle().getBundleValues() != null) {

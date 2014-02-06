@@ -84,8 +84,7 @@ public class IntellisenseFocusAdapter implements FocusListener {
 
   private final String issueId;
 
-  public IntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues,
-      Text issuesCountText) {
+  public IntellisenseFocusAdapter(YouTrackClient client, boolean isCountIssues, Text issuesCountText) {
     this.client = client;
     this.isCountIssuses = isCountIssues;
     this.issuesCountText = issuesCountText;
@@ -320,18 +319,21 @@ public class IntellisenseFocusAdapter implements FocusListener {
                   tableItem.setBackground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
                 }
                 textLayout.setText(tableItem.getText());
-                IntellisenseItem intellisenseItem = itemByNameMap.get(tableItem.getText());
-                textLayout.setStyle(proposalStyle, 0, tableItem.getText().length());
-                int prefixLen =
-                    intellisenseItem.getPrefix() == null ? 0 : intellisenseItem.getPrefix()
-                        .length();
-                textLayout.setStyle(proposalStyleUnderlined, prefixLen
-                    + intellisenseItem.getMatchPositions().getStart(), prefixLen
-                    + intellisenseItem.getMatchPositions().getEnd() - 1);
+                if (itemByNameMap.containsKey(tableItem.getText())) {
+                  IntellisenseItem intellisenseItem = itemByNameMap.get(tableItem.getText());
+                  textLayout.setStyle(proposalStyle, 0, tableItem.getText().length());
+                  int prefixLen =
+                      intellisenseItem.getPrefix() == null ? 0 : intellisenseItem.getPrefix()
+                          .length();
+                  textLayout.setStyle(proposalStyleUnderlined, prefixLen
+                      + intellisenseItem.getMatchPositions().getStart(), prefixLen
+                      + intellisenseItem.getMatchPositions().getEnd() - 1);
 
-                event.gc.fillRectangle(0, event.y, ((Table) event.widget).getClientArea().width,
-                    event.height);
-                textLayout.draw(event.gc, event.x, event.y);
+                  event.gc.fillRectangle(0, event.y, ((Table) event.widget).getClientArea().width,
+                      event.height);
+                  textLayout.draw(event.gc, event.x, event.y);
+
+                }
               }
             }
           });
