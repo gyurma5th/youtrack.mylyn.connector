@@ -6,6 +6,7 @@ package com.jetbrains.mylyn.yt.core;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -68,11 +69,13 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String SINGLE_FIELD_KIND = "TaslAttributeKind.ORDINARY_FIELD_KIND";
 
+  public static final SimpleDateFormat YOUTRACK_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
   public YouTrackTaskDataHandler(YouTrackRepositoryConnector connector) {
     this.connector = connector;
   }
 
-  private String getNameFromLabel(TaskAttribute attribute) {
+  public static String getNameFromLabel(TaskAttribute attribute) {
     if (attribute == null || attribute.getMetaData() == null
         || attribute.getMetaData().getLabel() == null) {
       return null;
@@ -92,7 +95,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     YouTrackClient client = YouTrackRepositoryConnector.getClient(repository);
     YouTrackIssue issue = new YouTrackIssue();
 
+
     if (postNewCommentMode) {
+      // not using now
       String newComment = getNewComment(taskData);
       if (newComment != null && newComment.length() > 0) {
         client.addComment(taskData.getRoot().getAttribute(TaskAttribute.TASK_KEY).getValue(),
@@ -477,6 +482,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_MULTI_SELECT)) {
               issue.addCustomFieldValue(attribute.getId(),
                   new LinkedList<String>(attribute.getValues()));
+            } else if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_DATE)) {
+              issue.addCustomFieldValue(attribute.getId(),
+                  getDateFormat().format(new Date(Long.parseLong(attribute.getValue()))));
             } else {
               issue.addCustomFieldValue(attribute.getId(),
                   CastCheck.toObject(fieldClass, attribute.getValue()).toString());
@@ -654,6 +662,10 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     } finally {
       monitor.done();
     }
+  }
+
+  private SimpleDateFormat getDateFormat() {
+    return YOUTRACK_DATE_FORMAT;
   }
 
 }

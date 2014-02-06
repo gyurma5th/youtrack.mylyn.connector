@@ -20,10 +20,9 @@ import org.eclipse.mylyn.internal.tasks.ui.editors.DateAttributeEditor;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
-import org.eclipse.mylyn.tasks.ui.editors.LayoutHint;
-import org.eclipse.mylyn.tasks.ui.editors.LayoutHint.ColumnSpan;
-import org.eclipse.mylyn.tasks.ui.editors.LayoutHint.RowSpan;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -50,10 +49,12 @@ public class CustomFieldDateAttributeEditor extends DateAttributeEditor {
 
   private Text text;
 
-  public CustomFieldDateAttributeEditor(TaskDataModel manager, TaskAttribute taskAttribute) {
+  private String emptyValue;
+
+  public CustomFieldDateAttributeEditor(TaskDataModel manager, TaskAttribute taskAttribute,
+      String emptyValue) {
     super(manager, taskAttribute);
-    setLayoutHint(new LayoutHint(RowSpan.SINGLE, ColumnSpan.SINGLE));
-    setShowDateRelative(false);
+    this.emptyValue = emptyValue;
   }
 
   @Override
@@ -70,12 +71,7 @@ public class CustomFieldDateAttributeEditor extends DateAttributeEditor {
       datePicker = new DatePicker(composite, SWT.FLAT, getTextValue(), showTime, 0);
       datePicker.setFont(EditorUtil.TEXT_FONT);
       datePicker.setToolTipText(getDescription());
-      if (!showTime) {
-        datePicker.setDateFormat(DateFormat
-            .getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT));
-      } else {
-        datePicker.setDateFormat(DateFormat.getDateInstance(DateFormat.MEDIUM));
-      }
+      datePicker.setDateFormat(DateFormat.getDateInstance(DateFormat.MEDIUM));
       updateDatePicker();
 
       Text text = null;
@@ -107,6 +103,17 @@ public class CustomFieldDateAttributeEditor extends DateAttributeEditor {
           @Override
           public void mouseDoubleClick(MouseEvent e) {
             // TODO Auto-generated method stub
+          }
+        });
+
+        text.addModifyListener(new ModifyListener() {
+
+          @Override
+          public void modifyText(ModifyEvent e) {
+            Text widget = (Text) e.widget;
+            if (widget.getText().equals("Choose Date")) {
+              widget.setText(emptyValue == null ? "" : emptyValue);
+            }
           }
         });
       }
