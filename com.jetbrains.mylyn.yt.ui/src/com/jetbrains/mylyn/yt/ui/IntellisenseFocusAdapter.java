@@ -332,7 +332,6 @@ public class IntellisenseFocusAdapter implements FocusListener {
                   event.gc.fillRectangle(0, event.y, ((Table) event.widget).getClientArea().width,
                       event.height);
                   textLayout.draw(event.gc, event.x, event.y);
-
                 }
               }
             }
