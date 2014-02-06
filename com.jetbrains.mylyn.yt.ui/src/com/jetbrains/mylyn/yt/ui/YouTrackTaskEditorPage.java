@@ -71,7 +71,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
                     .getActiveWorkbenchWindow().getActivePage().getActiveEditor())
                     .getActivePageInstance()).getTask().getTaskId(), getTaskRepository());
 
-        if (issueId != null) {
+        if (issueId != null && issueId.contains("-")) {
           YouTrackSummaryPart.openCommandWizard(getEditorComposite().getShell(), null, true,
               (AbstractTaskEditorPage) ((TaskEditor) PlatformUI.getWorkbench()
                   .getActiveWorkbenchWindow().getActivePage().getActiveEditor())
