@@ -57,6 +57,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String USER_UPDATER = "TaskAttribute.USER_UPDATER";
 
+  public static final String TYPE_PERIOD = "TaskAttribute.TYPE_PERIOD";
+
   public static final String WIKIFY_DESCRIPTION = "TaskAttribute.WIKIFY_DESCRIPTION";
 
   public static final String TYPE_HTML = "TaskAttribute.TYPE_HTML";
@@ -414,8 +416,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         }
         if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
             YouTrackCustomFieldType.PERIOD)) {
-          customFieldAttribute.setValue(parsePeriodData(issue.getCustomFieldValue(field.getName())
-              .get(0)));
+          customFieldAttribute.getMetaData().setType("TaskAttribute.TYPE_PERIOD");
         }
       } else {
         if (project.getCustomFieldsMap().get(field.getName()).isCanBeEmpty()) {
@@ -671,35 +672,5 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   private SimpleDateFormat getDateFormat() {
     return YOUTRACK_DATE_FORMAT;
-  }
-
-
-  /**
-   * @param period in minutes from rest
-   * @return period in format AwBdChDm (weeks:days:hours:minutes)
-   */
-  private String parsePeriodData(String period) {
-    try {
-      int minutesAmount = Integer.parseInt(period);
-      if (YouTrackRepositoryConnector.timeSettings == null) {
-        return "";
-      }
-      int hourPerDay = YouTrackRepositoryConnector.timeSettings.getHoursSettings();
-      int daysPerWeek = YouTrackRepositoryConnector.timeSettings.getDaysSettings();
-      String result = "";
-      int weeks = minutesAmount / (hourPerDay * daysPerWeek * 60);
-      result += weeks > 0 ? (weeks + "w") : "";
-      minutesAmount -= weeks * hourPerDay * daysPerWeek * 60;
-      int days = minutesAmount / (hourPerDay * 60);
-      result += days > 0 ? (days + "d") : "";
-      minutesAmount -= days * hourPerDay * 60;
-      int hours = minutesAmount / 60;
-      result += hours > 0 ? (hours + "h") : "";
-      int minutes = minutesAmount - hours * 60;
-      result += minutes > 0 ? (minutes + "m") : "";
-      return result;
-    } catch (NumberFormatException e) {
-      return period;
-    }
   }
 }

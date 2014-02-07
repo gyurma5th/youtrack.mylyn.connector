@@ -51,6 +51,19 @@ public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
         emptyText = "";
       }
       return new CustomFieldDateAttributeEditor(model, taskAttribute, emptyText);
+    } else if (YouTrackTaskDataHandler.TYPE_PERIOD.equals(type)) {
+      String emptyText;
+      try {
+        emptyText =
+            YouTrackRepositoryConnector
+                .getProject(taskRepository,
+                    model.getTaskData().getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
+                .getCustomFieldsMap().get(YouTrackTaskDataHandler.getNameFromLabel(taskAttribute))
+                .getEmptyText();
+      } catch (NullPointerException e) {
+        emptyText = "";
+      }
+      return new PeriodTextAttributeEditor(model, taskAttribute, emptyText);
     }
 
     return super.createEditor(type, taskAttribute);
