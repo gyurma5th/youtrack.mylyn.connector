@@ -457,8 +457,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
     }
 
     for (TaskAttribute attribute : taskData.getRoot().getAttributes().values()) {
-      if (project.isCustomField(attribute.getId()) && attribute.getValue() != null
-          && !attribute.getValue().equals("")) {
+      if (project.isCustomField(attribute.getId()) && attribute.getValue() != null) {
 
         // TODO: fix this mess
 
@@ -468,8 +467,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                     taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
                 .getCustomFieldsMap().get(getNameFromLabel(attribute)).getEmptyText();
 
-        if (attribute.getValue().toString().equals(emptyText)) {
-          issue.addCustomFieldValue(attribute.getId(), attribute.getValue().toString());
+        if (attribute.getValue().toString().equals(emptyText) || attribute.getValue().equals("")) {
+          issue.addCustomFieldValue(attribute.getId(), emptyText);
         } else {
           Class fieldClass =
               YouTrackCustomFieldType.getTypeByName(
