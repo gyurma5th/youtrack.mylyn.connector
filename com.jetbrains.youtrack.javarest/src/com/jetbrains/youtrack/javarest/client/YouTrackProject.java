@@ -84,11 +84,9 @@ public class YouTrackProject {
 
   public synchronized void updateCustomFields(final YouTrackClient client) {
 
-
     if (client != null) {
 
       setCustomFieldsMap(new HashMap<String, YouTrackCustomField>());
-
       if (projectShortName != null && !projectShortName.equals("")) {
         for (YouTrackCustomField field : client.getProjectCustomFields(projectShortName)) {
           YouTrackCustomField fullField =

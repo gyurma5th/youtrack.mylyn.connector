@@ -34,10 +34,13 @@ import com.jetbrains.youtrack.javarest.client.YouTrackClientFactory;
 import com.jetbrains.youtrack.javarest.client.YouTrackIssue;
 import com.jetbrains.youtrack.javarest.client.YouTrackProject;
 import com.jetbrains.youtrack.javarest.utils.MyRunnable;
+import com.jetbrains.youtrack.javarest.utils.YouTrackTimeSettings;
 
 public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
   private static final long REPOSITORY_CONFIGURATION_UPDATE_INTERVAL = 2 * 60 * 60 * 1000;
+
+  public static YouTrackTimeSettings timeSettings = null;
 
   private static Map<TaskRepository, YouTrackClient> clientByRepository =
       new HashMap<TaskRepository, YouTrackClient>();
@@ -85,6 +88,10 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
     final YouTrackClient client = clientByRepository.get(repository);
 
+    if (client != null && timeSettings == null) {
+      updateTimeTrackingSettings(client);
+    }
+
     if (project != null) {
       if (!project.isCustomFieldsUpdated()) {
         project.updateCustomFields(client);
@@ -103,6 +110,10 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
     final YouTrackProject project = YouTrackRepositoryConnector.getProject(repository, projectname);
 
     final YouTrackClient client = clientByRepository.get(repository);
+
+    if (client != null && timeSettings == null) {
+      updateTimeTrackingSettings(client);
+    }
 
     if (project != null) {
       project.updateCustomFields(client);
@@ -315,5 +326,9 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   public void updateRepositoryConfiguration(TaskRepository taskRepository, ITask task,
       IProgressMonitor monitor) throws CoreException {
     forceUpdateProjectCustomFields(taskRepository, getProjectNameFromId(task.getTaskKey()));
+  }
+
+  public static void updateTimeTrackingSettings(YouTrackClient client) {
+    timeSettings = client.getTimeTrackingSettings();
   }
 }

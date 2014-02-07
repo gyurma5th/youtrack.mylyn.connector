@@ -25,6 +25,7 @@ import com.jetbrains.youtrack.javarest.utils.UserGroupValue;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearches;
 import com.jetbrains.youtrack.javarest.utils.VersionBundleValues;
+import com.jetbrains.youtrack.javarest.utils.YouTrackTimeSettings;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
@@ -698,5 +699,10 @@ public class YouTrackClient {
     } else {
       throw new RuntimeException("Null target issue id while update issue.");
     }
+  }
+
+  public YouTrackTimeSettings getTimeTrackingSettings() {
+    return service.path("/admin/timetracking").accept("application/xml")
+        .get(YouTrackTimeSettings.class);
   }
 }
