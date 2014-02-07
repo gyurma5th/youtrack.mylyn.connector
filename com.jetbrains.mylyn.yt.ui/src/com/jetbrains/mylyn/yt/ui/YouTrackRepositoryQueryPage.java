@@ -147,15 +147,18 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
 
   protected boolean restoreState(IRepositoryQuery query) {
     String filter = query.getAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER);
-    if (filter != null) {
-      if (customizeQueryCheckbox.getSelection()) {
-        getSearchBoxText().setText(filter);
-      } else {
-        for (SavedSearch savedSearch : searches) {
-          if (savedSearch.getSearchText().equals(filter)) {
-            savedSearchesCombo.setText(savedSearch.getName());
-            break;
-          }
+    boolean isCustom = Boolean.parseBoolean(query.getAttribute(YouTrackCorePlugin.QUERY_IS_CUSTOM));
+
+    if (isCustom) {
+      customizeQueryCheckbox.setSelection(true);
+      recursiveSetEnabled(fastQueryComposite, false);
+      recursiveSetEnabled(customQueryComposite, true);
+      getSearchBoxText().setText(filter);
+    } else {
+      for (SavedSearch savedSearch : searches) {
+        if (savedSearch.getSearchText().equals(filter)) {
+          savedSearchesCombo.setText(savedSearch.getName());
+          break;
         }
       }
     }
@@ -170,9 +173,11 @@ public class YouTrackRepositoryQueryPage extends AbstractRepositoryQueryPage {
     if (savedSearchesCombo.getText() != null && !customizeQueryCheckbox.getSelection()) {
       query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER,
           searches.get(savedSearchesCombo.getSelectionIndex()).getSearchText());
+      query.setAttribute(YouTrackCorePlugin.QUERY_IS_CUSTOM, "false");
     }
     if (getSearchBoxText().getText() != null && customizeQueryCheckbox.getSelection()) {
       query.setAttribute(YouTrackCorePlugin.QUERY_KEY_FILTER, getSearchBoxText().getText());
+      query.setAttribute(YouTrackCorePlugin.QUERY_IS_CUSTOM, "true");
     }
     setMessage(defaultMessage);
   }

@@ -27,6 +27,8 @@ public class YouTrackCorePlugin extends Plugin {
 
   public static final String QUERY_KEY_FILTER = ID_PLUGIN + ".filter";
 
+  public static final String QUERY_IS_CUSTOM = ID_PLUGIN + ".custom";
+
   private static YouTrackCorePlugin plugin;
 
   public YouTrackCorePlugin() {}
