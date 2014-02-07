@@ -27,6 +27,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 
 import com.jetbrains.mylyn.yt.core.YouTrackCorePlugin;
+import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
 
 
 public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
@@ -72,7 +73,18 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
     if (taskComment == null) {
       return String.format("\nReply to description:", task.getAttribute(TaskAttribute.DESCRIPTION));
     } else {
-      return String.format("\nReply to comment:", taskComment.getText());
+
+      TaskDataManager manager = TasksUiPlugin.getTaskDataManager();
+      TaskData taskData = null;
+      try {
+        taskData = manager.getTaskData(task);
+        TaskAttribute notWiki =
+            taskData.getRoot().getAttribute(
+                YouTrackTaskDataHandler.NOT_WIKI_COMMENT_PREFIX + taskComment.getNumber());
+        return String.format("\nReply to comment:", notWiki.getValue());
+      } catch (CoreException e) {
+        return "";
+      }
     }
   }
 

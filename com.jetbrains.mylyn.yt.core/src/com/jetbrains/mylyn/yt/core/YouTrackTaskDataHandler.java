@@ -67,6 +67,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
   public static final String TAG_PREFIX = "TaskAttribute.TAG_";
 
+  public static final String NOT_WIKI_COMMENT_PREFIX = "TaskAttribute.NOT_WIKI_COMMENT_";
+
   public static final String CUSTOM_FIELD_KIND = "TaslAttributeKind.CUSTOM_FIELD_KIND";
 
   public static final String SINGLE_FIELD_KIND = "TaslAttributeKind.ORDINARY_FIELD_KIND";
@@ -375,6 +377,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             taskData.getRoot().createAttribute(TaskAttribute.PREFIX_COMMENT + count);
         commentAttribute.getMetaData().setType(TaskAttribute.TYPE_COMMENT);
         mapper.applyTo(commentAttribute);
+        TaskAttribute nonWikiComment =
+            taskData.getRoot().createAttribute(NOT_WIKI_COMMENT_PREFIX + count);
+        nonWikiComment.setValue(issue.getComments().get(count).getText());
         count++;
       }
     }

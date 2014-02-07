@@ -69,6 +69,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 
+import com.jetbrains.mylyn.yt.core.YouTrackTaskDataHandler;
+
 /**
  * @author Robert Elves
  * @author Steffen Pingel
@@ -568,7 +570,10 @@ public class YouTrackTaskEditorCommentsPart extends AbstractTaskEditorPart {
 
     @Override
     protected String getReplyText() {
-      return taskComment.getText();
+      TaskAttribute notWiki =
+          getTaskData().getRoot().getAttribute(
+              YouTrackTaskDataHandler.NOT_WIKI_COMMENT_PREFIX + taskComment.getNumber());
+      return notWiki.getValue();
     }
 
     public Menu getMenu(Control parent) {
@@ -691,7 +696,10 @@ public class YouTrackTaskEditorCommentsPart extends AbstractTaskEditorPart {
                 new AbstractReplyToCommentAction(getTaskEditorPage(), comment) {
                   @Override
                   protected String getReplyText() {
-                    return comment.getText();
+                    TaskAttribute notWiki =
+                        getTaskData().getRoot().getAttribute(
+                            YouTrackTaskDataHandler.NOT_WIKI_COMMENT_PREFIX + comment.getNumber());
+                    return String.format("\nReply to comment:", notWiki.getValue());
                   }
                 };
             manager.add(replyAction);
