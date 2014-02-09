@@ -150,6 +150,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
       }
     }.setPath(PATH_COMMENTS));
 
+
     return descriptors;
   }
 

@@ -44,6 +44,8 @@ import com.jetbrains.youtrack.javarest.utils.EnumerationBundleValues;
 import com.jetbrains.youtrack.javarest.utils.EnumerationValue;
 import com.jetbrains.youtrack.javarest.utils.StateBundleValues;
 import com.jetbrains.youtrack.javarest.utils.StateValue;
+import com.jetbrains.youtrack.javarest.utils.UserBundleValues;
+import com.jetbrains.youtrack.javarest.utils.UserValue;
 
 public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
@@ -171,7 +173,12 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       }
     } else {
       if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
-        attribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
+        if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
+            YouTrackCustomFieldType.USER_SINGLE)) {
+          attribute.getMetaData().setType(TaskAttribute.TYPE_PERSON);
+        } else {
+          attribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
+        }
       } else {
         attribute.getMetaData().setType(TaskAttribute.TYPE_MULTI_SELECT);
       }
@@ -321,6 +328,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         project.updateCustomFields(connector.getClient(repository));
       }
       if (project.isCustomFieldsUpdated()
+          // NPE
           && project.getCustomFieldsMap().get("Priority").getBundle() != null
           && project.getCustomFieldsMap().get("Priority").getBundle().getBundleValues() != null) {
         LinkedList<EnumerationValue> priorities =
@@ -413,15 +421,24 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
               }
             }
           }
-        }
-        if (customFieldAttribute.getMetaData().getType().equals(TaskAttribute.TYPE_DATE)) {
+        } else if (customFieldAttribute.getMetaData().getType().equals(TaskAttribute.TYPE_DATE)) {
           customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());
-        } else {
-          customFieldAttribute.setValues(issue.getCustomFieldValue(field.getName()));
-        }
-        if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
+        } else if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
             YouTrackCustomFieldType.PERIOD)) {
           customFieldAttribute.getMetaData().setType("TaskAttribute.TYPE_PERIOD");
+        } else if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
+            YouTrackCustomFieldType.USER_SINGLE)) {
+          LinkedList<UserValue> users =
+              ((UserBundleValues) field.getBundle().getBundleValues()).getFullUsers();
+          if (users != null) {
+            for (UserValue user : users) {
+              if (user.getValue().equals(issue.getCustomFieldValue(field.getName()).getFirst())) {
+                customFieldAttribute.setValue(user.getFullName());
+              }
+            }
+          }
+        } else {
+          customFieldAttribute.setValues(issue.getCustomFieldValue(field.getName()));
         }
       } else {
         if (project.getCustomFieldsMap().get(field.getName()).isCanBeEmpty()) {
@@ -496,6 +513,9 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
             } else if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_DATE)) {
               issue.addCustomFieldValue(attribute.getId(),
                   getDateFormat().format(new Date(Long.parseLong(attribute.getValue()))));
+            } else if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_PERSON)) {
+              issue.addCustomFieldValue(attribute.getId(),
+                  attribute.getOption(attribute.getValue()));
             } else {
               issue.addCustomFieldValue(attribute.getId(),
                   CastCheck.toObject(fieldClass, attribute.getValue()).toString());
@@ -587,8 +607,22 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                 attr.putOption(customField.getEmptyText(), customField.getEmptyText());
               }
               if (values != null) {
-                for (String value : values) {
-                  attr.putOption(value, value);
+
+                if (!YouTrackCustomFieldType.getTypeByName(customField.getType()).equals(
+                    YouTrackCustomFieldType.USER_SINGLE)
+                    && !YouTrackCustomFieldType.getTypeByName(customField.getType()).equals(
+                        YouTrackCustomFieldType.USER_MULTI)) {
+                  for (String value : values) {
+                    attr.putOption(value, value);
+                  }
+                } else {
+                  LinkedList<UserValue> users =
+                      ((UserBundleValues) customField.getBundle().getBundleValues()).getFullUsers();
+                  if (users != null) {
+                    for (UserValue user : users) {
+                      attr.putOption(user.getFullName(), user.getValue());
+                    }
+                  }
                 }
               }
             }

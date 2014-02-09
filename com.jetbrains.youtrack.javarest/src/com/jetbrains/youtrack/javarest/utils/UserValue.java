@@ -9,7 +9,14 @@ public class UserValue extends BundleValue {
   @XmlAttribute(name = "login")
   private String value;
 
+  @XmlAttribute(name = "fullName")
+  private String fullName;
+
   public String getValue() {
     return value;
+  }
+
+  public String getFullName() {
+    return fullName;
   }
 }

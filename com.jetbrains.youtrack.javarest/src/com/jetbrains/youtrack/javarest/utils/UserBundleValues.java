@@ -28,6 +28,8 @@ public class UserBundleValues extends BundleValues {
     return bundleUserGroupValues;
   }
 
+  private LinkedList<UserValue> fullUsers;
+
   private LinkedList<UserValue> usersFromGroups;
 
   public void addUsersFromGroup(LinkedList<UserValue> groupUsers) {
@@ -37,6 +39,13 @@ public class UserBundleValues extends BundleValues {
     if (groupUsers != null && groupUsers.size() > 0) {
       usersFromGroups.addAll(groupUsers);
     }
+  }
+
+  public void addFullUser(UserValue fullUser) {
+    if (fullUsers == null) {
+      fullUsers = new LinkedList<UserValue>();
+    }
+    fullUsers.add(fullUser);
   }
 
   @Override
@@ -58,6 +67,31 @@ public class UserBundleValues extends BundleValues {
 
     values.addAll(uniqueUsers);
     return values;
+  }
+
+
+  public LinkedList<UserValue> getAllUsers() {
+    LinkedList<UserValue> values = new LinkedList<UserValue>();
+    Set<UserValue> uniqueUsers = new HashSet<UserValue>();
+
+    if (bundleUserValues != null) {
+      for (BundleValue value : bundleUserValues) {
+        uniqueUsers.add((UserValue) value);
+      }
+    }
+
+    if (usersFromGroups != null) {
+      for (BundleValue value : usersFromGroups) {
+        uniqueUsers.add((UserValue) value);
+      }
+    }
+
+    values.addAll(uniqueUsers);
+    return values;
+  }
+
+  public LinkedList<UserValue> getFullUsers() {
+    return fullUsers;
   }
 
 }

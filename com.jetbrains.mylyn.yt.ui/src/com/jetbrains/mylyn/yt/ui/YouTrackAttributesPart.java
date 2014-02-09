@@ -2,6 +2,7 @@ package com.jetbrains.mylyn.yt.ui;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
+import org.eclipse.mylyn.internal.tasks.ui.editors.PersonAttributeEditor;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
@@ -37,6 +38,9 @@ public class YouTrackAttributesPart extends AbstractTaskEditorPart {
         } else {
           GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP)
               .applyTo(editor.getControl());
+        }
+        if (editor instanceof PersonAttributeEditor) {
+          getTaskEditorPage().getAttributeEditorToolkit().adapt(editor);
         }
       }
     }

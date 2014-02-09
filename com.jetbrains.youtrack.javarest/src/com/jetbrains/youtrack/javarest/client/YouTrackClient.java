@@ -24,6 +24,7 @@ import com.jetbrains.youtrack.javarest.utils.UserBundleValues;
 import com.jetbrains.youtrack.javarest.utils.UserGroupValue;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearch;
 import com.jetbrains.youtrack.javarest.utils.UserSavedSearches;
+import com.jetbrains.youtrack.javarest.utils.UserValue;
 import com.jetbrains.youtrack.javarest.utils.VersionBundleValues;
 import com.jetbrains.youtrack.javarest.utils.YouTrackTimeSettings;
 import com.sun.jersey.api.client.ClientResponse;
@@ -368,7 +369,16 @@ public class YouTrackClient {
         }
       }
     }
+    if (userBundleValues.getAllUsers() != null) {
+      for (UserValue user : userBundleValues.getAllUsers()) {
+        userBundleValues.addFullUser(getUser(user.getValue()));
+      }
+    }
     return userBundleValues;
+  }
+
+  public UserValue getUser(String login) {
+    return service.path("/admin/user/").path(login).accept("application/xml").get(UserValue.class);
   }
 
   public GroupUsersList getUsersListInGroup(String groupname) {
