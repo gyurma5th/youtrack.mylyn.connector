@@ -92,13 +92,36 @@ public class YouTrackIssue {
           } else if (field.getType().equals(IssueSchemaField.TYPE_SINGLE_FIELD)) {
             addSingleField(field.getName(), field.getStringValues().get(0));
           } else if (field.getType().equals(IssueSchemaField.TYPE_MULTIUSER_FIELD)) {
-            // trick: work with TYPE_MULTIUSER_FIELD as a usual Custom Field
-            addCustomField(field.getName(), field.getStringValues(), null);
+            LinkedList<String> multiuserValues = new LinkedList<String>();
+            for (IssueSchemaValue value : field.getValues()) {
+              multiuserValues.add(getMultiuserValue(value));
+            }
+            addCustomField(field.getName(), multiuserValues, null);
           }
         }
       }
       mapped = true;
     }
+  }
+
+  private String getMultiuserValue(IssueSchemaValue multiuserValue) {
+    return multiuserValue.getFullName() + " (" + multiuserValue.getValue() + ")";
+  }
+
+  public static String getLoginFromMultiuserValue(String value) {
+    try {
+      if (value.lastIndexOf(" (") == -1) {
+        return value;
+      } else {
+        return value.substring(value.lastIndexOf(" (") + 2, value.length() - 1);
+      }
+    } catch (IndexOutOfBoundsException e) {
+      return value;
+    }
+  }
+
+  public static String getFullnameFromMultiuserValue(String value) {
+    return value.substring(0, value.lastIndexOf(" "));
   }
 
   public void fillCustomFieldsFromProject(YouTrackProject project, YouTrackClient client)

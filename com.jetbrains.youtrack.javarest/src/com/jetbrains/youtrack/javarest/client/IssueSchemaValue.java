@@ -14,6 +14,9 @@ public class IssueSchemaValue {
   @XmlAttribute(name = "role")
   private String role;
 
+  @XmlAttribute(name = "fullName")
+  private String fullName;
+
   public String getValue() {
     return value;
   }
@@ -24,5 +27,9 @@ public class IssueSchemaValue {
 
   public String getRole() {
     return role;
+  }
+
+  public String getFullName() {
+    return fullName;
   }
 }

@@ -632,14 +632,33 @@ public class YouTrackClient {
         }
         YouTrackCustomField customFieldInfo = newIssue.getCustomFieldInfo(customFieldName);
 
+        if (YouTrackCustomFieldType.getTypeByName(customFieldInfo.getType()).equals(
+            YouTrackCustomFieldType.USER_MULTI)) {
+          LinkedList<String> values = oldIssue.getCustomFieldValue(customFieldName);
+          LinkedList<String> newValues = new LinkedList<String>();
+          if (values != null) {
+            for (String value : values) {
+              newValues.add(YouTrackIssue.getLoginFromMultiuserValue(value));
+            }
+            oldIssue.addCustomFieldValue(customFieldName, newValues);
+          }
+        }
+
         if (needUpdateCustomField(oldIssue, newIssue, customFieldName)) {
           if (customFieldInfo.isSingle()) {
             if (customFieldInfo.getType().equals(YouTrackCustomFieldType.STRING.getName())) {
               this.applyCommand(oldIssueId,
                   customFieldName + ": " + newIssue.getSingleCustomFieldValue(customFieldName));
             } else {
-              addCFCommand.append(customFieldName + ": "
-                  + newIssue.getSingleCustomFieldValue(customFieldName) + " ");
+
+              if (YouTrackCustomFieldType.getTypeByName(customFieldInfo.getType()).equals(
+                  YouTrackCustomFieldType.USER_SINGLE)) {
+                addCFCommand.append(customFieldName + ": "
+                    + newIssue.getSingleCustomFieldValue(customFieldName) + " ");
+              } else {
+                addCFCommand.append(customFieldName + ": "
+                    + newIssue.getSingleCustomFieldValue(customFieldName) + " ");
+              }
             }
           } else {
 

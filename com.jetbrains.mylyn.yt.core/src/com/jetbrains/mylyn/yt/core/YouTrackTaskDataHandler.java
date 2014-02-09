@@ -175,7 +175,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
       if (YouTrackCustomFieldType.getTypeByName(field.getType()).singleField()) {
         if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
             YouTrackCustomFieldType.USER_SINGLE)) {
-          attribute.getMetaData().setType(TaskAttribute.TYPE_PERSON);
+          attribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
         } else {
           attribute.getMetaData().setType(TaskAttribute.TYPE_SINGLE_SELECT);
         }
@@ -428,14 +428,14 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
           customFieldAttribute.getMetaData().setType("TaskAttribute.TYPE_PERIOD");
         } else if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
             YouTrackCustomFieldType.USER_SINGLE)) {
-          LinkedList<UserValue> users =
-              ((UserBundleValues) field.getBundle().getBundleValues()).getFullUsers();
-          if (users != null) {
-            for (UserValue user : users) {
-              if (user.getValue().equals(issue.getCustomFieldValue(field.getName()).getFirst())) {
-                customFieldAttribute.setValue(user.getFullName());
-              }
-            }
+          customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());
+          customFieldAttribute.putOption(issue.getCustomFieldValue(field.getName()).getFirst(),
+              issue.getCustomFieldValue(field.getName()).getFirst());
+        } else if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
+            YouTrackCustomFieldType.USER_MULTI)) {
+          customFieldAttribute.setValues(issue.getCustomFieldValue(field.getName()));
+          for (String value : issue.getCustomFieldValue(field.getName())) {
+            customFieldAttribute.putOption(value, value);
           }
         } else {
           customFieldAttribute.setValues(issue.getCustomFieldValue(field.getName()));
@@ -508,14 +508,42 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                   .getFieldValuesClass();
           try {
             if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_MULTI_SELECT)) {
-              issue.addCustomFieldValue(attribute.getId(),
-                  new LinkedList<String>(attribute.getValues()));
+              YouTrackCustomField field =
+                  YouTrackRepositoryConnector
+                      .getProject(repository,
+                          taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
+                      .getCustomFieldsMap().get(getNameFromLabel(attribute));
+              if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
+                  YouTrackCustomFieldType.USER_MULTI)) {
+                LinkedList<String> logins = new LinkedList<String>();
+                for (String s : attribute.getValues()) {
+                  logins.add(YouTrackIssue.getLoginFromMultiuserValue(s));
+                }
+                issue.addCustomFieldValue(attribute.getId(), logins);
+              } else {
+                issue.addCustomFieldValue(attribute.getId(),
+                    new LinkedList<String>(attribute.getValues()));
+              }
+
             } else if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_DATE)) {
               issue.addCustomFieldValue(attribute.getId(),
                   getDateFormat().format(new Date(Long.parseLong(attribute.getValue()))));
-            } else if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_PERSON)) {
-              issue.addCustomFieldValue(attribute.getId(),
-                  attribute.getOption(attribute.getValue()));
+            } else if (attribute.getMetaData().getType().equals(TaskAttribute.TYPE_SINGLE_SELECT)) {
+
+              YouTrackCustomField field =
+                  YouTrackRepositoryConnector
+                      .getProject(repository,
+                          taskData.getRoot().getAttribute(TaskAttribute.PRODUCT).getValue())
+                      .getCustomFieldsMap().get(getNameFromLabel(attribute));
+
+              if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
+                  YouTrackCustomFieldType.USER_SINGLE)) {
+                issue.addCustomFieldValue(attribute.getId(), YouTrackIssue
+                    .getLoginFromMultiuserValue(attribute.getOption(attribute.getValue())));
+              } else {
+                issue.addCustomFieldValue(attribute.getId(),
+                    attribute.getOption(attribute.getValue()));
+              }
             } else {
               issue.addCustomFieldValue(attribute.getId(),
                   CastCheck.toObject(fieldClass, attribute.getValue()).toString());
@@ -620,7 +648,14 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
                       ((UserBundleValues) customField.getBundle().getBundleValues()).getFullUsers();
                   if (users != null) {
                     for (UserValue user : users) {
-                      attr.putOption(user.getFullName(), user.getValue());
+                      String option = user.getFullName() + " (" + user.getValue() + ")";
+                      if (YouTrackCustomFieldType.getTypeByName(customField.getType()).equals(
+                          YouTrackCustomFieldType.USER_SINGLE)) {
+                        attr.putOption(option, option);
+                      } else if (YouTrackCustomFieldType.getTypeByName(customField.getType())
+                          .equals(YouTrackCustomFieldType.USER_MULTI)) {
+                        attr.putOption(option, option);
+                      }
                     }
                   }
                 }
