@@ -22,11 +22,9 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.mylyn.commons.ui.dialogs.AbstractInPlaceDialog;
 import org.eclipse.mylyn.commons.ui.dialogs.IInPlaceDialogListener;
 import org.eclipse.mylyn.commons.ui.dialogs.InPlaceDialogEvent;
-import org.eclipse.mylyn.commons.workbench.InPlaceCheckBoxTreeDialog;
 import org.eclipse.mylyn.commons.workbench.WorkbenchUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.CheckboxMultiSelectAttributeEditor;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
-import org.eclipse.mylyn.internal.tasks.ui.editors.Messages;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
 import org.eclipse.osgi.util.NLS;
@@ -106,9 +104,9 @@ public class CheckboxMultiSelectOpenableAttributeEditor extends CheckboxMultiSel
           final List<String> values = getValues();
           Map<String, String> validValues = getAttributeMapper().getOptions(getTaskAttribute());
 
-          final InPlaceCheckBoxTreeDialog selectionDialog =
-              new InPlaceCheckBoxTreeDialog(WorkbenchUtil.getShell(), button, values, validValues,
-                  NLS.bind(Messages.CheckboxMultiSelectAttributeEditor_Select_X, getLabel()));
+          final InPlaceResizableCheckBoxTreeDialog selectionDialog =
+              new InPlaceResizableCheckBoxTreeDialog(WorkbenchUtil.getShell(), button, values,
+                  validValues, NLS.bind("Select {0}", getLabel()));
 
           selectionDialog.addEventListener(new IInPlaceDialogListener() {
 
