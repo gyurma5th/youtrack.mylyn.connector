@@ -362,7 +362,14 @@ public class YouTrackClient {
     if (userBundleValues.getUserGroupValues() != null) {
       for (UserGroupValue groupValue : userBundleValues.getUserGroupValues()) {
         try {
-          userBundleValues.addUsersFromGroup(getUsersListInGroup(groupValue.getValue()).getUsers());
+          int start = 0;
+          LinkedList<UserValue> users =
+              getUsersListInGroup(groupValue.getValue(), start).getUsers();
+          while (users != null) {
+            userBundleValues.addUsersFromGroup(users);
+            start += 10;
+            users = getUsersListInGroup(groupValue.getValue(), start).getUsers();
+          }
         } catch (UniformInterfaceException e) {
           // You do not have permissions to read user,
           // supress for possibility create issue.
@@ -381,8 +388,9 @@ public class YouTrackClient {
     return service.path("/admin/user/").path(login).accept("application/xml").get(UserValue.class);
   }
 
-  public GroupUsersList getUsersListInGroup(String groupname) {
-    return service.path("/admin/user").queryParam("group", groupname).accept("application/xml")
+  public GroupUsersList getUsersListInGroup(String groupname, int start) {
+    return service.path("/admin/user").queryParam("group", groupname)
+        .queryParam("start", String.valueOf(start)).accept("application/xml")
         .get(GroupUsersList.class);
   }
 

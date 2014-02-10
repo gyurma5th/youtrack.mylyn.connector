@@ -99,6 +99,17 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
       addAttribute(composite, toolkit, attribute, true);
     }
 
+
+    // Composite composite2 = new Composite(composite, SWT.NONE);
+    // // final RowLayout rowLayout1 = new RowLayout();
+    // // rowLayout1.center = true;
+    // // rowLayout1.marginLeft = 0;
+    // // composite2.setLayout(rowLayout1);
+    // // rowLayout1.spacing = 8;
+    // // GridDataFactory.fillDefaults().grab(true, false).applyTo(composite2);
+    // composite2.setLayout(layout);
+    // GridDataFactory.fillDefaults().grab(true, false).applyTo(composite2);
+
     // Updater name
     attribute = getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.USER_UPDATER);
     if (attribute != null) {
@@ -110,6 +121,8 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
     if (attribute != null) {
       addAttribute(composite, toolkit, attribute, true);
     }
+
+
 
     if (layout instanceof GridLayout) {
       GridLayout gl = (GridLayout) layout;
