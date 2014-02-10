@@ -1,6 +1,7 @@
 package com.jetbrains.youtrack.javarest.client;
 
 
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -37,9 +38,26 @@ public class YouTrackClientFactory {
     // this.baseClient = Client.create(defaultConfig);
     defaultConfig.getProperties().put(ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
     this.baseClient = ApacheHttpClient.create(defaultConfig);
-    getClientFactory().addFilter(new LoggingFilter(System.out));
+    getClientFactory().addFilter(new SecureLoggingFilter(System.out));
     // handleCookies();
   }
+
+  private class SecureLoggingFilter extends LoggingFilter {
+
+    public SecureLoggingFilter(PrintStream out) {
+      super(out);
+    }
+
+    @Override
+    public ClientResponse handle(ClientRequest request) throws ClientHandlerException {
+      if (request.getURI().getPath().contains("/rest/user/login")) {
+        return getNext().handle(request);
+      }
+      return super.handle(request);
+    }
+
+  }
+
 
   public void handleCookies() {
 
