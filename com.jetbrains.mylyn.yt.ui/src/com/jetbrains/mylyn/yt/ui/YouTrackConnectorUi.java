@@ -64,7 +64,16 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
 
   @Override
   public String getTaskKindLabel(ITask repositoryTask) {
-    return "Issue";
+    TaskDataManager manager = TasksUiPlugin.getTaskDataManager();
+    try {
+      TaskData taskData = manager.getTaskData(repositoryTask);
+      if (taskData.isNew()) {
+        return "New issue";
+      } else {
+        return "";
+      }
+    } catch (CoreException e) {}
+    return "";
   }
 
   @Override

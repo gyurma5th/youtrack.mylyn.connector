@@ -18,11 +18,13 @@ import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -46,6 +48,8 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
   private static final String ADD_NEW_TAG_PROPOSAL = "Add tag with command...";
 
   private static final String ADD_LINK_TEXT = "Add link";
+
+  private static final String ADD_SUMMARY_TEXT = "write issue summary here";
 
   private static String[] linkTypeSentences;
 
@@ -327,6 +331,14 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
         toolkit.paintBordersFor(border);
       }
       getTaskEditorPage().getAttributeEditorToolkit().adapt(summaryEditor);
+      for (Control control : summaryEditor.getControl().getParent().getChildren()) {
+        if (control instanceof StyledText) {
+          StyledText text = (StyledText) control;
+          if (text.getText().length() == 0) {
+            text.setToolTipText(ADD_SUMMARY_TEXT);
+          }
+        }
+      }
     }
   }
 
