@@ -312,7 +312,6 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
 
     if (!project.isCustomFieldsUpdated()) {
       project.updateCustomFields(connector.getClient(repository));
-      YouTrackRepositoryConnector.updateTimeTrackingSettings(connector.getClient(repository));
     }
 
     if (issue.getSingleCustomFieldValue("Assignee") != null) {
@@ -425,7 +424,8 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
           customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());
         } else if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
             YouTrackCustomFieldType.PERIOD)) {
-          customFieldAttribute.getMetaData().setType("TaskAttribute.TYPE_PERIOD");
+          customFieldAttribute.getMetaData().setType(TYPE_PERIOD);
+          customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());
         } else if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
             YouTrackCustomFieldType.USER_SINGLE)) {
           customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());

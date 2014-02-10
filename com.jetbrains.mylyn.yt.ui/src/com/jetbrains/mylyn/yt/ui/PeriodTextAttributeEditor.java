@@ -12,6 +12,7 @@ package com.jetbrains.mylyn.yt.ui;
 import org.eclipse.mylyn.commons.workbench.forms.CommonFormUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.EditorUtil;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TextAttributeEditor;
+import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
 import org.eclipse.swt.SWT;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import com.jetbrains.mylyn.yt.core.YouTrackRepositoryConnector;
+import com.jetbrains.youtrack.javarest.utils.YouTrackTimeSettings;
 
 /**
  * @author Steffen Pingel
@@ -35,10 +37,13 @@ public class PeriodTextAttributeEditor extends TextAttributeEditor {
 
   private String emptyValue;
 
+  private TaskRepository repository;
+
   public PeriodTextAttributeEditor(TaskDataModel manager, TaskAttribute taskAttribute,
-      String emptyValue) {
+      String emptyValue, TaskRepository taskRepository) {
     super(manager, taskAttribute);
     this.emptyValue = emptyValue;
+    this.repository = taskRepository;
   }
 
   protected Text getText() {
@@ -113,11 +118,12 @@ public class PeriodTextAttributeEditor extends TextAttributeEditor {
   private String parsePeriodData(String period) {
     try {
       int minutesAmount = Integer.parseInt(period);
-      if (YouTrackRepositoryConnector.timeSettings == null) {
+      YouTrackTimeSettings timeSettings = YouTrackRepositoryConnector.getTimeSettings(repository);
+      if (timeSettings == null) {
         return "";
       }
-      int hourPerDay = YouTrackRepositoryConnector.timeSettings.getHoursSettings();
-      int daysPerWeek = YouTrackRepositoryConnector.timeSettings.getDaysSettings();
+      int hourPerDay = timeSettings.getHoursSettings();
+      int daysPerWeek = timeSettings.getDaysSettings();
       String result = "";
       int weeks = minutesAmount / (hourPerDay * daysPerWeek * 60);
       result += weeks > 0 ? (weeks + "w") : "";

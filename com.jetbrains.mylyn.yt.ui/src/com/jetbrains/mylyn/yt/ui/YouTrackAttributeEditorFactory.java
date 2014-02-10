@@ -68,7 +68,7 @@ public class YouTrackAttributeEditorFactory extends AttributeEditorFactory {
       } catch (NullPointerException e) {
         emptyText = "";
       }
-      return new PeriodTextAttributeEditor(model, taskAttribute, emptyText);
+      return new PeriodTextAttributeEditor(model, taskAttribute, emptyText, taskRepository);
     } else if (TaskAttribute.TYPE_PERSON.equals(type)) {
       if (TaskAttribute.TYPE_PERSON.equals(type)) {
         return new PersonAttributeEditor(model, taskAttribute) {

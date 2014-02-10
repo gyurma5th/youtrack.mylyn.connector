@@ -40,7 +40,8 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
   private static final long REPOSITORY_CONFIGURATION_UPDATE_INTERVAL = 2 * 60 * 60 * 1000;
 
-  public static YouTrackTimeSettings timeSettings = null;
+  private static Map<TaskRepository, YouTrackTimeSettings> timeSettingsByRepository =
+      new HashMap<TaskRepository, YouTrackTimeSettings>();
 
   private static Map<TaskRepository, YouTrackClient> clientByRepository =
       new HashMap<TaskRepository, YouTrackClient>();
@@ -86,10 +87,10 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
     final YouTrackProject project = YouTrackRepositoryConnector.getProject(repository, projectname);
 
-    final YouTrackClient client = clientByRepository.get(repository);
+    final YouTrackClient client = getClient(repository);
 
-    if (client != null && timeSettings == null) {
-      updateTimeTrackingSettings(client);
+    if (client != null) {
+      timeSettingsByRepository.put(repository, client.getTimeTrackingSettings());
     }
 
     if (project != null) {
@@ -109,10 +110,10 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
 
     final YouTrackProject project = YouTrackRepositoryConnector.getProject(repository, projectname);
 
-    final YouTrackClient client = clientByRepository.get(repository);
+    final YouTrackClient client = getClient(repository);
 
-    if (client != null && timeSettings == null) {
-      updateTimeTrackingSettings(client);
+    if (client != null) {
+      timeSettingsByRepository.put(repository, client.getTimeTrackingSettings());
     }
 
     if (project != null) {
@@ -128,6 +129,15 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
       client.login(repository.getUserName(), repository.getPassword());
     }
     return client;
+  }
+
+  public static synchronized YouTrackTimeSettings getTimeSettings(TaskRepository repository) {
+    YouTrackTimeSettings timeSettings = timeSettingsByRepository.get(repository);
+    if (timeSettings == null) {
+      timeSettings = getClient(repository).getTimeTrackingSettings();
+      timeSettingsByRepository.put(repository, timeSettings);
+    }
+    return timeSettings;
   }
 
   @Override
@@ -326,9 +336,5 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   public void updateRepositoryConfiguration(TaskRepository taskRepository, ITask task,
       IProgressMonitor monitor) throws CoreException {
     forceUpdateProjectCustomFields(taskRepository, getProjectNameFromId(task.getTaskKey()));
-  }
-
-  public static void updateTimeTrackingSettings(YouTrackClient client) {
-    timeSettings = client.getTimeTrackingSettings();
   }
 }
