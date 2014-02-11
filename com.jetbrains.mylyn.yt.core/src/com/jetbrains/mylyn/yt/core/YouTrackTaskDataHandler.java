@@ -420,6 +420,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
               }
             }
           }
+          customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());
         } else if (customFieldAttribute.getMetaData().getType().equals(TaskAttribute.TYPE_DATE)) {
           customFieldAttribute.setValue(issue.getCustomFieldValue(field.getName()).getFirst());
         } else if (YouTrackCustomFieldType.getTypeByName(field.getType()).equals(
