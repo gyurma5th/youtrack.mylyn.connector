@@ -5,7 +5,7 @@
 <xsl:for-each select="site">
 	<html>
 	<head>
-	<title>update</title>
+	<title>YouTrack Mylyn Connector</title>
 	<style>@import url("web/site.css");</style>
 	</head>
 	<body>
