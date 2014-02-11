@@ -239,7 +239,7 @@ public class YouTrackSummaryPart extends TaskEditorSummaryPart {
           TaskAttribute attribute =
               getTaskData().getRoot().getMappedAttribute(YouTrackTaskDataHandler.TAG_PREFIX);
           attribute.putOption(selectedText, selectedText);
-          attribute.addValue("\n" + selectedText);
+          attribute.addValue(selectedText);
           YouTrackTaskEditorPageFactory.synchronizeTaskUi(getTaskEditorPage().getTaskEditor());
         }
         combo.setText(ADD_TAG_TEXT);

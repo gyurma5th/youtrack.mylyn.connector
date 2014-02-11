@@ -364,7 +364,7 @@ public class YouTrackTaskDataHandler extends AbstractTaskDataHandler {
         attr.getMetaData().setReadOnly(true).setType(TaskAttribute.TYPE_SHORT_TEXT);
         attr.addValue(tag.getText());
         attribute.putOption(attr.getValue(), attr.getValue());
-        attribute.addValue("\n" + attr.getValue());
+        attribute.addValue(attr.getValue());
         count++;
       }
     }
