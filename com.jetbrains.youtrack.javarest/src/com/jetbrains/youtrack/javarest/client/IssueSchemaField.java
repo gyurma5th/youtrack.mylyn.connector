@@ -17,6 +17,8 @@ public class IssueSchemaField {
 
   public static final String TYPE_CUSTOM_FIELD = "CustomField";
 
+  public static final String TYPE_CUSTOM_FIELD_SINCE_5_1 = "CustomFieldValue";
+
   public static final String TYPE_MULTIUSER_FIELD = "MultiUserField";
 
   @XmlElement(name = "value")

@@ -87,7 +87,8 @@ public class YouTrackIssue {
               link.setValue(linkValue.getValue());
               addLink(link);
             }
-          } else if (field.getType().equals(IssueSchemaField.TYPE_CUSTOM_FIELD)) {
+          } else if (field.getType().equals(IssueSchemaField.TYPE_CUSTOM_FIELD)
+              || field.getType().equals(IssueSchemaField.TYPE_CUSTOM_FIELD_SINCE_5_1)) {
             addCustomField(field.getName(), field.getStringValues(), null);
           } else if (field.getType().equals(IssueSchemaField.TYPE_SINGLE_FIELD)) {
             addSingleField(field.getName(), field.getStringValues().get(0));

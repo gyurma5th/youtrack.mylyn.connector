@@ -67,7 +67,7 @@ public class YouTrackConnectorUi extends AbstractRepositoryConnectorUi {
     TaskDataManager manager = TasksUiPlugin.getTaskDataManager();
     try {
       TaskData taskData = manager.getTaskData(repositoryTask);
-      if (taskData.isNew()) {
+      if (taskData != null && taskData.isNew()) {
         return "New issue";
       } else {
         return "";
