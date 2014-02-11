@@ -6,9 +6,12 @@ package com.jetbrains.mylyn.yt.core;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.ILogListener;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
+import util.PluginExceptionLogListener;
 import util.StdOutErrLog;
 
 public class YouTrackCorePlugin extends Plugin {
@@ -46,6 +49,9 @@ public class YouTrackCorePlugin extends Plugin {
         + File.separator + ".log");
 
     StdOutErrLog.tieSystemOutAndErrToLog();
+
+    ILogListener iL = new PluginExceptionLogListener();
+    Platform.addLogListener(iL);
   }
 
   @Override
