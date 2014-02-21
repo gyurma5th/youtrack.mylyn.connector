@@ -8,6 +8,10 @@ public class StdOutErrLog {
 
   private static final Logger logger = Logger.getLogger(StdOutErrLog.class.getName());
 
+  private final static String APPENDER_NOT_FOUND = "No appenders could be found for logger";
+
+  private final static String INITIALIZE_APPENDER = "Please initialize the log4j system properly.";
+
   public static void tieSystemOutAndErrToLog() {
     System.setOut(createLoggingProxy(System.out));
     System.setErr(createLoggingProxy(System.err));
@@ -19,8 +23,10 @@ public class StdOutErrLog {
 
       @Override
       public void print(final String string) {
-        realPrintStream.print(string);
-        logger.info(string);
+        if (!string.contains(APPENDER_NOT_FOUND) && !string.contains(INITIALIZE_APPENDER)) {
+          realPrintStream.print(string);
+          logger.info(string);
+        }
       }
 
       @Override
