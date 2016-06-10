@@ -22,6 +22,7 @@ import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
@@ -56,6 +57,8 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
   public final static String ISSUE_URL_PREFIX = "/issue/";
 
   private static YouTrackClientFactory clientFactory;
+  
+  private final YoutrackAttachmentHandler attachmentHandler = new YoutrackAttachmentHandler(this);
 
   public YouTrackRepositoryConnector() {
     taskDataHandler = new YouTrackTaskDataHandler(this);
@@ -168,6 +171,11 @@ public class YouTrackRepositoryConnector extends AbstractRepositoryConnector {
     int index = taskUrl.indexOf(ISSUE_URL_PREFIX);
     return (index != -1) ? taskUrl.substring(0, index) : null;
   }
+  
+  @Override
+	public AbstractTaskAttachmentHandler getTaskAttachmentHandler() {
+		return attachmentHandler;
+	}
 
   @Override
   public TaskData getTaskData(TaskRepository taskRepository, String taskId, IProgressMonitor monitor)

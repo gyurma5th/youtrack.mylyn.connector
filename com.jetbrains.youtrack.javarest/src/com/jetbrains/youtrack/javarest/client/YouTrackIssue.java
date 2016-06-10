@@ -1,5 +1,6 @@
 package com.jetbrains.youtrack.javarest.client;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -43,6 +44,8 @@ public class YouTrackIssue {
 
   private boolean mapped = false;
 
+  private LinkedList<IssueAttachment> attachments;
+
   public YouTrackIssue(String newId) {
     this.setId(newId);
   }
@@ -56,7 +59,19 @@ public class YouTrackIssue {
     setCustomFieldsInfo(new HashMap<String, YouTrackCustomField>());
     setCustomFieldsValues(new HashMap<String, LinkedList<String>>());
     setSingleFields(new HashMap<String, String>());
+    setAttachments(new LinkedList<IssueAttachment>());
   }
+
+  public void setAttachments(LinkedList<IssueAttachment> attachments) {
+	this.attachments = attachments;
+  }
+  
+  //@XmlElement(name = "comment")
+  public LinkedList<IssueAttachment> getAttachments() {
+    return attachments;
+  }
+
+  
 
   public void setId(String id) {
     this.id = id;
@@ -338,4 +353,8 @@ public class YouTrackIssue {
     this.fields = fields;
   }
 
+	public void addAttachments(Collection<IssueAttachment> attachments) {
+		this.attachments.addAll(attachments);
+		
+	}
 }

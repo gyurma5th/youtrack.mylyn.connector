@@ -2,7 +2,7 @@
 <feature
       id="com.jetbrains.mylyn.yt.connector.feature"
       label="YouTrack Mylyn Connector"
-      version="1.0.0.qualifier"
+      version="1.1.0.qualifier"
       provider-name="JetBrains">
 
    <description url="http://amarchuk.github.io/youtrack.mylyn.connector/">
@@ -94,19 +94,19 @@ where such changes and/or additions to the Program originate from and are distri
          id="com.jetbrains.mylyn.yt.core"
          download-size="0"
          install-size="0"
-         version="1.0.0.qualifier"/>
+         version="1.1.0.qualifier"/>
 
    <plugin
          id="com.jetbrains.mylyn.yt.ui"
          download-size="0"
          install-size="0"
-         version="1.0.0.qualifier"/>
+         version="1.1.0.qualifier"/>
 
    <plugin
          id="com.jetbrains.youtrack.javarest"
          download-size="0"
          install-size="0"
-         version="1.0.0.qualifier"/>
+         version="1.1.0.qualifier"/>
 
    <plugin
          id="Log4JProperties"

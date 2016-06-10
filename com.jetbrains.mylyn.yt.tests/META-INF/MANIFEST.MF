@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: YouTrack Mylyn Connector Tests
 Bundle-SymbolicName: com.jetbrains.mylyn.yt.tests;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: JETBRAINS
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -13,8 +13,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.tasks.ui,
  org.eclipse.mylyn.tests.util,
  org.eclipse.mylyn.commons.net,
- com.jetbrains.youtrack.javarest;bundle-version="1.0.0",
- com.jetbrains.mylyn.yt.core;bundle-version="1.0.0",
- com.jetbrains.mylyn.yt.ui;bundle-version="1.0.0"
+ com.jetbrains.youtrack.javarest;bundle-version="1.1.0",
+ com.jetbrains.mylyn.yt.core;bundle-version="1.1.0",
+ com.jetbrains.mylyn.yt.ui;bundle-version="1.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.jetbrains.mylyn.yt.tests
