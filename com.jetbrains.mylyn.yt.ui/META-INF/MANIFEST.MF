@@ -15,10 +15,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.mylyn.commons.ui;bundle-version="3.8.3",
  org.eclipse.mylyn.commons.workbench;bundle-version="3.8.3",
  org.eclipse.jface.text;bundle-version="3.7",
- org.eclipse.ui.forms;bundle-version="3.5.200",
- org.apache.commons.lang;bundle-version="2.6.0"
+ org.eclipse.ui.forms;bundle-version="3.5.200"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.jetbrains.mylyn.yt.ui
 Bundle-ClassPath: .
-Import-Package: org.eclipse.mylyn.commons.workbench.forms
+Import-Package: org.apache.commons.lang,
+ org.eclipse.mylyn.commons.workbench.forms
