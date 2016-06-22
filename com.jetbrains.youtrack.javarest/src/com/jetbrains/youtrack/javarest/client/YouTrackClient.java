@@ -788,20 +788,20 @@ public class YouTrackClient {
 		
 		FormDataMultiPart multipartEntity = new FormDataMultiPart();
 		multipartEntity.bodyPart(attachmentBody);
-		if (description != null && !description.isEmpty()) {
-			description = description.replace("/", "_");
-			name = description + "__" + name;
-		}
-//		try {
-//			multipartEntity.field("name", URLEncoder.encode(name, "UTF-8"));
-//		} catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-			multipartEntity.field("name", name);
-//		}
+		name = createAttachmentName(name, description);
+		multipartEntity.field("name", name);
 
 		checkClientResponse(resource.type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, multipartEntity),
 				201, "Failed to upload attachment ");
 
+	}
+
+	public String createAttachmentName(String name, String description) {
+		if (description != null && !description.isEmpty()) {
+			description = description.replace("/", "_");
+			name = description + "__" + name;
+		}
+		return name;
 	}
 
 	public InputStream getAttachment(String url) throws URISyntaxException {

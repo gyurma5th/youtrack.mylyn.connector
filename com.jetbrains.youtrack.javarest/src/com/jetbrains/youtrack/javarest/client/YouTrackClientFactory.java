@@ -16,6 +16,7 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
+import com.sun.jersey.multipart.impl.MultiPartWriter;
 
 public class YouTrackClientFactory {
 
@@ -37,6 +38,7 @@ public class YouTrackClientFactory {
     // dont use simple Client because cookies not handle properly
     // this.baseClient = Client.create(defaultConfig);
     defaultConfig.getProperties().put(ApacheHttpClientConfig.PROPERTY_HANDLE_COOKIES, true);
+    defaultConfig.getClasses().add(MultiPartWriter.class);
     this.baseClient = ApacheHttpClient.create(defaultConfig);
     getClientFactory().addFilter(new SecureLoggingFilter(System.out));
     // handleCookies();

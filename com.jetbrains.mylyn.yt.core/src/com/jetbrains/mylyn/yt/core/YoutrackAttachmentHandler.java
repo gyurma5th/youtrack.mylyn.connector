@@ -10,6 +10,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.mylyn.internal.tasks.core.TaskAttachment;
+import org.eclipse.mylyn.internal.tasks.ui.editors.Messages;
+import org.eclipse.mylyn.internal.tasks.ui.util.AttachmentUtil;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
@@ -24,14 +27,11 @@ import com.jetbrains.youtrack.javarest.client.YouTrackClient;
  * @author evoVaGy3
  *
  */
+@SuppressWarnings("restriction")
 public class YoutrackAttachmentHandler extends AbstractTaskAttachmentHandler {
 
-	//private static final String URL = "URL";
-	private static final String NAME = "NAME";
-	private YouTrackRepositoryConnector repositoryConnector;
 
 	public YoutrackAttachmentHandler(YouTrackRepositoryConnector rc) {
-		this.repositoryConnector = rc;
 	}
 
 	@Override
@@ -39,17 +39,11 @@ public class YoutrackAttachmentHandler extends AbstractTaskAttachmentHandler {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler#canPostContent(org.eclipse.mylyn.tasks.core.TaskRepository, org.eclipse.mylyn.tasks.core.ITask)
-	 */
 	@Override
 	public boolean canPostContent(TaskRepository repository, ITask task) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler#getContent(org.eclipse.mylyn.tasks.core.TaskRepository, org.eclipse.mylyn.tasks.core.ITask, org.eclipse.mylyn.tasks.core.data.TaskAttribute, org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public InputStream getContent(TaskRepository repository, ITask task, TaskAttribute attachmentAttribute,
 			IProgressMonitor monitor) throws CoreException {
@@ -58,18 +52,16 @@ public class YoutrackAttachmentHandler extends AbstractTaskAttachmentHandler {
 		try {
 			return client.getAttachment(attachmentMapper.getUrl());
 		} catch (URISyntaxException e) {
-			throw new CoreException(new Status(Status.ERROR, YouTrackCorePlugin.ID_PLUGIN, "Cannot load attachment." + e.getMessage(), e));
+			throw new CoreException(new Status(Status.ERROR, YouTrackCorePlugin.ID_PLUGIN,
+					"Cannot load attachment." + e.getMessage(), e));
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler#postContent(org.eclipse.mylyn.tasks.core.TaskRepository, org.eclipse.mylyn.tasks.core.ITask, org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource, java.lang.String, org.eclipse.mylyn.tasks.core.data.TaskAttribute, org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public void postContent(TaskRepository repository, ITask task, AbstractTaskAttachmentSource source, String comment,
 			TaskAttribute attachmentAttribute, IProgressMonitor monitor) throws CoreException {
-		SubMonitor progress = SubMonitor.convert(monitor, "Add attachment", (int) source.getLength() + 1);
-		
+		SubMonitor progress = SubMonitor.convert(monitor, "Add attachment", (int) source.getLength() + 2);
+
 		UnsubmittedTaskAttachment attachment = new UnsubmittedTaskAttachment(source, attachmentAttribute);
 
 		YouTrackClient client = YouTrackRepositoryConnector.getClient(repository);
@@ -78,7 +70,20 @@ public class YoutrackAttachmentHandler extends AbstractTaskAttachmentHandler {
 				attachment.getDescription(), attachment.createInputStream(progress.newChild(1)),
 				progress.newChild((int) source.getLength()));
 
+		if (!comment.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+			builder.append("=").append(attachment.getFileName()).append("=\n");
+			String description = attachment.getDescription();
+			if (AttachmentUtil.isContext(new TaskAttachment(repository, task, attachmentAttribute))) {
+				description = Messages.AttachmentTableLabelProvider_Task_Context;
+			}
+			builder.append(description).append("\n");
+			builder.append("[file:").append(client.createAttachmentName(attachment.getFileName(), attachment.getDescription()))
+					.append("]\n\n");
+			builder.append(comment);
+			client.addComment(issueId, builder.toString());
+		}
+
 	}
 
 }
-

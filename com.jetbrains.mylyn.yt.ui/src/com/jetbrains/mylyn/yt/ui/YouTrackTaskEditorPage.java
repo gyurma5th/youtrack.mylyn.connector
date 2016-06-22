@@ -233,6 +233,7 @@ public class YouTrackTaskEditorPage extends AbstractTaskEditorPage {
     // createParts(PATH_PEOPLE, bottomComposite, descriptors);
     // bottomComposite.pack(true);
     createParts(PATH_ATTRIBUTES, getEditorComposite(), descriptors);
+    createParts(PATH_ATTACHMENTS, getEditorComposite(), descriptors);
     createParts(PATH_COMMENTS, getEditorComposite(), descriptors);
   }
 
